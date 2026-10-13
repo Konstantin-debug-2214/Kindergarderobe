@@ -55,8 +55,8 @@ Unbekannte Routen führen zur Übersicht.
 
 - **Tablet:** keine Leiste. Die Übersicht hat oben Suche, Knopf „Kosten“, Icon-Knöpfe Statistik, Aussortiert und Einstellungen sowie den Knopf „Teil hinzufügen“. Alle anderen Screens haben links oben einen runden Zurück-Knopf (Teil hinzufügen: Schließen-Knopf „×“ und „Abbrechen“). Die Statistik verlinkt auf „Soll-Mengen & Saisonwechsel“.
 - **Smartphone:** untere Navigationsleiste mit fünf Einträgen: **Start** (`#/`), **Statistik** (`#/statistik`), **+** als runder Primär-Knopf in der Mitte (`#/neu`), **Aussortiert** (`#/aussortiert`), **Mehr** (`#/einstellungen`). Der aktive Eintrag ist in Primärfarbe hervorgehoben.
-  - Die Leiste erscheint auf Übersicht, Statistik, Aussortiert, Einstellungen und Soll-Mengen & Saisonwechsel.
-  - Ohne Leiste (mit Zurück- bzw. Schließen-Knopf): Kategorie, Detail, Nach Jahreszeit, Teil hinzufügen/bearbeiten, Kosten. Das Detail hat unten eine eigene Aktionsleiste mit „Aussortieren“ und „Bearbeiten“.
+  - Die Leiste erscheint auf Übersicht, Statistik, Aussortiert und Einstellungen.
+  - Ohne Leiste (mit Zurück- bzw. Schließen-Knopf): Kategorie, Detail, Nach Jahreszeit, Teil hinzufügen/bearbeiten, Kosten, Soll-Mengen & Saisonwechsel. Das Detail hat unten eine eigene Aktionsleiste mit „Aussortieren“ und „Bearbeiten“.
   - Übersicht: Icon-Knopf „€“ oben rechts führt zu Kosten.
   - Statistik: Verweis-Karte „Soll-Mengen & Saisonwechsel“ mit Anzahl der Fehlenden oben.
   - „Mehr“ öffnet den Screen „Einstellungen“ mit Einträgen „Kosten“ (mit Jahressumme) und „Soll-Mengen & Saisonwechsel“, darunter Backup und Begrüßung.

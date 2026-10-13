@@ -13,19 +13,9 @@ import { icon } from './icons.js';
 export const LEISTE_SCREENS = new Set([
   'uebersicht',
   'statistik',
-  'saisonwechsel',
   'aussortiert',
   'einstellungen',
 ]);
-
-/**
- * Screens ohne eigenen Eintrag in der Leiste: welcher Eintrag gilt dort als
- * aktiv. "Soll-Mengen & Saisonwechsel" gehoert zur Statistik und wird von dort
- * aus geoeffnet.
- */
-const AKTIVER_EINTRAG = {
-  saisonwechsel: 'statistik',
-};
 
 /** Einträge der Leiste in Anzeigereihenfolge. */
 const EINTRAEGE = [
@@ -76,10 +66,8 @@ export function aktualisiereLeiste(knoten, screen) {
   const sichtbar = LEISTE_SCREENS.has(screen);
   knoten.hidden = !sichtbar;
 
-  const aktiv = AKTIVER_EINTRAG[screen] || screen;
-
   for (const eintrag of knoten.querySelectorAll('[data-screen]')) {
-    if (sichtbar && eintrag.dataset.screen === aktiv) {
+    if (sichtbar && eintrag.dataset.screen === screen) {
       eintrag.setAttribute('aria-current', 'page');
     } else {
       eintrag.removeAttribute('aria-current');
