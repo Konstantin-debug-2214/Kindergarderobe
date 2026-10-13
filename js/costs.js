@@ -1,0 +1,69 @@
+/**
+ * costs.js – Kostenberechnung, reine Logik ohne DOM.
+ *
+ * Alle Beträge sind ganze Zahlen in Cent (8,00 € = 800). Dadurch gibt es
+ * keine Fließkomma-Fehler; erst formatEuro macht daraus einen Text.
+ *
+ * Durchschnitt, Sammelkäufe und die Kosten-Ansicht folgen in Auftrag 06.
+ */
+
+const EURO_FORMAT = new Intl.NumberFormat('de-DE', {
+  style: 'currency',
+  currency: 'EUR',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+/**
+ * Summe aller Ausgaben eines Jahres, in Cent.
+ * Gerechnet wird nur aus ausgaben – auch Ausgaben zu aussortierten Teilen
+ * zählen weiter mit (siehe Zählregeln in CLAUDE.md).
+ * @param {Array<{datum: string, betrag: number}>} ausgaben
+ * @param {number} jahr
+ * @returns {number} Betrag in Cent
+ */
+export function jahressumme(ausgaben = [], jahr) {
+  return ausgaben
+    .filter((ausgabe) => jahrVon(ausgabe.datum) === jahr)
+    .reduce((summe, ausgabe) => summe + ganzeZahl(ausgabe.betrag), 0);
+}
+
+/**
+ * Summe aller Ausgaben, in Cent.
+ * @param {Array<{betrag: number}>} ausgaben
+ */
+export function gesamtsumme(ausgaben = []) {
+  return ausgaben.reduce((summe, ausgabe) => summe + ganzeZahl(ausgabe.betrag), 0);
+}
+
+/**
+ * Formatiert einen Betrag in Cent als deutschen Eurobetrag: 800 -> "8,00 €".
+ * @param {number} betragInCent
+ */
+export function formatEuro(betragInCent) {
+  return EURO_FORMAT.format(ganzeZahl(betragInCent) / 100);
+}
+
+/**
+ * Wandelt eine Eingabe wie "8,50" oder "8.5" in Cent um.
+ * @returns {number|null} Cent, oder null wenn die Eingabe keine Zahl ist
+ */
+export function euroTextInCent(text) {
+  const sauber = String(text ?? '').trim().replace(/\s/g, '').replace(',', '.');
+  if (sauber === '') return null;
+  const zahl = Number(sauber);
+  if (!Number.isFinite(zahl) || zahl < 0) return null;
+  return Math.round(zahl * 100);
+}
+
+/** Das Jahr aus einem ISO-Datum ("2026-08-14" oder voller Zeitstempel). */
+export function jahrVon(datum) {
+  const anfang = String(datum ?? '').slice(0, 4);
+  // Ohne die Ziffernprüfung würde Number('') zu 0 statt zu null führen.
+  return /^\d{4}$/.test(anfang) ? Number(anfang) : null;
+}
+
+/** Schützt vor kaputten Werten aus einem Backup. */
+function ganzeZahl(wert) {
+  return Number.isFinite(wert) ? Math.round(wert) : 0;
+}
