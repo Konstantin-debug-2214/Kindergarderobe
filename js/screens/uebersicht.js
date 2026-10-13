@@ -1,19 +1,30 @@
 /**
  * uebersicht.js – Screen "Übersicht" (#/).
  *
- * Noch ohne Daten: Kacheln, Suche und Backup-Banner kommen in späteren
- * Aufträgen. Vorhanden sind die Kopf-Knöpfe und Testlinks, damit sich alle
- * Routen erreichen lassen.
+ * In diesem Auftrag echt: Datum, Begrüßung mit gespeichertem Namen und der
+ * Backup-Banner. Kacheln und Suche bleiben Platzhalter.
  */
 
 import { el } from '../ui/dom.js';
 import { iconKnopf, knopf, suchfeld } from '../ui/knoepfe.js';
+import { banner } from '../ui/banner.js';
+import { speicher } from '../storage.js';
+import { backupAlterInTagen, backupFaellig, exportiereBackup } from '../backup.js';
+import { alterText, begruessung } from './einstellungen.js';
 import { testlinks } from './platzhalter.js';
 
 /** Beispielwerte für die Testlinks. */
 const BEISPIEL_KATEGORIE = 'oberteile';
 const BEISPIEL_JAHRESZEIT = 'herbst';
 const BEISPIEL_TEIL = 'beispiel-teil';
+
+/**
+ * Stand des Änderungszählers, bei dem der Banner ausgeblendet wurde.
+ * Bewusst nur im Arbeitsspeicher: Der Banner soll bis zur nächsten Änderung
+ * verschwinden, aber kein Teil der gespeicherten Daten sein (sonst würde das
+ * Ausblenden selbst als Änderung zählen).
+ */
+let ausgeblendetBei = null;
 
 /** Formatiert das heutige Datum, z. B. "Montag, 13. Oktober". */
 function heutigesDatum() {
@@ -24,10 +35,53 @@ function heutigesDatum() {
   }).format(new Date());
 }
 
-export function uebersichtScreen() {
-  const begruessung = el('div', { class: 'uebersicht__begruessung' }, [
+/** Text des Backup-Hinweises, abhängig davon, ob es schon ein Backup gibt. */
+export function bannerText(letztesBackupAm, heute = new Date()) {
+  const tage = backupAlterInTagen(letztesBackupAm, heute);
+
+  if (tage === null) {
+    return 'Es gibt noch kein Backup. Zeit, die Daten zu sichern.';
+  }
+  if (tage === 0) {
+    return 'Seit dem letzten Backup hat sich etwas geändert. Zeit, die Daten zu sichern.';
+  }
+  return `Das letzte Backup ist ${alterText(tage).replace('vor ', '')} alt. `
+    + 'Zeit, die Daten zu sichern.';
+}
+
+function backupBanner(einstellungen, neuZeichnen) {
+  if (!backupFaellig(einstellungen)) return null;
+  if (ausgeblendetBei === einstellungen.aenderungenSeitBackup) return null;
+
+  const sichern = knopf({ text: 'Jetzt sichern', variante: 'primaer' });
+  sichern.addEventListener('click', async () => {
+    sichern.disabled = true;
+    try {
+      await exportiereBackup(speicher);
+    } finally {
+      sichern.disabled = false;
+    }
+  });
+
+  return banner({
+    art: 'hinweis',
+    text: bannerText(einstellungen.letztesBackupAm),
+    aktionen: [sichern],
+    beiSchliessen: () => {
+      // Bis zur nächsten Änderung ausblenden – jede Änderung erhöht den
+      // Zähler, dadurch erscheint der Hinweis von selbst wieder.
+      ausgeblendetBei = einstellungen.aenderungenSeitBackup;
+      neuZeichnen();
+    },
+  });
+}
+
+export function uebersichtScreen(parameter, { neuZeichnen = () => {} } = {}) {
+  const einstellungen = speicher.einstellungen();
+
+  const begruessungsBlock = el('div', { class: 'uebersicht__begruessung' }, [
     el('p', { class: 'uebersicht__datum', text: heutigesDatum() }),
-    el('h1', { class: 'uebersicht__hallo', text: 'Hallo, [Name]!' }),
+    el('h1', { class: 'uebersicht__hallo', text: begruessung(einstellungen.name) }),
   ]);
 
   // Tablet: alle Ziele liegen offen in der Kopfzeile.
@@ -45,33 +99,34 @@ export function uebersichtScreen() {
   ]);
 
   // Smartphone: nur der "€"-Knopf; alles Weitere liegt in der unteren Leiste.
-  const werkzeugeSmartphone = el(
-    'div',
-    { class: 'uebersicht__werkzeuge nur-smartphone' },
-    [iconKnopf({ label: 'Kosten', iconName: 'euro', href: '#/kosten' })],
-  );
+  const werkzeugeSmartphone = el('div', { class: 'uebersicht__werkzeuge nur-smartphone' }, [
+    iconKnopf({ label: 'Kosten', iconName: 'euro', href: '#/kosten' }),
+  ]);
 
-  const sucheSmartphone = el(
-    'div',
-    { class: 'uebersicht__suche-zeile nur-smartphone' },
-    [
-      suchfeld({
-        label: 'Kleidung oder Spielzeug suchen',
-        platzhalter: 'Kleidung oder Spielzeug suchen',
-      }),
-    ],
-  );
+  const sucheSmartphone = el('div', { class: 'uebersicht__suche-zeile nur-smartphone' }, [
+    suchfeld({
+      label: 'Kleidung oder Spielzeug suchen',
+      platzhalter: 'Kleidung oder Spielzeug suchen',
+    }),
+  ]);
+
+  const hinweis = backupBanner(einstellungen, neuZeichnen);
 
   return el('div', { class: 'inhalt' }, [
-    el('header', { class: 'uebersicht__kopf' }, [begruessung, werkzeugeTablet, werkzeugeSmartphone]),
+    el('header', { class: 'uebersicht__kopf' }, [
+      begruessungsBlock,
+      werkzeugeTablet,
+      werkzeugeSmartphone,
+    ]),
     sucheSmartphone,
+    hinweis ? el('div', { class: 'uebersicht__banner' }, [hinweis]) : null,
     el('section', { class: 'karte platzhalter' }, [
       el('p', { class: 'platzhalter__marke', text: 'Platzhalter' }),
       el('p', {
         class: 'platzhalter__hinweis',
         text:
-          'Hier stehen später die sechs Kategorie-Kacheln mit Stückzahl, die vier '
-          + 'Jahreszeiten-Kacheln und der Backup-Hinweis.',
+          'Hier stehen später die sechs Kategorie-Kacheln mit Stückzahl und die vier '
+          + 'Jahreszeiten-Kacheln.',
       }),
     ]),
     testlinks('Testlinks (vorläufig)', [

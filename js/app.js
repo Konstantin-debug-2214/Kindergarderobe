@@ -6,7 +6,9 @@
  */
 
 import { starteRouter } from './router.js';
-import { leeren } from './ui/dom.js';
+import { speicher, SpeicherFehler } from './storage.js';
+import { el, leeren } from './ui/dom.js';
+import { banner } from './ui/banner.js';
 import { aktualisiereLeiste, baueLeiste } from './ui/leiste.js';
 
 import { uebersichtScreen } from './screens/uebersicht.js';
@@ -70,18 +72,61 @@ function start() {
 
   baueLeiste(leisteKnoten);
 
-  starteRouter({
-    beiWechsel({ screen, parameter }) {
-      const bauen = SCREENS[screen];
-      leeren(screenKnoten).append(bauen(parameter));
+  /** Die gerade angezeigte Route – für das Neuzeichnen nach Datenänderungen. */
+  let aktuelleRoute = null;
 
-      aktualisiereLeiste(leisteKnoten, screen);
-      document.title = `${TITEL[screen]} – Kindergarderobe`;
-      window.scrollTo(0, 0);
-    },
-  });
+  /**
+   * Baut den Screen auf.
+   * @param {{screen: string, parameter: Object}} route
+   * @param {{frisch?: boolean}} [optionen] frisch bedeutet: neu betretener
+   *   Screen (Routenwechsel). Bei false baut sich derselbe Screen nach einer
+   *   Datenänderung nur neu auf und darf seinen Zustand behalten, etwa eine
+   *   gerade gezeigte Meldung.
+   */
+  function zeichne({ screen, parameter }, { frisch = true } = {}) {
+    aktuelleRoute = { screen, parameter };
+    const bauen = SCREENS[screen];
+
+    try {
+      // neuZeichnen erlaubt einem Screen, sich selbst neu aufzubauen.
+      leeren(screenKnoten).append(bauen(parameter, { neuZeichnen, frisch }));
+    } catch (fehler) {
+      leeren(screenKnoten).append(fehlerSeite(fehler));
+    }
+
+    aktualisiereLeiste(leisteKnoten, screen);
+    document.title = `${TITEL[screen]} – Kindergarderobe`;
+    if (frisch) window.scrollTo(0, 0);
+  }
+
+  function neuZeichnen() {
+    if (aktuelleRoute) zeichne(aktuelleRoute, { frisch: false });
+  }
+
+  starteRouter({ beiWechsel: zeichne });
+
+  // Nach jeder Datenänderung den aktuellen Screen neu aufbauen.
+  speicher.beiAenderung(neuZeichnen);
 
   dauerhaftenSpeicherAnfragen();
+}
+
+/**
+ * Notanzeige, wenn ein Screen nicht gebaut werden kann – zum Beispiel, weil
+ * die gespeicherten Daten beschädigt sind. Besser als eine leere Seite.
+ */
+function fehlerSeite(fehler) {
+  console.error(fehler);
+  return el('div', { class: 'inhalt' }, [
+    banner({
+      art: 'fehler',
+      rolle: 'alert',
+      text: 'Die Ansicht konnte nicht aufgebaut werden.',
+      zusatz: fehler instanceof SpeicherFehler
+        ? fehler.message
+        : 'Bitte die Seite neu laden. Hilft das nicht, ein Backup einspielen.',
+    }),
+  ]);
 }
 
 start();

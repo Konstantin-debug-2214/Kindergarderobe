@@ -66,18 +66,40 @@ keine Backups (`*.json`), keine CSV-Dateien. Die `.gitignore` schließt diese
 Dateitypen aus. Ausgenommen ist das spätere `manifest.webmanifest`, das nicht
 auf `.json` endet.
 
+## Tests
+
+Die reine Logik (Datenmodell, Speicher, Backup, Kosten) ist mit dem in Node
+eingebauten Testrunner geprüft – ohne npm-Pakete. Im Projektordner:
+
+```
+node --test
+```
+
 ## Ordnerstruktur
 
 ```
 index.html
 css/      tokens.css, base.css, components.css, screens.css
-js/       app.js, router.js, screens/*.js, ui/*.js
+js/       app.js, router.js, model.js, storage.js, backup.js, costs.js
+          screens/*.js, ui/*.js
+tests/    Tests der reinen Logik (node --test)
 fonts/    Fredoka und Nunito (woff2) samt OFL-Lizenz
 icons/    App-Icons für das spätere Manifest
 ```
 
+Alle Daten liegen unter einem Schlüssel im `localStorage` des Browsers. Darauf
+greift ausschließlich `js/storage.js` zu. Geldbeträge sind durchgehend ganze
+Zahlen in Cent (8,00 € wird als `800` gespeichert), damit beim Rechnen keine
+Fließkomma-Fehler entstehen.
+
 ## Stand
 
-Auftrag 01 – Grundgerüst: Ordnerstruktur, Design-Tokens, Hash-Router und
-Navigation stehen. Die Screens sind noch Platzhalter; die fachlichen Funktionen
-folgen in den nächsten Aufträgen.
+- **Auftrag 01 – Grundgerüst:** Ordnerstruktur, Design-Tokens, Hash-Router und
+  Navigation.
+- **Auftrag 02 – Daten, Speicher, Backup:** Datenmodell mit Validierung,
+  Speicher, Backup (Export über das Teilen-Menü, Import mit Vorschau und
+  Rückfrage), Erinnerung an fällige Backups, Einstellungen-Screen und
+  Begrüßung auf der Übersicht.
+
+Noch Platzhalter: Kacheln mit Zahlen, Filter, Formulare, Kosten-Ansicht,
+Statistik, Soll-Mengen und Aussortiert.
