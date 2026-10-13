@@ -9,7 +9,7 @@ Ziel: auf einen Blick sehen, was da ist, was passt, was fehlt und was es gekoste
 ## Technik (verbindlich)
 
 - Reines HTML, CSS und JavaScript (ES-Module, `<script type="module">`). **Kein Framework, keine Bibliothek, kein Build-Schritt, kein npm-Paket zur Laufzeit.**
-- Keine Netzwerkzugriffe zur Laufzeit. Schriften liegen lokal unter `fonts/` (Fredoka 500/600, Nunito 400/600/700/800, woff2, OFL-Lizenz mitliefern).
+- Keine Netzwerkzugriffe zur Laufzeit. Schriften liegen lokal unter `fonts/` als Variable Fonts (Fredoka und Nunito, woff2, Teilmenge „latin“, OFL-Lizenz mitgeliefert); genutzt werden Fredoka 500/600 und Nunito 400/600/700/800.
 - Icons als Inline-SVG (Strich-Icons), keine Icon-Fonts, keine Emojis.
 - Daten in `localStorage` über ein eigenes Modul `js/storage.js` (nie direkt aus anderen Modulen). Beim Start `navigator.storage.persist()` anfragen.
 - Responsive: Layout für Tablet quer (Hauptziel) und Smartphone hoch; Umbruch per CSS (Grid/Flex, Media Queries), keine getrennten Seiten.
@@ -27,6 +27,7 @@ js/         app.js (Start, Router), router.js (Hash-Routing, siehe Routen)
             costs.js (reine Kostenberechnung), backup.js (Export, Import, Erinnerung), screens/*.js (je Screen ein Modul), ui/*.js (Bausteine)
 fonts/
 icons/      App-Icons für das Manifest
+tests/        Tests der reinen Logik mit dem eingebauten Node-Testrunner (`node --test`), keine npm-Pakete
 Claude-Code-Uebergabe/        Aufträge (*.md, werden committet)
 Design-Preview-Screenshots/   Design-Screenshots (nur lokal, stehen in .gitignore)
 ```
@@ -55,7 +56,8 @@ Unbekannte Routen führen zur Übersicht.
 
 - **Tablet:** keine Leiste. Die Übersicht hat oben Suche, Knopf „Kosten“, Icon-Knöpfe Statistik, Aussortiert und Einstellungen sowie den Knopf „Teil hinzufügen“. Alle anderen Screens haben links oben einen runden Zurück-Knopf (Teil hinzufügen: Schließen-Knopf „×“ und „Abbrechen“). Die Statistik verlinkt auf „Soll-Mengen & Saisonwechsel“.
 - **Smartphone:** untere Navigationsleiste mit fünf Einträgen: **Start** (`#/`), **Statistik** (`#/statistik`), **+** als runder Primär-Knopf in der Mitte (`#/neu`), **Aussortiert** (`#/aussortiert`), **Mehr** (`#/einstellungen`). Der aktive Eintrag ist in Primärfarbe hervorgehoben.
-  - Die Leiste erscheint auf Übersicht, Statistik, Aussortiert und Einstellungen.
+  - Die Leiste erscheint nur auf Übersicht, Statistik, Aussortiert und Einstellungen.
+  - Statistik, Aussortiert und Einstellungen haben auf dem Smartphone keinen Zurück-Knopf (die Leiste navigiert).
   - Ohne Leiste (mit Zurück- bzw. Schließen-Knopf): Kategorie, Detail, Nach Jahreszeit, Teil hinzufügen/bearbeiten, Kosten, Soll-Mengen & Saisonwechsel. Das Detail hat unten eine eigene Aktionsleiste mit „Aussortieren“ und „Bearbeiten“.
   - Übersicht: Icon-Knopf „€“ oben rechts führt zu Kosten.
   - Statistik: Verweis-Karte „Soll-Mengen & Saisonwechsel“ mit Anzahl der Fehlenden oben.
@@ -150,7 +152,7 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
 
 - Die Erinnerung erscheint, **sobald seit dem letzten Backup etwas hinzugefügt, bearbeitet oder geändert wurde** (`aenderungenSeitBackup > 0`). Ein regelmäßiges, zeitgesteuertes Backup ist nicht vorgesehen.
 - Nach einem erfolgreichen Export wird `aenderungenSeitBackup` auf 0 gesetzt und `letztesBackupAm` gespeichert.
-- **Offen (vor Auftrag 02 mit John klären):** Was mit der Auswahl „Erinnern nach“ (2 Wochen / 30 / 60 Tage / Nie) aus dem Design geschieht. Nicht eigenmächtig umsetzen oder entfernen.
+- Es gibt **keine** Einstellung für ein Erinnerungsintervall. Die Auswahl „Erinnern nach“ aus dem Design entfällt (Entscheidung John, 13.10.2026).
 
 ## Zählregeln
 
@@ -176,7 +178,7 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
 7. **Statistik:** Gesamtzahl im Schrank (ohne Aussortiertes); Balkendiagramme nach Kategorie, **Art der Kleidung** (die häufigsten 7), **Spielzeug nach Art** (neu, nicht im Design), Jahreszeit (Hinweis: ein Teil kann zu mehreren gehören) und Größe; jeder Balken führt per Tipp zu den Teilen; Link zu „Soll-Mengen & Saisonwechsel“.
 8. **Soll-Mengen & Saisonwechsel:** Umschalter für die vier Jahreszeiten (gewählter Knopf in der Akzentfarbe der Jahreszeit). Links Tabelle „Art · Passend · Soll (− / +) · Stand“ mit Stand „kein Soll“, „noch n fehlen“ oder „vollständig“. Rechts Saisonwechsel-Check mit Saisonbeginn („ab 1. Dezember · in 7 Wochen“), Summen „ist da / passt / fehlt“, Liste „Besorgen“ (Art + Anzahl) und Liste „Wird bald zu klein“. Nur Kleidung.
 9. **Aussortiert:** Liste mit Name, Kategorie, Größe bzw. Alter, Datum und Grund (zu klein, verschenkt, verkauft, kaputt); „Zurückholen“ je Teil; „Aussortiert leeren“ mit Bestätigungsdialog (endgültig, nur über ein älteres Backup wiederherstellbar); leerer Zustand mit Hinweis.
-10. **Einstellungen & Backup:** Name des Kindes mit Live-Vorschau der Begrüßung; Backup-Status (letztes Backup, fällig oder gesichert); „Backup exportieren“ (Teilen-Menü, JSON); „Backup einspielen“ mit Vorschau (Dateiname, Erstelldatum, Anzahl Teile, Aussortiert, Kosten, Marken), Warnung, dass alle aktuellen Daten ersetzt werden, und Bestätigung. Auswahl „Erinnern nach“: siehe offener Punkt unter Backup-Erinnerung. Smartphone zusätzlich: Einträge „Kosten“ und „Soll-Mengen & Saisonwechsel“.
+10. **Einstellungen & Backup:** Name des Kindes mit Live-Vorschau der Begrüßung; Backup-Status (letztes Backup, fällig oder gesichert); „Backup exportieren“ (Teilen-Menü, JSON); „Backup einspielen“ mit Vorschau (Dateiname, Erstelldatum, Anzahl Teile, Aussortiert, Kosten, Marken), Warnung, dass alle aktuellen Daten ersetzt werden, und Bestätigung. Keine Auswahl „Erinnern nach“. Smartphone zusätzlich: Einträge „Kosten“ und „Soll-Mengen & Saisonwechsel“.
 
 Backup: JSON-Export per Knopf (über das Teilen-Menü, Fallback Download), Import mit Vorschau und Rückfrage. Kein automatisches Backup, kein CSV-Export, kein CSV-Import.
 
@@ -186,10 +188,11 @@ Nicht in V1: Anlässe, Fotos, mehrere Kinder, Sync, Wetterdaten/Temperaturen, Gr
 
 - Vorlage: Design-Canvas „Kindergarderobe“ (Tablet 1194 × 834, Smartphone 390 × 844). Screenshots liegen unter `Design-Preview-Screenshots/` (nur lokal). **Bei Widersprüchen zwischen Screenshot und dieser Datei gilt CLAUDE.md.**
 - Farben und Schriften in `css/tokens.css`:
-  Hintergrund `#F1F5F3`, Text `#1E2B2F`, gedämpft `#55636A`, Text auf Kachel `#3E4C52`, Primär `#1F6F8B`, Rahmen `#DCE5E1`, Karten weiß.
+  Hintergrund `#F1F5F3`, Text `#1E2B2F`, gedämpft `#55636A`, Text auf Kachel `#3E4C52`, Primär `#1F6F8B` (gedrückt: `--farbe-primaer-dunkel` `#195A71`), Rahmen `#DCE5E1`, Karten weiß.
   Kategorie-Farben: Oberteile `#CFE3EA`, Unterteile `#D9EBDF`, Sets & Sonstiges `#F7E2B5`, Schuhe `#F2D6CF`, Mützen & Co. `#E2DCF0`, Spielzeug weiß mit Rahmen.
   Jahreszeiten-Farben siehe oben. Überschriften Fredoka 600, Text Nunito.
-- Abstände: als Skala in `tokens.css`, abgeleitet aus den Screenshots.
+- Abstände: Skala in `tokens.css` mit 4-px-Basis, `--abstand-1` (4 px) bis `--abstand-10` (64 px); z. B. 20 px zwischen Kacheln, 32 px Innenabstand der Inhaltsfläche.
+- Breakpoint: bis 767 px Breite Smartphone-Layout (mit unterer Leiste), darüber Tablet-Layout. Hilfsklassen `.nur-tablet` / `.nur-smartphone`.
 - Radien: Kacheln 28 px, Karten 24 px, Knöpfe und Eingaben rund (Höhe/2).
 - Smartphone: Kacheln zweispaltig, Suche über volle Breite, Navigation siehe oben.
 - Hinweis-Banner (Backup): Fläche `#FBEFD5`, Text `#6B4A0E`; Erfolg: Fläche `#DDEFE3`, Text `#2F6B45`.
@@ -211,6 +214,7 @@ Jedes Teil wird **überall in der Farbe seiner Kategorie** dargestellt: Karten, 
 - „Spielzeug“ im Kategorie-Filter von „Nach Jahreszeit“ → entfällt.
 - Gewählter Jahreszeiten-Knopf in Soll-Mengen in Primärfarbe → Akzentfarbe der Jahreszeit.
 - Detail (Tablet) ohne Merkmal → Merkmal-Kachel ergänzen.
+- Einstellungen mit Auswahl „Erinnern nach“ bzw. Karte „Backup-Erinnerung“ → entfällt.
 
 ## Arbeitsweise
 
