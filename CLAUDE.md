@@ -1,5 +1,7 @@
 # Kindergarderobe – Projektregeln für Claude Code
 
+Stand: 13.10.2026 (nach Auftrag 01)
+
 Inventar-App für Kleidung und Spielzeug eines Kindes. Eigenbedarf, ein Kind.
 Hauptgerät: Tablet im Querformat (1194 × 834). Die App muss zusätzlich auf dem Smartphone (390 × 844) gut bedienbar sein.
 Ziel: auf einen Blick sehen, was da ist, was passt, was fehlt und was es gekostet hat. Schwerpunkt: Kategorien, Jahreszeiten, Filter.
@@ -11,7 +13,7 @@ Ziel: auf einen Blick sehen, was da ist, was passt, was fehlt und was es gekoste
 - Icons als Inline-SVG (Strich-Icons), keine Icon-Fonts, keine Emojis.
 - Daten in `localStorage` über ein eigenes Modul `js/storage.js` (nie direkt aus anderen Modulen). Beim Start `navigator.storage.persist()` anfragen.
 - Responsive: Layout für Tablet quer (Hauptziel) und Smartphone hoch; Umbruch per CSS (Grid/Flex, Media Queries), keine getrennten Seiten.
-- Veröffentlichung über GitHub Pages aus dem `main`-Branch. Das Repository ist öffentlich: **niemals echte Daten, Backups (`*.json` außer `manifest.webmanifest`) oder die alte CSV committen.**
+- Veröffentlichung über GitHub Pages aus dem `main`-Branch. Das Repository ist öffentlich: **niemals echte Daten, Backups (`*.json`), die alte CSV oder die Design-Screenshots committen.**
 - Diagramme selbst als SVG zeichnen.
 - Später: `manifest.webmanifest` + Service Worker, damit die App vom Startbildschirm offline läuft.
 
@@ -20,14 +22,44 @@ Ziel: auf einen Blick sehen, was da ist, was passt, was fehlt und was es gekoste
 ```
 index.html
 css/        tokens.css (Farben, Abstände, Schriften), base.css, components.css, screens.css
-js/         app.js (Start, Router), router.js (Hash-Routing: #/, #/kategorie/:id, #/jahreszeit/:id, #/teil/:id, #/neu, #/kosten, #/statistik, #/aussortiert, #/einstellungen)
+js/         app.js (Start, Router), router.js (Hash-Routing, siehe Routen)
             storage.js, model.js (Datenmodell, Konstanten, Validierung), filters.js (reine Filter-/Zählfunktionen)
             costs.js (reine Kostenberechnung), backup.js (Export, Import, Erinnerung), screens/*.js (je Screen ein Modul), ui/*.js (Bausteine)
 fonts/
 icons/      App-Icons für das Manifest
+Claude-Code-Uebergabe/        Aufträge (*.md, werden committet)
+Design-Preview-Screenshots/   Design-Screenshots (nur lokal, stehen in .gitignore)
 ```
 
 Reine Logik (Filtern, Zählen, Größen vergleichen, Kosten rechnen, Backup prüfen) gehört in Module ohne DOM-Zugriff, damit sie isoliert testbar ist.
+
+### Routen
+
+| Route | Screen |
+|---|---|
+| `#/` | Übersicht |
+| `#/kategorie/:id` | Kategorie mit Filtern |
+| `#/jahreszeit/:id` | Nach Jahreszeit |
+| `#/teil/:id` | Detail |
+| `#/teil/:id/bearbeiten` | Teil bearbeiten |
+| `#/neu` | Teil hinzufügen |
+| `#/kosten` | Kosten |
+| `#/statistik` | Statistik |
+| `#/saisonwechsel` | Soll-Mengen & Saisonwechsel |
+| `#/aussortiert` | Aussortiert |
+| `#/einstellungen` | Einstellungen & Backup (auf dem Smartphone „Mehr“) |
+
+Unbekannte Routen führen zur Übersicht.
+
+## Navigation (laut Design)
+
+- **Tablet:** keine Leiste. Die Übersicht hat oben Suche, Knopf „Kosten“, Icon-Knöpfe Statistik, Aussortiert und Einstellungen sowie den Knopf „Teil hinzufügen“. Alle anderen Screens haben links oben einen runden Zurück-Knopf (Teil hinzufügen: Schließen-Knopf „×“ und „Abbrechen“). Die Statistik verlinkt auf „Soll-Mengen & Saisonwechsel“.
+- **Smartphone:** untere Navigationsleiste mit fünf Einträgen: **Start** (`#/`), **Statistik** (`#/statistik`), **+** als runder Primär-Knopf in der Mitte (`#/neu`), **Aussortiert** (`#/aussortiert`), **Mehr** (`#/einstellungen`). Der aktive Eintrag ist in Primärfarbe hervorgehoben.
+  - Die Leiste erscheint auf Übersicht, Statistik, Aussortiert, Einstellungen und Soll-Mengen & Saisonwechsel.
+  - Ohne Leiste (mit Zurück- bzw. Schließen-Knopf): Kategorie, Detail, Nach Jahreszeit, Teil hinzufügen/bearbeiten, Kosten. Das Detail hat unten eine eigene Aktionsleiste mit „Aussortieren“ und „Bearbeiten“.
+  - Übersicht: Icon-Knopf „€“ oben rechts führt zu Kosten.
+  - Statistik: Verweis-Karte „Soll-Mengen & Saisonwechsel“ mit Anzahl der Fehlenden oben.
+  - „Mehr“ öffnet den Screen „Einstellungen“ mit Einträgen „Kosten“ (mit Jahressumme) und „Soll-Mengen & Saisonwechsel“, darunter Backup und Begrüßung.
 
 ## Datenmodell
 
@@ -38,19 +70,19 @@ Reine Logik (Filtern, Zählen, Größen vergleichen, Kosten rechnen, Backup prü
 | `id` | String | ja | `crypto.randomUUID()` |
 | `typ` | Enum | ja | `kleidung`, `spielzeug` |
 | `name` | String | ja | z. B. „Regenjacke gelb“ |
-| `kategorie` | Enum | ja | siehe Kategorien |
-| `art` | String | ja | aus der Liste der Kategorie oder eigene |
+| `kategorie` | Enum | ja | siehe Kategorien; Spielzeug hat immer `spielzeug` |
+| `art` | String | ja | Kleidung: aus der Artenliste der Kategorie; Spielzeug: aus der Liste der Spielzeug-Arten; jeweils oder eigene |
 | `anzahl` | Zahl ≥ 1 | ja | Socken z. B. 10 (Paar) |
 | `passform` | Enum | nur Kleidung | `passt_gut`, `bald_zu_klein`, `zu_klein` (Oberfläche: „Passt gut“, „Bald zu klein“, „Zu klein“); Spielzeug hat keine Passform |
 | `aussortiert` | Boolean | ja | Standard `false`; aussortierte Teile landen im Papierkorb |
-| `farbe` | String | nein | gelb, rot, blau, grün, grau, weiß, bunt (erweiterbar) |
+| `farbe` | String | nein | gelb, rot, blau, grün, grau, weiß, bunt (erweiterbar); reine Angabe zum Teil, bestimmt **nicht** die Kartenfarbe |
 | `merkmal` | Enum | nein | `blanko`, `aufdruck`, `marke` |
 | `marke` | String | nur bei `merkmal = marke` | Wert aus der pflegbaren Markenliste (z. B. Paw Patrol, Spider-Man) |
 | `preis` | Objekt | nein | siehe Kosten |
-| `notiz` | String | nein | |
+| `notiz` | String | nein | erscheint im Detail als Untertitel unter dem Namen |
 | `hinzugefuegtAm`, `geaendertAm` | ISO-Datum | automatisch | |
 | `aussortiertAm` | ISO-Datum | automatisch | beim Aussortieren |
-| `aussortiertGrund` | Enum | nein | `zu_klein`, `verschenkt`, `verkauft`, `kaputt`, `sonstiges`; wird beim Aussortieren abgefragt |
+| `aussortiertGrund` | Enum | nein | `zu_klein`, `verschenkt`, `verkauft`, `kaputt`; wird beim Aussortieren abgefragt |
 
 ### Nur Kleidung
 
@@ -58,15 +90,15 @@ Reine Logik (Filtern, Zählen, Größen vergleichen, Kosten rechnen, Backup prü
 |---|---|---|---|
 | `groesse` | Objekt | ja | `{ system, von, bis }`, siehe Größensysteme |
 | `jahreszeiten` | Array | ja, min. 1 | `fruehling`, `sommer`, `herbst`, `winter`; Schnellknopf „Ganzjährig“ setzt alle vier |
-| `herkunft` | Enum | nein | `gekauft`, `geschenkt`, `second_hand` |
 
 ### Nur Spielzeug
 
 | Feld | Typ | Pflicht | Hinweis |
 |---|---|---|---|
 | `alterAb` | Zahl | nein | Auswahl 0, 1, 2, 3, 4, 6, 8 oder eigene |
-| `spielzeugArt` | String | ja | Brettspiel, Puzzle, Lego, Auto, Bastelkram, Kuscheltier, Buch oder eigene |
 | `tags` | Array | nein | frei eingetragene Merkmale, z. B. „Holz“, „24 Teile“ |
+
+Spielzeug hat **keine** Größe, **keine** Jahreszeiten und **keine** Passform.
 
 ### Kategorien und Arten (zweistufig, beide filterbar)
 
@@ -77,7 +109,7 @@ Reine Logik (Filtern, Zählen, Größen vergleichen, Kosten rechnen, Backup prü
 | Sets & Sonstiges `sets_sonstiges` | Set (Oberteil + Hose), Schlafanzug, Strampler, Overall, Schneeanzug, Softshellanzug, Schlafsack, Sonstiges | Konfektion |
 | Schuhe `schuhe` | Sneaker, Sandalen, Gummistiefel, Winterstiefel, Hausschuhe | EU-Schuhgröße |
 | Mützen & Co. `muetzen` | Mütze, Beanie, Cap, Sonnenhut, Regenmütze, Handschuhe, Fäustlinge, Schal, Halstuch | Kopfumfang (cm) bzw. Handschuhgröße |
-| Spielzeug `spielzeug` | siehe `spielzeugArt` | keine Größe |
+| Spielzeug `spielzeug` | Brettspiel, Puzzle, Lego, Auto, Bastelkram, Kuscheltier, Buch | keine Größe |
 
 „Sets & Sonstiges“ ist die Sammelkategorie: Alles, was sich nicht eindeutig zuordnen lässt, kommt dorthin. Die Zuordnung der Arten ist eine Konstante in `js/model.js` und muss leicht änderbar sein.
 
@@ -89,7 +121,7 @@ Reine Logik (Filtern, Zählen, Größen vergleichen, Kosten rechnen, Backup prü
 - `handschuh`: 0 … 6.
 - Bei Einzelgröße gilt `von === bis`. Im Formular: Schnellauswahl der gängigen Größen plus „Andere …“.
 
-### Jahreszeiten
+### Jahreszeiten (nur Kleidung)
 
 | Jahreszeit | Monate | Akzent | Fläche |
 |---|---|---|---|
@@ -98,7 +130,7 @@ Reine Logik (Filtern, Zählen, Größen vergleichen, Kosten rechnen, Backup prü
 | Herbst `herbst` | Sept. – Nov. | `#9A4422` | `#F2D6CF` |
 | Winter `winter` | Dez. – Feb. | `#5B4A9E` | `#E2DCF0` |
 
-Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert. Keine Temperaturen, keine Wetterdaten.
+Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert. Keine Temperaturen, keine Wetterdaten. Spielzeug erscheint in keiner Jahreszeiten-Ansicht und in keinem Jahreszeiten-Filter.
 
 ### Kosten
 
@@ -110,9 +142,15 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
 ### Weitere gespeicherte Daten
 
 - `marken`: pflegbare Liste (anlegen, löschen). Gelöschte Marken bleiben an bestehenden Teilen erhalten.
-- `sollMengen`: Liste `{ id, art, jahreszeit, soll }` – Soll je Art **und** Jahreszeit, optional. Gezählt werden nur passende Teile (Passform „Passt gut“) der Jahreszeit; unterschrittenes Soll wird als Lücke angezeigt.
-- `einstellungen`: `{ name, letztesBackupAm, aenderungenSeitBackup, backupErinnerungTage }`. `name` ist der Name des Kindes und erscheint in der Begrüßung „Hallo, [Name]!“. `backupErinnerungTage`: `14` (Standard), `30`, `60` oder `null` (nie erinnern).
+- `sollMengen`: Liste `{ id, art, jahreszeit, soll }` – Soll je Art **und** Jahreszeit, optional, nur Kleidung. Gezählt werden nur Teile mit Passform „Passt gut“ in der Jahreszeit; „Bald zu klein“ zählt **nicht** mit. Unterschrittenes Soll wird als Lücke angezeigt.
+- `einstellungen`: `{ name, letztesBackupAm, aenderungenSeitBackup }`. `name` ist der Name des Kindes und erscheint in der Begrüßung „Hallo, [Name]!“.
 - Schema-Version `version: 1` für spätere Migrationen.
+
+### Backup-Erinnerung
+
+- Die Erinnerung erscheint, **sobald seit dem letzten Backup etwas hinzugefügt, bearbeitet oder geändert wurde** (`aenderungenSeitBackup > 0`). Ein regelmäßiges, zeitgesteuertes Backup ist nicht vorgesehen.
+- Nach einem erfolgreichen Export wird `aenderungenSeitBackup` auf 0 gesetzt und `letztesBackupAm` gespeichert.
+- **Offen (vor Auftrag 02 mit John klären):** Was mit der Auswahl „Erinnern nach“ (2 Wochen / 30 / 60 Tage / Nie) aus dem Design geschieht. Nicht eigenmächtig umsetzen oder entfernen.
 
 ## Zählregeln
 
@@ -120,40 +158,63 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
 - Teile mit `aussortiert: true` zählen nirgends mit und erscheinen nur im Bereich „Aussortiert“.
 - Aussortiert ist ein Papierkorb: Teile lassen sich zurückholen; „Aussortiert leeren“ löscht endgültig, nur nach Sicherheitsabfrage.
 - Kosten aussortierter Teile bleiben in der Kostensumme erhalten.
+- Jahreszeiten-Zahlen zählen nur Kleidung.
 
 ## Screens in Version 1
 
-1. **Übersicht:** Datum und Begrüßung, Suche, Knopf „Kosten“, Icon-Knöpfe für Statistik, Aussortiert und Einstellungen, Knopf „Teil hinzufügen“; Backup-Hinweis als Banner („Das letzte Backup ist 59 Tage alt …“) mit „Jetzt sichern“ und Ausblenden-Knopf; sechs Kategorie-Kacheln mit Stückzahl; vier Jahreszeiten-Kacheln mit Monaten, Stückzahl und „Jetzt“-Markierung.
-2. **Kategorie mit Filtern:** Filterspalte mit Jahreszeit, Größe, Art, Merkmal (Blanko / Aufdruck / Marke, bei Marke Auswahlliste), Passform; Suche; Karten mit Name, Größe, Jahreszeiten, Merkmal bzw. Marke.
-3. **Detail:** Liste der Teile der Kategorie links (mit Größe, Preis und Hinweis „Bald zu klein“), Details rechts: Größe, Farbe, Preis (bei Sammelkauf mit Hinweis), Jahreszeiten, Passform zum Antippen, Notiz; Knöpfe „Bearbeiten“ und „Aussortieren“ (fragt den Grund ab).
-4. **Nach Jahreszeit:** vier Jahreszeiten-Knöpfe, Filter nach Kategorie, Karten mit Kategorie und Größe.
-5. **Teil hinzufügen / bearbeiten:** Umschalter Kleidung / Spielzeug, Live-Vorschau der Karte. Kleidung: Name, Kategorie, Art, Größe, Jahreszeiten, Passform, Farbe, Merkmal (+ Marke, Markenliste anlegen/löschen), Preis (Einzelpreis oder Sammelkauf auswählen / neu), Notiz. Spielzeug: Name, Art, Alter ab, Farbe (optional), freie Merkmale, Preis, Notiz.
-6. **Kosten:** Summe des Jahres, Teile, Durchschnitt; Formular „Kosten hinzufügen“ (Wofür?, Gesamtbetrag, Anzahl Teile); Einträge neueste zuerst.
-7. **Statistik:** Gesamtzahl im Schrank (ohne Aussortiertes); Balkendiagramme nach Kategorie, Art (die häufigsten 7), Jahreszeit (Hinweis: ein Teil kann zu mehreren gehören) und Größe; jeder Balken führt per Tipp zu den Teilen; Link zu „Soll-Mengen & Saisonwechsel“.
-8. **Soll-Mengen & Saisonwechsel:** Umschalter für die vier Jahreszeiten. Links Tabelle „Art · Passend · Soll (− / +) · Stand“ mit Stand „kein Soll“, „noch n fehlen“ oder „vollständig“. Rechts Saisonwechsel-Check mit Saisonbeginn („ab 1. Dezember · in 7 Wochen“), Summen „ist da / passt / fehlt“, Liste „Besorgen“ (Art + Anzahl) und Liste „Wird bald zu klein“.
-9. **Aussortiert:** Liste mit Name, Kategorie, Größe bzw. Alter, Datum und Grund; „Zurückholen“ je Teil; „Aussortiert leeren“ mit Bestätigungsdialog (endgültig, nur über ein älteres Backup wiederherstellbar); leerer Zustand mit Hinweis.
-10. **Einstellungen & Backup:** Name des Kindes mit Live-Vorschau der Begrüßung; Backup-Erinnerung (2 Wochen / 30 Tage / 60 Tage / Nie erinnern); Backup-Status (letztes Backup, fällig oder gesichert); „Backup exportieren“ (Teilen-Menü, JSON); „Backup einspielen“ mit Vorschau (Dateiname, Erstelldatum, Anzahl Teile, Aussortiert, Kosten, Marken), Warnung, dass alle aktuellen Daten ersetzt werden, und Bestätigung.
+1. **Übersicht:** Datum und Begrüßung, Suche, Knopf „Kosten“, Icon-Knöpfe für Statistik, Aussortiert und Einstellungen, Knopf „Teil hinzufügen“ (Smartphone siehe Navigation); Backup-Hinweis als Banner („Das letzte Backup ist 59 Tage alt. Zeit, die Daten zu sichern.“) mit „Jetzt sichern“ und Ausblenden-Knopf, Anzeige nach der Regel unter „Backup-Erinnerung“; sechs Kategorie-Kacheln mit Stückzahl; vier Jahreszeiten-Kacheln mit Monaten, Stückzahl und „Jetzt“-Markierung.
+2. **Kategorie mit Filtern:** Suche; Karten mit Name, Größe (bzw. Alter ab), Jahreszeiten, Merkmal bzw. Marke. Filterspalte (scrollbar):
+   - Kleidungs-Kategorien: Jahreszeit, Größe, Merkmal (Blanko / Aufdruck / Marke, bei Marke Auswahlliste), Passform, Art.
+   - Kategorie Spielzeug: eigener Filter mit Art, Alter ab und Merkmal; kein Jahreszeit-, Größen- oder Passform-Filter.
+3. **Detail:** Tablet: Liste der Teile der Kategorie links (mit Größe, Preis und Hinweis „Bald zu klein“), Details rechts. Smartphone: Blättern mit „‹ ›“ und „2 von 7“, Aktionsleiste unten. Details: Name, darunter die **Notiz als Untertitel**; Kacheln Größe, Farbe, **Merkmal** (Blanko / Aufdruck / Markenname) und Preis (bei Sammelkauf mit Hinweis); Jahreszeiten; Passform zum Antippen; Notizfeld zum Bearbeiten. Knöpfe „Bearbeiten“ und „Aussortieren“ (fragt den Grund ab). Bei Spielzeug: Alter ab statt Größe, keine Jahreszeiten, keine Passform.
+4. **Nach Jahreszeit:** vier Jahreszeiten-Knöpfe (gewählter Knopf in der Akzentfarbe der Jahreszeit), Filter nach Kategorie **ohne Spielzeug**, Karten mit Kategorie und Größe in der Farbe ihrer Kategorie.
+5. **Teil hinzufügen / bearbeiten:** Umschalter Kleidung / Spielzeug, Live-Vorschau der Karte (in der Farbe der Kategorie).
+   - Kleidung: Name, Kategorie (nur die fünf Kleidungs-Kategorien), **Art** (direkt nach der Kategorie, Auswahl aus der Artenliste der Kategorie plus „Andere …“), Größe, Jahreszeiten, Passform, Farbe, Merkmal (+ Marke, Markenliste anlegen/löschen), **Anzahl** (Zähler − / +, Standard 1), Preis (Einzelpreis oder Sammelkauf auswählen / neu), Notiz.
+   - Spielzeug: Name, Art, Alter ab, Farbe (optional), Merkmal, freie Merkmale, **Anzahl**, Preis, Notiz.
+   - Art und Anzahl fehlen im Design und werden im Stil der übrigen Felder gestaltet.
+6. **Kosten:** Summe des Jahres, Teile, Durchschnitt; Formular „Kosten hinzufügen“ (Wofür?, Gesamtbetrag, Anzahl Teile); Einträge neueste zuerst. Smartphone: Knopf „+ Kosten“ statt dauerhaft sichtbarem Formular.
+7. **Statistik:** Gesamtzahl im Schrank (ohne Aussortiertes); Balkendiagramme nach Kategorie, **Art der Kleidung** (die häufigsten 7), **Spielzeug nach Art** (neu, nicht im Design), Jahreszeit (Hinweis: ein Teil kann zu mehreren gehören) und Größe; jeder Balken führt per Tipp zu den Teilen; Link zu „Soll-Mengen & Saisonwechsel“.
+8. **Soll-Mengen & Saisonwechsel:** Umschalter für die vier Jahreszeiten (gewählter Knopf in der Akzentfarbe der Jahreszeit). Links Tabelle „Art · Passend · Soll (− / +) · Stand“ mit Stand „kein Soll“, „noch n fehlen“ oder „vollständig“. Rechts Saisonwechsel-Check mit Saisonbeginn („ab 1. Dezember · in 7 Wochen“), Summen „ist da / passt / fehlt“, Liste „Besorgen“ (Art + Anzahl) und Liste „Wird bald zu klein“. Nur Kleidung.
+9. **Aussortiert:** Liste mit Name, Kategorie, Größe bzw. Alter, Datum und Grund (zu klein, verschenkt, verkauft, kaputt); „Zurückholen“ je Teil; „Aussortiert leeren“ mit Bestätigungsdialog (endgültig, nur über ein älteres Backup wiederherstellbar); leerer Zustand mit Hinweis.
+10. **Einstellungen & Backup:** Name des Kindes mit Live-Vorschau der Begrüßung; Backup-Status (letztes Backup, fällig oder gesichert); „Backup exportieren“ (Teilen-Menü, JSON); „Backup einspielen“ mit Vorschau (Dateiname, Erstelldatum, Anzahl Teile, Aussortiert, Kosten, Marken), Warnung, dass alle aktuellen Daten ersetzt werden, und Bestätigung. Auswahl „Erinnern nach“: siehe offener Punkt unter Backup-Erinnerung. Smartphone zusätzlich: Einträge „Kosten“ und „Soll-Mengen & Saisonwechsel“.
 
-Backup: JSON-Export per Knopf (über das Teilen-Menü, Fallback Download), Import mit Vorschau und Rückfrage, Erinnerung nach 14 Tagen oder vielen Änderungen. Kein automatisches Backup, kein CSV-Export, kein CSV-Import.
+Backup: JSON-Export per Knopf (über das Teilen-Menü, Fallback Download), Import mit Vorschau und Rückfrage. Kein automatisches Backup, kein CSV-Export, kein CSV-Import.
 
-Nicht in V1: Anlässe, Fotos, mehrere Kinder, Sync, Wetterdaten/Temperaturen, Größenwarnung, Wachstumsverlauf, „Heute anziehen“.
+Nicht in V1: Anlässe, Fotos, mehrere Kinder, Sync, Wetterdaten/Temperaturen, Größenwarnung, Wachstumsverlauf, „Heute anziehen“, Herkunft (gekauft/geschenkt/Second-Hand).
 
 ## Design
 
-- Vorlage: Design-Canvas „Kindergarderobe“ (Tablet 1194 × 834, Smartphone 390 × 844). Farben und Schriften in `css/tokens.css`:
+- Vorlage: Design-Canvas „Kindergarderobe“ (Tablet 1194 × 834, Smartphone 390 × 844). Screenshots liegen unter `Design-Preview-Screenshots/` (nur lokal). **Bei Widersprüchen zwischen Screenshot und dieser Datei gilt CLAUDE.md.**
+- Farben und Schriften in `css/tokens.css`:
   Hintergrund `#F1F5F3`, Text `#1E2B2F`, gedämpft `#55636A`, Text auf Kachel `#3E4C52`, Primär `#1F6F8B`, Rahmen `#DCE5E1`, Karten weiß.
-  Kategorie-Kacheln: Oberteile `#CFE3EA`, Unterteile `#D9EBDF`, Sets & Sonstiges `#F7E2B5`, Schuhe `#F2D6CF`, Mützen & Co. `#E2DCF0`, Spielzeug weiß mit Rahmen.
+  Kategorie-Farben: Oberteile `#CFE3EA`, Unterteile `#D9EBDF`, Sets & Sonstiges `#F7E2B5`, Schuhe `#F2D6CF`, Mützen & Co. `#E2DCF0`, Spielzeug weiß mit Rahmen.
   Jahreszeiten-Farben siehe oben. Überschriften Fredoka 600, Text Nunito.
+- Abstände: als Skala in `tokens.css`, abgeleitet aus den Screenshots.
 - Radien: Kacheln 28 px, Karten 24 px, Knöpfe und Eingaben rund (Höhe/2).
-- Smartphone: Kacheln zweispaltig, Icon-Knöpfe für Kosten und Hinzufügen, Suche über volle Breite. Statistik, Aussortiert und Einstellungen müssen auch auf dem Smartphone erreichbar sein (z. B. über ein Menü), auch wenn die Canvas das noch nicht zeigt.
+- Smartphone: Kacheln zweispaltig, Suche über volle Breite, Navigation siehe oben.
 - Hinweis-Banner (Backup): Fläche `#FBEFD5`, Text `#6B4A0E`; Erfolg: Fläche `#DDEFE3`, Text `#2F6B45`.
 - Touch: jedes Bedienelement mindestens 48 × 48 px, keine Funktion nur per Hover, keine Doppeltipps.
 - Echte `<button>`, `<a>`, `<input>` mit `<label>`; `aria-label` an reinen Icon-Knöpfen; Kontrast mindestens 4,5:1.
 - Oberflächentexte auf Deutsch, Code und Kommentare dürfen Englisch sein.
 - Passform in der Oberfläche: „Passt gut“, „Bald zu klein“, „Zu klein“. Aussortieren ist eine eigene Aktion, keine Passform.
 
+### Farbregel für Teile (verbindlich)
+
+Jedes Teil wird **überall in der Farbe seiner Kategorie** dargestellt: Karten, Listen-Icons im Detail, Aussortiert-Liste, Vorschau im Formular, Karten in „Nach Jahreszeit“. Ein Oberteil ist also immer pastellblau, ein Unterteil immer pastellgrün usw. Die Jahreszeiten-Knöpfe und -Kacheln haben ihre eigenen Farben, die Teile behalten trotzdem ihre Kategorie-Farbe. Das Feld `farbe` färbt keine Karte.
+
+### Bekannte Fehler im Design (nicht übernehmen)
+
+- Karten in der Kategorie-Ansicht und Icons in Detail/Aussortiert haben unterschiedliche Farben je Teil → Kategorie-Farbe verwenden.
+- Karten in „Nach Jahreszeit“ in der Jahreszeiten-Farbe → Kategorie-Farbe verwenden.
+- Vorschau in „Teil hinzufügen“ in der gewählten Teil-Farbe (gelb) → Kategorie-Farbe verwenden.
+- „Spielzeug“ als Kategorie im Kleidungs-Formular (Tablet) → nur die fünf Kleidungs-Kategorien anzeigen.
+- „Spielzeug“ im Kategorie-Filter von „Nach Jahreszeit“ → entfällt.
+- Gewählter Jahreszeiten-Knopf in Soll-Mengen in Primärfarbe → Akzentfarbe der Jahreszeit.
+- Detail (Tablet) ohne Merkmal → Merkmal-Kachel ergänzen.
+
 ## Arbeitsweise
 
-- Arbeite nur den Auftrag ab, den du bekommst. Neue Funktionen nicht eigenmächtig hinzufügen.
-- Kleine, nachvollziehbare Commits mit deutschen Commit-Messages.
+- Arbeite nur den Auftrag ab, den du bekommst. Neue Funktionen nicht eigenmächtig hinzufügen. Bei Unklarheiten nachfragen statt selbst entscheiden.
+- Elemente, die nicht im Design vorkommen (z. B. Dialoge für Aussortieren, „Aussortiert leeren“, Import-Vorschau, leere Zustände, Felder Art und Anzahl, Statistik „Spielzeug nach Art“), gestaltest du selbst im Stil der vorhandenen Screens. **Liste sie in der Zusammenfassung unter „Selbst gestaltet – bitte prüfen“ auf**, damit John sie im Design nachziehen kann.
+- Kleine, nachvollziehbare Commits mit deutschen Commit-Messages. Vor jedem Commit mit `git status` prüfen, dass keine Screenshots, JSON-Backups oder CSV-Dateien dabei sind.
 - Am Ende jedes Auftrags: kurze Zusammenfassung, was gebaut wurde, was offen ist und wie man es im Browser testet.
