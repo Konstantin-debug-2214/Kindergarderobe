@@ -1,0 +1,15 @@
+# Niemals echte Daten oder Backups ins oeffentliche Repository
+*.json
+*.csv
+
+# Design-Screenshots (Uebergabe)
+Claude-Code-Uebergabe/*.png
+Claude-Code-Uebergabe/*.jpg
+Design-Preview-Screenshots/
+
+# Betriebssystem
+.DS_Store
+Thumbs.db
+
+# Ausnahme: das Web-App-Manifest heisst manifest.webmanifest
+# und faellt nicht unter *.json
