@@ -30,6 +30,17 @@ const PFADE = {
   liste: ['M4 7h16', 'M4 12h16', 'M4 17h16'],
   warnung: ['M12 4.5 2.8 20h18.4z', 'M12 10v4.4', 'M12 17.2v.2'],
   'pfeil-rechts': ['M9.5 5l7 7-7 7'],
+  haken: ['M5 12.4 9.9 17.3 19 7.2'],
+  // Teilen bzw. Exportieren: Pfeil aus der Ablage heraus
+  export: [
+    'M12 3.2v10.3', 'M8.4 6.8 12 3.2l3.6 3.6',
+    'M4.6 14.2v4.3a1.5 1.5 0 0 0 1.5 1.5h11.8a1.5 1.5 0 0 0 1.5-1.5v-4.3',
+  ],
+  // Einspielen: Pfeil in die Ablage hinein
+  import: [
+    'M12 13.5V3.2', 'M8.4 9.9 12 13.5l3.6-3.6',
+    'M4.6 14.2v4.3a1.5 1.5 0 0 0 1.5 1.5h11.8a1.5 1.5 0 0 0 1.5-1.5v-4.3',
+  ],
 };
 
 /**

@@ -53,6 +53,36 @@
   width: 100%;
 }
 
+/* --- Einstellungen & Backup ----------------------------------------------- */
+
+/* Tablet: Begrüßung links, Backup rechts – wie im Design. */
+.einstellungen__raster {
+  display: grid;
+  grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--abstand-5);
+}
+
+.einstellungen__zeilen {
+  margin-bottom: var(--abstand-5);
+  padding: var(--abstand-1) 0;
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-karte);
+  background: var(--farbe-flaeche);
+  box-shadow: var(--schatten-karte);
+}
+
+.einstellungen__backup-knoepfe {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--abstand-3);
+  margin-top: var(--abstand-5);
+}
+
+.meldungsbereich:not(:empty) {
+  margin-bottom: var(--abstand-5);
+}
+
 /* --- Platzhalter (gilt bis die echten Screens gebaut sind) ---------------- */
 
 .platzhalter {
@@ -147,6 +177,41 @@
   /* Auf dem Smartphone bleibt oben nur der "€"-Knopf zu den Kosten. */
   .uebersicht__werkzeuge {
     flex: 0 0 auto;
+  }
+
+  /* Karten untereinander, Backup zuerst (wie im Design). */
+  .einstellungen__raster {
+    grid-template-columns: 1fr;
+  }
+
+  .einstellungen__karte:last-child {
+    order: -1;
+  }
+
+  .einstellungen__backup-knoepfe {
+    grid-template-columns: 1fr;
+  }
+
+  .banner {
+    flex-wrap: wrap;
+  }
+
+  /* Schließen bleibt oben neben dem Text, die Knöpfe kommen darunter. */
+  .banner__aktionen {
+    order: 2;
+    width: 100%;
+  }
+
+  .banner__aktionen .knopf {
+    width: 100%;
+  }
+
+  .dialog__aktionen {
+    flex-direction: column-reverse;
+  }
+
+  .dialog__aktionen .knopf {
+    width: 100%;
   }
 
   .testlinks__liste {
