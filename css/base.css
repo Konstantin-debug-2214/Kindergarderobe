@@ -1,0 +1,122 @@
+/* ==========================================================================
+   base.css – Zurücksetzen, Grundtypografie, App-Rahmen
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--farbe-hintergrund);
+  color: var(--farbe-text);
+  font-family: var(--schrift-text);
+  font-size: var(--text-md);
+  font-weight: var(--schriftgewicht-normal);
+  line-height: var(--zeilenhoehe-normal);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1, h2, h3 {
+  margin: 0;
+  font-family: var(--schrift-ueberschrift);
+  font-weight: var(--schriftgewicht-ueberschrift);
+  line-height: var(--zeilenhoehe-eng);
+}
+
+h1 { font-size: var(--text-2xl); }
+h2 { font-size: var(--text-xl); }
+h3 { font-size: var(--text-lg); }
+
+p {
+  margin: 0;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: var(--farbe-primaer);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+svg {
+  display: block;
+  flex: none;
+}
+
+/* Sichtbarer Fokus für Tastatur und Vorlesehilfen */
+:focus-visible {
+  outline: 3px solid var(--farbe-fokus);
+  outline-offset: 2px;
+}
+
+/* Nur für Vorlesehilfen sichtbar */
+.nur-vorlesehilfe {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --- App-Rahmen ---------------------------------------------------------- */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+/* Der Screen füllt den Platz über der unteren Leiste. */
+.screen-bereich {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Inhaltsfläche: weiße Karte auf dem Hintergrund (Tablet) */
+.inhalt {
+  max-width: var(--inhalt-max-breite);
+  margin: 0 auto;
+  padding: var(--abstand-7);
+}
+
+/* --- Sichtbarkeit je Geraet (Breakpoint 768px) --------------------------- */
+
+@media (max-width: 767px) {
+  .nur-tablet { display: none !important; }
+}
+
+@media (min-width: 768px) {
+  .nur-smartphone { display: none !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+  }
+}

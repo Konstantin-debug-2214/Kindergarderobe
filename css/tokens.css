@@ -1,0 +1,116 @@
+/* ==========================================================================
+   tokens.css – Farben, Schriften, Abstände, Radien
+   Einzige Stelle, an der Design-Werte definiert werden.
+   Quelle: CLAUDE.md (Farben, Radien) und die Design-Screenshots (Abstände).
+   ========================================================================== */
+
+/* --- Schriften (lokal, keine Netzwerkzugriffe) ---------------------------- */
+
+/* Fredoka als Variable Font: deckt die benötigten Schnitte 500 und 600 ab. */
+@font-face {
+  font-family: 'Fredoka';
+  src: url('../fonts/fredoka-latin-variable.woff2') format('woff2');
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Nunito als Variable Font: deckt 400, 600, 700 und 800 ab. */
+@font-face {
+  font-family: 'Nunito';
+  src: url('../fonts/nunito-latin-variable.woff2') format('woff2');
+  font-weight: 200 1000;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* --- Grundfarben ------------------------------------------------------- */
+  --farbe-hintergrund: #F1F5F3;
+  --farbe-flaeche: #FFFFFF;
+  --farbe-text: #1E2B2F;
+  --farbe-text-gedaempft: #55636A;
+  --farbe-text-kachel: #3E4C52;
+  --farbe-primaer: #1F6F8B;
+  --farbe-primaer-dunkel: #195A71;   /* selbst abgeleitet: gedrückter Zustand */
+  --farbe-primaer-kontrast: #FFFFFF;
+  --farbe-rahmen: #DCE5E1;
+  --farbe-fokus: #1F6F8B;
+
+  /* --- Kategorie-Kacheln -------------------------------------------------- */
+  --farbe-kat-oberteile: #CFE3EA;
+  --farbe-kat-unterteile: #D9EBDF;
+  --farbe-kat-sets-sonstiges: #F7E2B5;
+  --farbe-kat-schuhe: #F2D6CF;
+  --farbe-kat-muetzen: #E2DCF0;
+  --farbe-kat-spielzeug: #FFFFFF;    /* weiß mit Rahmen */
+
+  /* --- Jahreszeiten: Akzent (Text/Icon) und Fläche ------------------------ */
+  --farbe-fruehling-akzent: #2F7A4E;
+  --farbe-fruehling-flaeche: #D9EBDF;
+  --farbe-sommer-akzent: #9A6A0C;
+  --farbe-sommer-flaeche: #F7E2B5;
+  --farbe-herbst-akzent: #9A4422;
+  --farbe-herbst-flaeche: #F2D6CF;
+  --farbe-winter-akzent: #5B4A9E;
+  --farbe-winter-flaeche: #E2DCF0;
+
+  /* --- Banner ------------------------------------------------------------- */
+  --farbe-hinweis-flaeche: #FBEFD5;
+  --farbe-hinweis-text: #6B4A0E;
+  --farbe-erfolg-flaeche: #DDEFE3;
+  --farbe-erfolg-text: #2F6B45;
+
+  /* --- Schrift ------------------------------------------------------------ */
+  --schrift-ueberschrift: 'Fredoka', 'Trebuchet MS', sans-serif;
+  --schrift-text: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+
+  --schriftgewicht-normal: 400;
+  --schriftgewicht-halbfett: 600;
+  --schriftgewicht-fett: 700;
+  --schriftgewicht-extrafett: 800;
+  --schriftgewicht-ueberschrift: 600;
+  --schriftgewicht-ueberschrift-leicht: 500;
+
+  /* Schriftgrößen (aus den Screenshots abgemessen) */
+  --text-xs: 0.8125rem;   /* 13px – Meta, Einheiten */
+  --text-sm: 0.875rem;    /* 14px – Hilfstexte */
+  --text-md: 1rem;        /* 16px – Fließtext */
+  --text-lg: 1.125rem;    /* 18px – Kachel-Label */
+  --text-xl: 1.375rem;    /* 22px – Abschnittsüberschrift */
+  --text-2xl: 1.875rem;   /* 30px – Screen-Titel */
+  --text-3xl: 2.125rem;   /* 34px – Begrüßung, große Zahlen */
+
+  --zeilenhoehe-eng: 1.2;
+  --zeilenhoehe-normal: 1.45;
+
+  /* --- Abstandsskala (Basis 4 px, aus den Screenshots abgeleitet) --------- */
+  --abstand-1: 4px;
+  --abstand-2: 8px;
+  --abstand-3: 12px;
+  --abstand-4: 16px;
+  --abstand-5: 20px;   /* Abstand zwischen den Kacheln */
+  --abstand-6: 24px;
+  --abstand-7: 32px;   /* Innenabstand der Inhaltsfläche */
+  --abstand-8: 40px;
+  --abstand-9: 48px;
+  --abstand-10: 64px;
+
+  /* --- Radien ------------------------------------------------------------- */
+  --radius-kachel: 28px;
+  --radius-karte: 24px;
+  --radius-feld: 16px;     /* Banner, mehrzeilige Felder */
+  --radius-rund: 999px;    /* Knöpfe und Eingaben: Höhe/2 */
+
+  /* --- Maße --------------------------------------------------------------- */
+  --touch-ziel: 48px;      /* Mindestgröße jedes Bedienelements */
+  --leiste-hoehe: 72px;    /* untere Leiste auf dem Smartphone */
+  --inhalt-max-breite: 1200px;
+
+  /* --- Schatten (dezent, wie in den Screenshots) -------------------------- */
+  --schatten-karte: 0 1px 2px rgba(30, 43, 47, 0.06), 0 8px 24px rgba(30, 43, 47, 0.05);
+  --schatten-leiste: 0 -2px 12px rgba(30, 43, 47, 0.06);
+
+  /* --- Bewegung ----------------------------------------------------------- */
+  --uebergang: 120ms ease;
+}

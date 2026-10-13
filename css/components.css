@@ -1,0 +1,231 @@
+/* ==========================================================================
+   components.css – wiederverwendbare Bausteine
+   Breakpoint Smartphone: max-width 767px (siehe screens.css).
+   ========================================================================== */
+
+/* --- Knöpfe --------------------------------------------------------------- */
+
+.knopf {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--abstand-2);
+  min-height: var(--touch-ziel);
+  padding: 0 var(--abstand-6);
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-rund);
+  background: var(--farbe-flaeche);
+  color: var(--farbe-text);
+  font-family: var(--schrift-text);
+  font-size: var(--text-md);
+  font-weight: var(--schriftgewicht-fett);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--uebergang), border-color var(--uebergang);
+}
+
+.knopf:hover {
+  border-color: var(--farbe-primaer);
+}
+
+.knopf:active {
+  background: var(--farbe-hintergrund);
+}
+
+.knopf--primaer {
+  border-color: var(--farbe-primaer);
+  background: var(--farbe-primaer);
+  color: var(--farbe-primaer-kontrast);
+}
+
+.knopf--primaer:active {
+  background: var(--farbe-primaer-dunkel);
+}
+
+/* Runder Knopf, der nur ein Icon trägt. Braucht immer ein aria-label. */
+.icon-knopf {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-ziel);
+  height: var(--touch-ziel);
+  padding: 0;
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-rund);
+  background: var(--farbe-flaeche);
+  color: var(--farbe-text);
+  cursor: pointer;
+  transition: background var(--uebergang), border-color var(--uebergang);
+}
+
+.icon-knopf:hover {
+  border-color: var(--farbe-primaer);
+}
+
+.icon-knopf:active {
+  background: var(--farbe-hintergrund);
+}
+
+.icon-knopf--primaer {
+  border-color: var(--farbe-primaer);
+  background: var(--farbe-primaer);
+  color: var(--farbe-primaer-kontrast);
+}
+
+/* --- Suchfeld ------------------------------------------------------------- */
+
+.suchfeld {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-3);
+  min-height: var(--touch-ziel);
+  padding: 0 var(--abstand-5);
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-rund);
+  background: var(--farbe-flaeche);
+  color: var(--farbe-text-gedaempft);
+}
+
+/* Das Eingabefeld fuellt die ganze Pille, damit das Touch-Ziel 48 px hoch ist. */
+.suchfeld input {
+  flex: 1 1 auto;
+  align-self: stretch;
+  min-width: 0;
+  min-height: var(--touch-ziel);
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: var(--text-md);
+  outline: none;
+}
+
+.suchfeld:focus-within {
+  border-color: var(--farbe-primaer);
+}
+
+/* --- Kopfzeile eines Screens --------------------------------------------- */
+
+.kopfzeile {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-5);
+  flex-wrap: wrap;
+  margin-bottom: var(--abstand-7);
+}
+
+.kopfzeile__titelblock {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.kopfzeile__titel {
+  font-size: var(--text-2xl);
+}
+
+.kopfzeile__unterzeile {
+  margin-top: var(--abstand-1);
+  color: var(--farbe-text-gedaempft);
+  font-size: var(--text-sm);
+}
+
+.kopfzeile__aktionen {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-3);
+  flex-wrap: wrap;
+}
+
+/* --- Karte ---------------------------------------------------------------- */
+
+.karte {
+  padding: var(--abstand-6);
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-karte);
+  background: var(--farbe-flaeche);
+  box-shadow: var(--schatten-karte);
+}
+
+/* --- Hinweis-Banner ------------------------------------------------------- */
+
+.banner {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-3);
+  padding: var(--abstand-4) var(--abstand-5);
+  border-radius: var(--radius-feld);
+  background: var(--farbe-hinweis-flaeche);
+  color: var(--farbe-hinweis-text);
+  font-weight: var(--schriftgewicht-halbfett);
+}
+
+.banner--erfolg {
+  background: var(--farbe-erfolg-flaeche);
+  color: var(--farbe-erfolg-text);
+}
+
+/* --- Untere Leiste (nur Smartphone) --------------------------------------- */
+
+.leiste {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  display: none;            /* wird erst im Smartphone-Breakpoint gezeigt */
+  align-items: center;
+  justify-content: space-around;
+  gap: var(--abstand-1);
+  height: var(--leiste-hoehe);
+  padding: 0 var(--abstand-2);
+  padding-bottom: env(safe-area-inset-bottom);
+  border-top: 1px solid var(--farbe-rahmen);
+  background: var(--farbe-flaeche);
+  box-shadow: var(--schatten-leiste);
+}
+
+.leiste[hidden] {
+  display: none;
+}
+
+.leiste__eintrag {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex: 1 1 0;
+  min-width: var(--touch-ziel);
+  min-height: var(--touch-ziel);
+  padding: var(--abstand-1) 0;
+  border: 0;
+  background: none;
+  color: var(--farbe-text-gedaempft);
+  font-size: var(--text-xs);
+  font-weight: var(--schriftgewicht-halbfett);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.leiste__eintrag[aria-current='page'] {
+  color: var(--farbe-primaer);
+  font-weight: var(--schriftgewicht-extrafett);
+}
+
+/* Der große Plus-Knopf in der Mitte */
+.leiste__plus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  margin: 0 var(--abstand-1);
+  border: 0;
+  border-radius: var(--radius-rund);
+  background: var(--farbe-primaer);
+  color: var(--farbe-primaer-kontrast);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.leiste__plus:active {
+  background: var(--farbe-primaer-dunkel);
+}
