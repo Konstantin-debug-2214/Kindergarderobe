@@ -80,8 +80,8 @@ node --test
 ```
 index.html
 css/      tokens.css, base.css, components.css, screens.css
-js/       app.js, router.js, model.js, storage.js, backup.js, costs.js
-          screens/*.js, ui/*.js
+js/       app.js, router.js, model.js, storage.js, backup.js, costs.js,
+          formular.js, screens/*.js, ui/*.js
 tests/    Tests der reinen Logik (node --test)
 fonts/    Fredoka und Nunito (woff2) samt OFL-Lizenz
 icons/    App-Icons für das spätere Manifest
@@ -100,6 +100,9 @@ Fließkomma-Fehler entstehen.
   Speicher, Backup (Export über das Teilen-Menü, Import mit Vorschau und
   Rückfrage), Erinnerung an fällige Backups, Einstellungen-Screen und
   Begrüßung auf der Übersicht.
+- **Auftrag 03 – Teil hinzufügen / bearbeiten:** gemeinsames Formular für
+  Kleidung und Spielzeug mit Live-Vorschau in der Kategorie-Farbe, eigener Art
+  und Größe, Markenliste, Anzahl, Einzelpreis und Sammelkauf.
 
-Noch Platzhalter: Kacheln mit Zahlen, Filter, Formulare, Kosten-Ansicht,
+Noch Platzhalter: Kacheln mit Zahlen, Filter, Detailansicht, Kosten-Ansicht,
 Statistik, Soll-Mengen und Aussortiert.

@@ -15,8 +15,8 @@ import { uebersichtScreen } from './screens/uebersicht.js';
 import { kategorieScreen } from './screens/kategorie.js';
 import { jahreszeitScreen } from './screens/jahreszeit.js';
 import { teilScreen } from './screens/teil.js';
-import { teilBearbeitenScreen } from './screens/teilBearbeiten.js';
-import { neuScreen } from './screens/neu.js';
+// Neu und Bearbeiten teilen sich ein Formular.
+import { neuScreen, teilBearbeitenScreen } from './screens/teilFormular.js';
 import { kostenScreen } from './screens/kosten.js';
 import { statistikScreen } from './screens/statistik.js';
 import { saisonwechselScreen } from './screens/saisonwechsel.js';
