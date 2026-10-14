@@ -81,7 +81,7 @@ node --test
 index.html
 css/      tokens.css, base.css, components.css, screens.css
 js/       app.js, router.js, model.js, storage.js, backup.js, costs.js,
-          formular.js, screens/*.js, ui/*.js
+          filters.js, formular.js, screens/*.js, ui/*.js
 tests/    Tests der reinen Logik (node --test)
 fonts/    Fredoka und Nunito (woff2) samt OFL-Lizenz
 icons/    App-Icons für das spätere Manifest
@@ -103,6 +103,9 @@ Fließkomma-Fehler entstehen.
 - **Auftrag 03 – Teil hinzufügen / bearbeiten:** gemeinsames Formular für
   Kleidung und Spielzeug mit Live-Vorschau in der Kategorie-Farbe, eigener Art
   und Größe, Markenliste, Anzahl, Einzelpreis und Sammelkauf.
+- **Auftrag 04 – Übersicht und Kategorie-Ansicht:** Kategorie- und
+  Jahreszeiten-Kacheln mit Stückzahlen, Suche über alle Teile, Kategorie-Ansicht
+  mit Karten, Filterspalte (Tablet) bzw. Filterblatt (Smartphone).
 
-Noch Platzhalter: Kacheln mit Zahlen, Filter, Detailansicht, Kosten-Ansicht,
-Statistik, Soll-Mengen und Aussortiert.
+Noch Platzhalter: Detailansicht, Nach Jahreszeit, Kosten-Ansicht, Statistik,
+Soll-Mengen und Aussortiert.

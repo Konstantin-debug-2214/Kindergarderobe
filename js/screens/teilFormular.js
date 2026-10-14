@@ -36,6 +36,8 @@ import {
   groessenSystemFuer,
   groessenWerte,
   kleidungsKategorien,
+  istKleidungsKategorie,
+  KATEGORIE_SPIELZEUG,
   pruefeTeilAusfuehrlich,
 } from '../model.js';
 import {
@@ -68,8 +70,10 @@ let meldung = null;
 
 /* --- Einstiege ------------------------------------------------------------ */
 
-export function neuScreen(parameter, optionen = {}) {
-  if (optionen.frisch !== false) starteNeu();
+export function neuScreen(parameter = {}, optionen = {}) {
+  // "#/neu?kategorie=schuhe" belegt die Kategorie vor, z. B. wenn man aus
+  // einer leeren Kategorie heraus ein Teil anlegt.
+  if (optionen.frisch !== false) starteNeu(parameter.kategorie);
   return formular({ modus: 'neu' }, optionen);
 }
 
@@ -83,8 +87,12 @@ export function teilBearbeitenScreen({ teilId }, optionen = {}) {
   return formular({ modus: 'bearbeiten', teilId }, optionen);
 }
 
-function starteNeu() {
-  entwurf = leererEntwurf(TYP.KLEIDUNG);
+function starteNeu(kategorieId) {
+  const spielzeug = kategorieId === KATEGORIE_SPIELZEUG;
+  entwurf = leererEntwurf(spielzeug ? TYP.SPIELZEUG : TYP.KLEIDUNG);
+  if (kategorieId && !spielzeug && istKleidungsKategorie(kategorieId)) {
+    entwurf = { ...entwurf, kategorie: kategorieId };
+  }
   ausgangswert = { ...entwurf };
   fehlerJeFeld = {};
   betragText = '';
