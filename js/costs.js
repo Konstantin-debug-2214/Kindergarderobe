@@ -92,3 +92,62 @@ export function preisHinweis(teil, ausgaben = []) {
   if (!ausgabe) return null;
   return `${ausgabe.bezeichnung} · ${formatEuro(ausgabe.betrag)} für ${ausgabe.anzahlTeile} Teile`;
 }
+
+/* --- Zahlen für die Kosten-Ansicht ---------------------------------------- */
+
+/**
+ * Summe, Anzahl Teile und Durchschnitt eines Jahres.
+ * Gezählt werden die `anzahlTeile` der Ausgaben, nicht die Teile im Schrank:
+ * Kosten aussortierter oder gelöschter Teile bleiben erhalten (CLAUDE.md).
+ * @param {Array<Object>} ausgaben
+ * @param {number} jahr
+ * @returns {{summe: number, teile: number, durchschnitt: number}} Beträge in Cent
+ */
+export function jahresZahlen(ausgaben = [], jahr) {
+  const desJahres = ausgaben.filter((ausgabe) => jahrVon(ausgabe.datum) === jahr);
+  const summe = desJahres.reduce((wert, ausgabe) => wert + ganzeZahl(ausgabe.betrag), 0);
+  const teile = desJahres.reduce((wert, ausgabe) => wert + teilezahl(ausgabe), 0);
+
+  return {
+    summe,
+    teile,
+    // Kaufmännisch auf Cent gerundet; ohne Teile gibt es keinen Durchschnitt.
+    durchschnitt: teile > 0 ? Math.round(summe / teile) : 0,
+  };
+}
+
+/**
+ * Preis je Teil eines Sammelkaufs, kaufmännisch auf Cent gerundet.
+ * @param {{betrag: number, anzahlTeile?: number}} ausgabe
+ * @returns {number} Betrag in Cent
+ */
+export function proTeil(ausgabe) {
+  const teile = teilezahl(ausgabe);
+  if (teile <= 0) return 0;
+  return Math.round(ganzeZahl(ausgabe?.betrag) / teile);
+}
+
+/**
+ * Alle Jahre mit Ausgaben, neuestes zuerst.
+ * @param {Array<Object>} ausgaben
+ * @returns {Array<number>}
+ */
+export function jahreMitAusgaben(ausgaben = []) {
+  const jahre = new Set();
+  for (const ausgabe of ausgaben) {
+    const jahr = jahrVon(ausgabe.datum);
+    if (jahr !== null) jahre.add(jahr);
+  }
+  return [...jahre].sort((a, b) => b - a);
+}
+
+/** Ein Eintrag ohne Angabe zählt als ein Teil. */
+function teilezahl(ausgabe) {
+  const wert = Number(ausgabe?.anzahlTeile);
+  return Number.isFinite(wert) && wert > 0 ? Math.round(wert) : 1;
+}
+
+/** Ein Sammelkauf umfasst mehr als ein Teil. */
+export function istSammelkauf(ausgabe) {
+  return teilezahl(ausgabe) > 1;
+}
