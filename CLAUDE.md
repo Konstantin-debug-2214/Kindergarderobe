@@ -1,6 +1,6 @@
 # Kindergarderobe – Projektregeln für Claude Code
 
-Stand: 13.10.2026 (nach Auftrag 03)
+Stand: 13.10.2026 (nach Auftrag 04)
 
 Inventar-App für Kleidung und Spielzeug eines Kindes. Eigenbedarf, ein Kind.
 Hauptgerät: Tablet im Querformat (1194 × 834). Die App muss zusätzlich auf dem Smartphone (390 × 844) gut bedienbar sein.
@@ -24,7 +24,8 @@ index.html
 css/        tokens.css (Farben, Abstände, Schriften), base.css, components.css, screens.css
 js/         app.js (Start, Router), router.js (Hash-Routing, siehe Routen)
             storage.js, model.js (Datenmodell, Konstanten, Validierung), filters.js (reine Filter-/Zählfunktionen)
-            costs.js (reine Kostenberechnung), backup.js (Export, Import, Erinnerung), screens/*.js (je Screen ein Modul), ui/*.js (Bausteine)
+            costs.js (reine Kostenberechnung), backup.js (Export, Import, Erinnerung), formular.js (reine Formular-Logik)
+            screens/*.js (je Screen ein Modul; teilFormular.js für #/neu und Bearbeiten), ui/*.js (Bausteine)
 fonts/
 icons/      App-Icons für das Manifest
 tests/        Tests der reinen Logik mit dem eingebauten Node-Testrunner (`node --test`), keine npm-Pakete
@@ -50,7 +51,7 @@ Reine Logik (Filtern, Zählen, Größen vergleichen, Kosten rechnen, Backup prü
 | `#/aussortiert` | Aussortiert |
 | `#/einstellungen` | Einstellungen & Backup (auf dem Smartphone „Mehr“) |
 
-Unbekannte Routen führen zur Übersicht.
+Unbekannte Routen führen zur Übersicht. Der Router liest Werte hinter `?` (z. B. `#/neu?kategorie=sets_sonstiges` belegt die Kategorie vor).
 
 ## Navigation (laut Design)
 
