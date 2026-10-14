@@ -426,3 +426,158 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* --- Bereiche der Übersicht ----------------------------------------------- */
+
+.bereich + .bereich {
+  margin-top: var(--abstand-7);
+}
+
+.bereich__kopf {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--abstand-4);
+  margin-bottom: var(--abstand-4);
+}
+
+.bereich__titel {
+  font-size: var(--text-xl);
+}
+
+.bereich__zusatz {
+  color: var(--farbe-text-gedaempft);
+  font-size: var(--text-sm);
+}
+
+/* Sechs Kategorie-Kacheln: Tablet dreispaltig. */
+.kachelraster {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--abstand-5);
+}
+
+/* Vier Jahreszeiten nebeneinander. */
+.jahreszeitraster {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--abstand-5);
+}
+
+/* Karten: Tablet dreispaltig. */
+.kartenraster {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--abstand-5);
+}
+
+/* --- Kategorie-Ansicht ---------------------------------------------------- */
+
+.kategorie__suche {
+  width: 280px;
+}
+
+.kategorie__raster {
+  display: grid;
+  grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--abstand-6);
+}
+
+.kategorie__filter {
+  padding: var(--abstand-6) var(--abstand-5);
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-karte);
+  background: var(--farbe-flaeche);
+  box-shadow: var(--schatten-karte);
+}
+
+.kategorie__liste {
+  min-width: 0;
+}
+
+/* Filter-Knopf und die gesetzten Filter stehen in einer umbrechenden Zeile. */
+.kategorie__steuerung {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--abstand-2);
+  margin-bottom: var(--abstand-5);
+}
+
+.kategorie__steuerung .filterchips {
+  display: contents;
+}
+
+/* Auf dem Tablet scrollt die Filterspalte für sich. */
+@media (min-width: 768px) {
+  .kategorie {
+    display: flex;
+    flex-direction: column;
+    max-height: 100dvh;
+  }
+
+  .kategorie__raster {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .kategorie__filter,
+  .kategorie__liste {
+    max-height: 100%;
+    overflow-y: auto;
+  }
+}
+
+/* --- Smartphone ----------------------------------------------------------- */
+
+@media (max-width: 767px) {
+  .kachelraster {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--abstand-4);
+  }
+
+  .kachel {
+    min-height: 136px;
+    padding: var(--abstand-4);
+  }
+
+  .kachel__name {
+    font-size: var(--text-lg);
+  }
+
+  .jahreszeitraster {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--abstand-4);
+  }
+
+  .kartenraster {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--abstand-4);
+  }
+
+  .teilkarte__bild {
+    min-height: 96px;
+  }
+
+  .teilkarte__koerper {
+    padding: var(--abstand-3) var(--abstand-4) var(--abstand-4);
+  }
+
+  .kategorie__raster {
+    display: block;
+  }
+
+  .kategorie__suche {
+    width: 100%;
+  }
+
+  .kategorie .kopfzeile__aktionen {
+    order: 1;
+  }
+}
+
+/* Leere Kategorie: der Hinweis nimmt die ganze Breite ein. */
+.kategorie__raster--leer {
+  grid-template-columns: minmax(0, 1fr);
+}

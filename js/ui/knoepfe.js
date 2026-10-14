@@ -39,13 +39,33 @@ export function iconKnopf({ label, iconName, href, variante = 'leise' }) {
     : el('button', { ...attribute, type: 'button' }, icon(iconName));
 }
 
-/** Suchfeld ohne Funktion (wird in einem späteren Auftrag angeschlossen). */
-export function suchfeld({ platzhalter, label, klasse }) {
+/**
+ * Suchfeld. Meldet jede Eingabe sofort, damit die Treffer mitlaufen.
+ * @param {{
+ *   label: string, platzhalter?: string, klasse?: string, wert?: string,
+ *   beiEingabe?: (wert: string) => void
+ * }} optionen
+ */
+export function suchfeld({ platzhalter, label, klasse, wert = '', beiEingabe }) {
   const feldId = `suche-${Math.random().toString(36).slice(2, 8)}`;
+
+  const eingabe = el('input', {
+    id: feldId,
+    type: 'search',
+    placeholder: platzhalter,
+    autocomplete: 'off',
+  });
+  eingabe.value = wert;
+
+  if (beiEingabe) {
+    eingabe.addEventListener('input', () => beiEingabe(eingabe.value));
+    // Das "×" eines Suchfeldes löst in manchen Browsern nur "search" aus.
+    eingabe.addEventListener('search', () => beiEingabe(eingabe.value));
+  }
 
   return el('div', { class: ['suchfeld', klasse].filter(Boolean).join(' ') }, [
     icon('suche', 20),
     el('label', { class: 'nur-vorlesehilfe', for: feldId, text: label }),
-    el('input', { id: feldId, type: 'search', placeholder: platzhalter, autocomplete: 'off' }),
+    eingabe,
   ]);
 }
