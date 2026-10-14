@@ -1,6 +1,6 @@
 # Kindergarderobe – Projektregeln für Claude Code
 
-Stand: 13.10.2026 (nach Auftrag 02)
+Stand: 13.10.2026 (nach Auftrag 03)
 
 Inventar-App für Kleidung und Spielzeug eines Kindes. Eigenbedarf, ein Kind.
 Hauptgerät: Tablet im Querformat (1194 × 834). Die App muss zusätzlich auf dem Smartphone (390 × 844) gut bedienbar sein.
@@ -24,8 +24,7 @@ index.html
 css/        tokens.css (Farben, Abstände, Schriften), base.css, components.css, screens.css
 js/         app.js (Start, Router), router.js (Hash-Routing, siehe Routen)
             storage.js, model.js (Datenmodell, Konstanten, Validierung), filters.js (reine Filter-/Zählfunktionen)
-            costs.js (reine Kostenberechnung), backup.js (Export, Import, Erinnerung), formular.js (reine Formular-Logik)
-            screens/*.js (je Screen ein Modul; "Teil hinzufügen" und "Teil bearbeiten" teilen sich teilFormular.js), ui/*.js (Bausteine)
+            costs.js (reine Kostenberechnung), backup.js (Export, Import, Erinnerung), screens/*.js (je Screen ein Modul), ui/*.js (Bausteine)
 fonts/
 icons/      App-Icons für das Manifest
 tests/        Tests der reinen Logik mit dem eingebauten Node-Testrunner (`node --test`), keine npm-Pakete
@@ -122,7 +121,7 @@ Spielzeug hat **keine** Größe, **keine** Jahreszeiten und **keine** Passform.
 - `schuh`: EU 17 … 40; Spannen wie 23–26 erlaubt.
 - `kopf`: Kopfumfang in cm (35 … 58).
 - `handschuh`: 0 … 6.
-- Bei Einzelgröße gilt `von === bis`. Im Formular: Schnellauswahl der gängigen Größen plus „Andere …“.
+- Bei Einzelgröße gilt `von === bis`. Im Formular: Schnellauswahl der gängigen Größen plus „Andere …“ (Von/Bis über den vollen Bereich). Gängig (freigegeben): Konfektion 86–134, Schuh 22–34, Kopfumfang 48–55 cm, Handschuh 0–6.
 
 ### Jahreszeiten (nur Kleidung)
 
@@ -167,6 +166,13 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
 - Kosten aussortierter Teile bleiben in der Kostensumme erhalten.
 - Jahreszeiten-Zahlen zählen nur Kleidung.
 
+## Suche, Filter, Sortierung (freigegeben)
+
+- Suche auf der Übersicht: Treffer ersetzen beim Tippen die Kacheln (Karten in Kategoriefarbe, Tipp → Detail); gesucht wird in Name, Art, Marke, Notiz und freien Merkmalen, ohne Groß-/Kleinschreibung; Aussortiertes wird nicht gefunden.
+- Filterlogik: innerhalb einer Gruppe ODER, zwischen Gruppen UND; Standard ohne Filter (alle Teile sichtbar). Doppelgrößen und Spannen passen auf jede enthaltene Größe.
+- Karten sortiert alphabetisch nach Name. Bei `anzahl > 1` wird die Anzahl auf der Karte angezeigt.
+- Filter und Suchbegriff einer Kategorie bleiben beim Wechsel ins Detail und zurück erhalten; beim Zurück zur Übersicht werden sie zurückgesetzt.
+
 ## Screens in Version 1
 
 1. **Übersicht:** Datum und Begrüßung, Suche, Knopf „Kosten“, Icon-Knöpfe für Statistik, Aussortiert und Einstellungen, Knopf „Teil hinzufügen“ (Smartphone siehe Navigation); Backup-Hinweis als Banner („Das letzte Backup ist 59 Tage alt. Zeit, die Daten zu sichern.“) mit „Jetzt sichern“ und Ausblenden-Knopf, Anzeige nach der Regel unter „Backup-Erinnerung“; sechs Kategorie-Kacheln mit Stückzahl; vier Jahreszeiten-Kacheln mit Monaten, Stückzahl und „Jetzt“-Markierung.
@@ -178,6 +184,7 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
 5. **Teil hinzufügen / bearbeiten:** Umschalter Kleidung / Spielzeug, Live-Vorschau der Karte (in der Farbe der Kategorie).
    - Kleidung: Name, Kategorie (nur die fünf Kleidungs-Kategorien), **Art** (direkt nach der Kategorie, Auswahl aus der Artenliste der Kategorie plus „Andere …“), Größe, Jahreszeiten, Farbe, Merkmal (+ Marke, Markenliste anlegen/löschen), Passform, **Anzahl** (Zähler − / +, Standard 1), Preis (Einzelpreis oder Sammelkauf auswählen / neu), Notiz.
    - Spielzeug: Name, Art, Alter ab, Farbe (optional), Merkmal, freie Merkmale, **Anzahl**, Preis, Notiz.
+   - Reihenfolge der Felder wie im Design (Farbe und Merkmal vor Passform). Tablet: links Vorschau, Name, Preis, Notiz, rechts die übrigen Felder in dieser Reihenfolge. Smartphone: eine Spalte in der oben genannten Reihenfolge.
    - Art und Anzahl fehlen im Design und werden im Stil der übrigen Felder gestaltet.
 6. **Kosten:** Summe des Jahres, Teile, Durchschnitt; Formular „Kosten hinzufügen“ (Wofür?, Gesamtbetrag, Anzahl Teile); Einträge neueste zuerst. Smartphone: Knopf „+ Kosten“ statt dauerhaft sichtbarem Formular.
 7. **Statistik:** Gesamtzahl im Schrank (ohne Aussortiertes); Balkendiagramme nach Kategorie, **Art der Kleidung** (die häufigsten 7), **Spielzeug nach Art** (neu, nicht im Design), Jahreszeit (Hinweis: ein Teil kann zu mehreren gehören) und Größe; jeder Balken führt per Tipp zu den Teilen; Link zu „Soll-Mengen & Saisonwechsel“.
