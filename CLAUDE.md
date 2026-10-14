@@ -1,6 +1,6 @@
 # Kindergarderobe – Projektregeln für Claude Code
 
-Stand: 13.10.2026 (nach Auftrag 04)
+Stand: 13.10.2026 (nach Auftrag 05)
 
 Inventar-App für Kleidung und Spielzeug eines Kindes. Eigenbedarf, ein Kind.
 Hauptgerät: Tablet im Querformat (1194 × 834). Die App muss zusätzlich auf dem Smartphone (390 × 844) gut bedienbar sein.
@@ -166,6 +166,7 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
 - Aussortiert ist ein Papierkorb: Teile lassen sich zurückholen; „Aussortiert leeren“ löscht endgültig, nur nach Sicherheitsabfrage.
 - Kosten aussortierter Teile bleiben in der Kostensumme erhalten.
 - Jahreszeiten-Zahlen zählen nur Kleidung.
+- Auch die Teileliste im Detail („n TEILE“) und die Kopfzahl in „Nach Jahreszeit“ zählen nach Stück. Die Kopfzahl in „Nach Jahreszeit“ gilt für die ganze Jahreszeit, unabhängig vom Kategorie-Filter. Die Position beim Blättern („2 von 7“) zählt Einträge.
 
 ## Suche, Filter, Sortierung (freigegeben)
 
@@ -187,7 +188,7 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
    - Spielzeug: Name, Art, Alter ab, Farbe (optional), Merkmal, freie Merkmale, **Anzahl**, Preis, Notiz.
    - Reihenfolge der Felder wie im Design (Farbe und Merkmal vor Passform). Tablet: links Vorschau, Name, Preis, Notiz, rechts die übrigen Felder in dieser Reihenfolge. Smartphone: eine Spalte in der oben genannten Reihenfolge.
    - Art und Anzahl fehlen im Design und werden im Stil der übrigen Felder gestaltet.
-6. **Kosten:** Summe des Jahres, Teile, Durchschnitt; Formular „Kosten hinzufügen“ (Wofür?, Gesamtbetrag, Anzahl Teile); Einträge neueste zuerst. Smartphone: Knopf „+ Kosten“ statt dauerhaft sichtbarem Formular.
+6. **Kosten:** Summe des Jahres, Teile, Durchschnitt; Formular „Kosten hinzufügen“ (Wofür?, Gesamtbetrag, Anzahl Teile); Einträge neueste zuerst. Smartphone: Knopf „+ Kosten“ statt dauerhaft sichtbarem Formular. Freigegeben (nicht im Design): Jahr-Umschalter ‹ › an der Summenkarte (nur bei Ausgaben in anderen Jahren), Datumsfeld (Standard heute), Tipp auf Einzelteil → Detail des Teils, Tipp auf Sammelkauf → Dialog zum Ändern/Löschen mit zugeordneten Teilen; Löschen nur nach Rückfrage, zugeordnete Teile verlieren ihren Preis.
 7. **Statistik:** Gesamtzahl im Schrank (ohne Aussortiertes); Balkendiagramme nach Kategorie, **Art der Kleidung** (die häufigsten 7), **Spielzeug nach Art** (neu, nicht im Design), Jahreszeit (Hinweis: ein Teil kann zu mehreren gehören) und Größe; jeder Balken führt per Tipp zu den Teilen; Link zu „Soll-Mengen & Saisonwechsel“.
 8. **Soll-Mengen & Saisonwechsel:** Umschalter für die vier Jahreszeiten (gewählter Knopf in der Akzentfarbe der Jahreszeit). Links Tabelle „Art · Passend · Soll (− / +) · Stand“ mit Stand „kein Soll“, „noch n fehlen“ oder „vollständig“. Rechts Saisonwechsel-Check mit Saisonbeginn („ab 1. Dezember · in 7 Wochen“), Summen „ist da / passt / fehlt“, Liste „Besorgen“ (Art + Anzahl) und Liste „Wird bald zu klein“. Nur Kleidung.
 9. **Aussortiert:** Liste mit Name, Kategorie, Größe bzw. Alter, Datum und Grund (zu klein, verschenkt, verkauft, kaputt); „Zurückholen“ je Teil; „Aussortiert leeren“ mit Bestätigungsdialog (endgültig, nur über ein älteres Backup wiederherstellbar); leerer Zustand mit Hinweis.
@@ -209,6 +210,8 @@ Nicht in V1: Anlässe, Fotos, mehrere Kinder, Sync, Wetterdaten/Temperaturen, Gr
 - Radien: Kacheln 28 px, Karten 24 px, Knöpfe und Eingaben rund (Höhe/2).
 - Smartphone: Kacheln zweispaltig, Suche über volle Breite, Navigation siehe oben.
 - Hinweis-Banner (Backup): Fläche `#FBEFD5`, Text `#6B4A0E`; Erfolg: Fläche `#DDEFE3`, Text `#2F6B45`.
+- Endgültiges Löschen: Rahmen und Icon `#B3261E` (`--farbe-warnung`), Text `#8C1D18` (`--farbe-warnung-text`).
+- Kurze Bestätigung: Nach Aktionen wie Aussortieren, Zurückholen und Leeren erscheint unten eine kurze Bestätigung in den Erfolgsfarben; sie verschwindet nach etwa 3 Sekunden von selbst (Baustein `ui/hinweis.js`).
 - Touch: jedes Bedienelement mindestens 48 × 48 px, keine Funktion nur per Hover, keine Doppeltipps.
 - Echte `<button>`, `<a>`, `<input>` mit `<label>`; `aria-label` an reinen Icon-Knöpfen; Kontrast mindestens 4,5:1.
 - Oberflächentexte auf Deutsch, Code und Kommentare dürfen Englisch sein.
