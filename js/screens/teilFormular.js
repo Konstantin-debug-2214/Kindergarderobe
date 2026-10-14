@@ -54,6 +54,9 @@ import {
 } from '../formular.js';
 import { euroTextInCent, formatEuro } from '../costs.js';
 
+/** Felder, deren Meldung an einer anderen Stelle steht als ihr Name sagt. */
+const ANZEIGE_FELD = { marke: 'merkmal' };
+
 /** Zustand des Formulars, siehe Kopfkommentar. */
 let entwurf = null;
 let ausgangswert = null;
@@ -122,13 +125,29 @@ function formular({ modus, teilId }, { neuZeichnen = () => {} }) {
   /** Ändert den Entwurf und baut den Screen neu auf. */
   function setze(aenderungen) {
     entwurf = { ...entwurf, ...aenderungen };
+    loescheFehler(Object.keys(aenderungen));
     neuZeichnen();
   }
 
   /** Ändert den Entwurf ohne Neuaufbau – für Eingaben beim Tippen. */
   function setzeStill(aenderungen) {
     entwurf = { ...entwurf, ...aenderungen };
+    loescheFehler(Object.keys(aenderungen));
     aktualisiereVorschau();
+  }
+
+  /**
+   * Nimmt die Fehlermeldung an den geänderten Feldern weg – sobald jemand
+   * etwas einträgt, soll dort nicht länger "fehlt" stehen. Andere offene
+   * Fehler bleiben sichtbar.
+   */
+  function loescheFehler(felder) {
+    for (const feld of felder) {
+      if (!fehlerJeFeld[feld]) continue;
+      delete fehlerJeFeld[feld];
+      // Beim stillen Ändern wird nicht neu gezeichnet, deshalb direkt entfernen.
+      document.querySelector(`[data-feld="${ANZEIGE_FELD[feld] ?? feld}"] .feldfehler`)?.remove();
+    }
   }
 
   const zurueckZiel = modus === 'neu' ? '#/' : `#/teil/${encodeURIComponent(teilId)}`;
@@ -290,7 +309,7 @@ function formular({ modus, teilId }, { neuZeichnen = () => {} }) {
         wert: entwurf.farbe,
         beiWahl: (farbe) => setze({ farbe }),
       })],
-    }), istKleidung ? 8 : 5);
+    }), istKleidung ? 7 : 5);
   }
 
   function bauMerkmal() {
@@ -314,7 +333,7 @@ function formular({ modus, teilId }, { neuZeichnen = () => {} }) {
       feld: 'merkmal',
       fehler: fehlerJeFeld.merkmal ?? fehlerJeFeld.marke,
       inhalt,
-    }), istKleidung ? 9 : 6);
+    }), istKleidung ? 8 : 6);
   }
 
   function bauMarkenliste() {
@@ -473,14 +492,15 @@ function formular({ modus, teilId }, { neuZeichnen = () => {} }) {
   /* --- Felder Kleidung --------------------------------------------------- */
 
   function bauKleidungsfelder() {
+    // Reihenfolge laut Design: Farbe und Merkmal stehen vor der Passform.
     return [
       bauKategorie(),
       bauArt(),
       bauGroesse(),
       bauJahreszeiten(),
-      bauPassform(),
       bauFarbe(),
       bauMerkmal(),
+      bauPassform(),
       bauAnzahl(),
     ];
   }
@@ -633,7 +653,7 @@ function formular({ modus, teilId }, { neuZeichnen = () => {} }) {
         wert: entwurf.passform,
         beiWahl: (passform) => setze({ passform }),
       })],
-    }), 7);
+    }), 9);
   }
 
   /* --- Felder Spielzeug -------------------------------------------------- */
