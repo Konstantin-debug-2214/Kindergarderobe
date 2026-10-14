@@ -109,5 +109,8 @@ Fließkomma-Fehler entstehen.
 - **Auftrag 05 – Nach Jahreszeit, Detail, Aussortiert:** Jahreszeiten-Ansicht
   mit Kategorie-Filter, Detailansicht mit Passform und Notiz zum sofortigen
   Speichern, Aussortieren mit Grund, Papierkorb mit Zurückholen und Leeren.
+- **Auftrag 06 – Kosten:** Summe, Teile und Durchschnitt je Jahr mit
+  Jahr-Umschalter, Kosten hinzufügen, Einträge mit Preis pro Teil bei
+  Sammelkäufen, Bearbeiten und Löschen.
 
-Noch Platzhalter: Kosten-Ansicht, Statistik und Soll-Mengen.
+Noch Platzhalter: Statistik und Soll-Mengen.
