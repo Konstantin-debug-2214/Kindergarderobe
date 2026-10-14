@@ -67,3 +67,28 @@ export function jahrVon(datum) {
 function ganzeZahl(wert) {
   return Number.isFinite(wert) ? Math.round(wert) : 0;
 }
+
+/* --- Preistexte für Listen und Detail ------------------------------------- */
+
+/**
+ * Kurzer Preistext eines Teils: "8,00 €", "Sammelkauf" oder "kein Preis".
+ * @param {Object} teil
+ */
+export function preisText(teil) {
+  if (teil?.preis?.art === 'einzeln') return formatEuro(teil.preis.betrag);
+  if (teil?.preis?.art === 'sammelkauf') return 'Sammelkauf';
+  return 'kein Preis';
+}
+
+/**
+ * Erklärung zum Sammelkauf: "Flohmarkt Kita · 25,00 € für 6 Teile".
+ * @param {Object} teil
+ * @param {Array<Object>} ausgaben
+ * @returns {string|null} null, wenn es nichts zu erklären gibt
+ */
+export function preisHinweis(teil, ausgaben = []) {
+  if (teil?.preis?.art !== 'sammelkauf') return null;
+  const ausgabe = ausgaben.find((a) => a.id === teil.preis.ausgabeId);
+  if (!ausgabe) return null;
+  return `${ausgabe.bezeichnung} · ${formatEuro(ausgabe.betrag)} für ${ausgabe.anzahlTeile} Teile`;
+}

@@ -225,3 +225,47 @@ export function teileDerKategorie(teile = [], kategorieId) {
 export function istSpielzeugKategorie(kategorieId) {
   return kategorieId === KATEGORIE_SPIELZEUG;
 }
+
+/* --- Listen für Jahreszeit, Detail und Aussortiert ------------------------ */
+
+/**
+ * Teile einer Jahreszeit: nur Kleidung, ohne Aussortiertes, alphabetisch.
+ * Spielzeug erscheint in keiner Jahreszeiten-Ansicht.
+ * @param {Array<Object>} teile
+ * @param {string} jahreszeitId
+ * @param {string|null} [kategorieId] zusätzlicher Kategorie-Filter
+ */
+export function teileDerJahreszeit(teile = [], jahreszeitId, kategorieId = null) {
+  const gefunden = imSchrank(teile).filter((teil) => teil.typ === TYP.KLEIDUNG
+    && (teil.jahreszeiten ?? []).includes(jahreszeitId)
+    && (!kategorieId || teil.kategorie === kategorieId));
+  return sortiereNachName(gefunden);
+}
+
+/**
+ * Aussortierte Teile, neueste Aussortierung zuerst.
+ * Teile ohne Datum landen am Ende.
+ */
+export function aussortierteNachDatum(teile = []) {
+  return teile
+    .filter((teil) => teil.aussortiert)
+    .slice()
+    .sort((a, b) => String(b.aussortiertAm ?? '').localeCompare(String(a.aussortiertAm ?? '')));
+}
+
+/**
+ * Stelle eines Teils in seiner Liste – fürs Blättern mit ‹ › im Detail.
+ * @param {Array<Object>} liste
+ * @param {string} teilId
+ * @returns {{stelle: number, gesamt: number, vorher: Object|null, nachher: Object|null}}
+ */
+export function nachbarn(liste = [], teilId) {
+  const index = liste.findIndex((teil) => teil.id === teilId);
+  if (index === -1) return { stelle: 0, gesamt: liste.length, vorher: null, nachher: null };
+  return {
+    stelle: index + 1,
+    gesamt: liste.length,
+    vorher: liste[index - 1] ?? null,
+    nachher: liste[index + 1] ?? null,
+  };
+}

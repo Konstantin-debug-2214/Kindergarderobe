@@ -55,6 +55,11 @@
   --farbe-winter-akzent: #5B4A9E;
   --farbe-winter-flaeche: #E2DCF0;
 
+  /* --- Warnung (endgültiges Löschen) -------------------------------------- */
+  /* Aus dem Design-Screenshot "Aussortiert" ausgelesen. */
+  --farbe-warnung: #B3261E;        /* Rahmen und Icon */
+  --farbe-warnung-text: #8C1D18;   /* Beschriftung */
+
   /* --- Banner ------------------------------------------------------------- */
   --farbe-hinweis-flaeche: #FBEFD5;
   --farbe-hinweis-text: #6B4A0E;
