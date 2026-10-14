@@ -9,7 +9,7 @@ import { el } from '../ui/dom.js';
 import { iconKnopf, knopf, suchfeld } from '../ui/knoepfe.js';
 import { banner } from '../ui/banner.js';
 import { speicher } from '../storage.js';
-import { backupAlterInTagen, backupFaellig, exportiereBackup } from '../backup.js';
+import { backupAlterInTagen, bannerSichtbar, exportiereBackup } from '../backup.js';
 import { alterText, begruessung } from './einstellungen.js';
 import { testlinks } from './platzhalter.js';
 
@@ -17,14 +17,6 @@ import { testlinks } from './platzhalter.js';
 const BEISPIEL_KATEGORIE = 'oberteile';
 const BEISPIEL_JAHRESZEIT = 'herbst';
 const BEISPIEL_TEIL = 'beispiel-teil';
-
-/**
- * Stand des Änderungszählers, bei dem der Banner ausgeblendet wurde.
- * Bewusst nur im Arbeitsspeicher: Der Banner soll bis zur nächsten Änderung
- * verschwinden, aber kein Teil der gespeicherten Daten sein (sonst würde das
- * Ausblenden selbst als Änderung zählen).
- */
-let ausgeblendetBei = null;
 
 /** Formatiert das heutige Datum, z. B. "Montag, 13. Oktober". */
 function heutigesDatum() {
@@ -50,8 +42,7 @@ export function bannerText(letztesBackupAm, heute = new Date()) {
 }
 
 function backupBanner(einstellungen, neuZeichnen) {
-  if (!backupFaellig(einstellungen)) return null;
-  if (ausgeblendetBei === einstellungen.aenderungenSeitBackup) return null;
+  if (!bannerSichtbar(einstellungen, speicher.bannerAusgeblendetBei())) return null;
 
   const sichern = knopf({ text: 'Jetzt sichern', variante: 'primaer' });
   sichern.addEventListener('click', async () => {
@@ -68,9 +59,9 @@ function backupBanner(einstellungen, neuZeichnen) {
     text: bannerText(einstellungen.letztesBackupAm),
     aktionen: [sichern],
     beiSchliessen: () => {
-      // Bis zur nächsten Änderung ausblenden – jede Änderung erhöht den
-      // Zähler, dadurch erscheint der Hinweis von selbst wieder.
-      ausgeblendetBei = einstellungen.aenderungenSeitBackup;
+      // Den Zählerstand merken: Jede Änderung erhöht ihn, dadurch erscheint
+      // der Hinweis von selbst wieder – auch nach einem Neuladen.
+      speicher.bannerAusblenden(einstellungen.aenderungenSeitBackup);
       neuZeichnen();
     },
   });

@@ -22,6 +22,23 @@ export function backupFaellig(einstellungen) {
 }
 
 /**
+ * Soll der Backup-Hinweis auf der Übersicht erscheinen?
+ *
+ * Der Ausblenden-Knopf merkt sich den Zählerstand. Der Hinweis kommt zurück,
+ * sobald seitdem wieder etwas geändert wurde – auch nach einem Neuladen.
+ * Ein gemerkter Stand über dem aktuellen Zähler ist veraltet (etwa nach einem
+ * eingespielten Backup) und wird nicht beachtet.
+ *
+ * @param {{aenderungenSeitBackup?: number}} einstellungen
+ * @param {number|null} ausgeblendetBei Zählerstand beim Ausblenden
+ */
+export function bannerSichtbar(einstellungen, ausgeblendetBei) {
+  if (!backupFaellig(einstellungen)) return false;
+  if (!Number.isInteger(ausgeblendetBei)) return true;
+  return einstellungen.aenderungenSeitBackup > ausgeblendetBei;
+}
+
+/**
  * Alter des letzten Backups in ganzen Tagen, oder null wenn es keines gibt.
  * @param {string|null} letztesBackupAm ISO-Zeitstempel
  * @param {Date} [heute]

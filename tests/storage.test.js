@@ -1,7 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { erstelleSpeicher, speicherImArbeitsspeicher, SpeicherFehler } from '../js/storage.js';
+import {
+  erstelleSpeicher,
+  OBERFLAECHE_SCHLUESSEL,
+  speicherImArbeitsspeicher,
+  SPEICHER_SCHLUESSEL,
+  SpeicherFehler,
+} from '../js/storage.js';
 import { neuesKleidungsteil, neuesSpielzeug } from '../js/model.js';
 
 /** Frischer Speicher je Test – ohne echtes localStorage. */
@@ -315,4 +321,71 @@ test('alles ersetzen übernimmt die Daten und setzt den Zähler auf 0', () => {
   assert.equal(speicher.einstellungen().name, 'Mila');
   assert.equal(speicher.einstellungen().aenderungenSeitBackup, 0);
   assert.equal(speicher.einstellungen().letztesBackupAm, '2026-08-15T09:00:00.000Z');
+});
+
+/* --- Oberflächen-Zustand: ausgeblendeter Backup-Hinweis ------------------- */
+
+test('ohne Ausblenden ist kein Zählerstand gemerkt', () => {
+  assert.equal(neuerSpeicher().bannerAusgeblendetBei(), null);
+});
+
+test('der gemerkte Zählerstand überlebt einen Neustart der App', () => {
+  const hintergrund = speicherImArbeitsspeicher();
+  const erster = erstelleSpeicher(hintergrund);
+  erster.teilAnlegen(kleidungsteil());
+  erster.bannerAusblenden(erster.einstellungen().aenderungenSeitBackup);
+
+  // Neue Instanz auf demselben Hintergrund – wie nach einem Neuladen.
+  const zweiter = erstelleSpeicher(hintergrund);
+  assert.equal(zweiter.bannerAusgeblendetBei(), 1);
+});
+
+test('Ausblenden zählt nicht als Änderung', () => {
+  const speicher = neuerSpeicher();
+  speicher.teilAnlegen(kleidungsteil());
+  const vorher = speicher.einstellungen().aenderungenSeitBackup;
+
+  speicher.bannerAusblenden(vorher);
+
+  assert.equal(speicher.einstellungen().aenderungenSeitBackup, vorher);
+});
+
+test('der Oberflächen-Zustand liegt unter einem eigenen Schlüssel', () => {
+  const hintergrund = speicherImArbeitsspeicher();
+  const speicher = erstelleSpeicher(hintergrund);
+  speicher.teilAnlegen(kleidungsteil());
+  speicher.bannerAusblenden(1);
+
+  const daten = JSON.parse(hintergrund.getItem(SPEICHER_SCHLUESSEL));
+  assert.ok(!JSON.stringify(daten).includes('bannerAusgeblendetBei'),
+    'der Zählerstand steht nicht bei den Daten');
+  assert.equal(JSON.parse(hintergrund.getItem(OBERFLAECHE_SCHLUESSEL)).bannerAusgeblendetBei, 1);
+});
+
+test('nach einem Export gilt ein früheres Ausblenden nicht mehr', () => {
+  const speicher = neuerSpeicher();
+  speicher.teilAnlegen(kleidungsteil());
+  speicher.bannerAusblenden(1);
+
+  speicher.backupNotieren('2026-10-14T10:00:00.000Z');
+
+  assert.equal(speicher.bannerAusgeblendetBei(), null);
+});
+
+test('nach einem eingespielten Backup gilt ein früheres Ausblenden nicht mehr', () => {
+  const speicher = neuerSpeicher();
+  speicher.teilAnlegen(kleidungsteil());
+  speicher.bannerAusblenden(1);
+
+  speicher.allesErsetzen({ teile: [], ausgaben: [], marken: [], sollMengen: [] });
+
+  assert.equal(speicher.bannerAusgeblendetBei(), null);
+});
+
+test('ein kaputter Oberflächen-Zustand stört nicht', () => {
+  const hintergrund = speicherImArbeitsspeicher();
+  hintergrund.setItem(OBERFLAECHE_SCHLUESSEL, '{kaputt');
+  const speicher = erstelleSpeicher(hintergrund);
+
+  assert.equal(speicher.bannerAusgeblendetBei(), null);
 });

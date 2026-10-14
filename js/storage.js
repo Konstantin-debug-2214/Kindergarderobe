@@ -15,6 +15,13 @@ import { SCHEMA_VERSION } from './model.js';
 
 export const SPEICHER_SCHLUESSEL = 'kindergarderobe';
 
+/**
+ * Zweiter Schlüssel nur für Oberflächen-Zustand (z. B. ein ausgeblendeter
+ * Hinweis). Bewusst getrennt von den Daten: zählt nicht als Änderung und
+ * gehört nicht ins Backup.
+ */
+export const OBERFLAECHE_SCHLUESSEL = 'kindergarderobe-oberflaeche';
+
 /** Fehler beim Schreiben – trägt eine Meldung für die Oberfläche. */
 export class SpeicherFehler extends Error {
   constructor(meldung, ursache) {
@@ -143,6 +150,38 @@ export function erstelleSpeicher(hintergrund = standardHintergrund()) {
     const teil = zustand.teile.find((t) => t.id === id);
     if (!teil) throw new SpeicherFehler('Das Teil wurde nicht gefunden.');
     return teil;
+  }
+
+  /* --- Oberflächen-Zustand ------------------------------------------------ */
+
+  /**
+   * Eigener Schlüssel, eigene Fehlerbehandlung: Geht hier etwas schief, ist
+   * das kein Grund, die App anzuhalten – es wird höchstens ein Hinweis
+   * wieder eingeblendet.
+   */
+  function liesOberflaeche() {
+    try {
+      const roh = hintergrund.getItem(OBERFLAECHE_SCHLUESSEL);
+      const werte = roh ? JSON.parse(roh) : null;
+      return werte && typeof werte === 'object' ? werte : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function schreibeOberflaeche(werte) {
+    try {
+      hintergrund.setItem(OBERFLAECHE_SCHLUESSEL, JSON.stringify(werte));
+    } catch {
+      // Oberflächen-Zustand ist entbehrlich.
+    }
+  }
+
+  /** Hebt ein Ausblenden auf, damit der Hinweis wieder erscheinen kann. */
+  function vergissBannerAusblenden() {
+    const werte = liesOberflaeche();
+    delete werte.bannerAusgeblendetBei;
+    schreibeOberflaeche(werte);
   }
 
   return {
@@ -308,6 +347,30 @@ export function erstelleSpeicher(hintergrund = standardHintergrund()) {
       });
     },
 
+    /* --- Oberflächen-Zustand ---------------------------------------------- */
+
+    /**
+     * Zählerstand, bei dem der Backup-Hinweis ausgeblendet wurde,
+     * oder null, wenn er sichtbar sein soll.
+     * @returns {number|null}
+     */
+    bannerAusgeblendetBei() {
+      const wert = liesOberflaeche().bannerAusgeblendetBei;
+      return Number.isInteger(wert) ? wert : null;
+    },
+
+    /**
+     * Blendet den Backup-Hinweis bis zur nächsten Änderung aus.
+     * Keine Datenänderung: der Zähler bleibt, das Backup unberührt.
+     * @param {number} stand aktueller Wert von aenderungenSeitBackup
+     */
+    bannerAusblenden(stand) {
+      schreibeOberflaeche({ ...liesOberflaeche(), bannerAusgeblendetBei: stand });
+    },
+
+    /** Hebt das Ausblenden auf – nach Export und Import. */
+    bannerWiederZeigen: vergissBannerAusblenden,
+
     /* --- Einstellungen ---------------------------------------------------- */
 
     nameSetzen(name) {
@@ -322,6 +385,9 @@ export function erstelleSpeicher(hintergrund = standardHintergrund()) {
      * Das ist keine Datenänderung und zählt deshalb nicht mit.
      */
     backupNotieren(zeitpunkt = jetzt()) {
+      // Der Zähler beginnt von vorn, deshalb gilt auch ein früheres
+      // Ausblenden des Hinweises nicht mehr.
+      vergissBannerAusblenden();
       return aendere('backupNotieren', (zustand) => {
         zustand.einstellungen.letztesBackupAm = zeitpunkt;
         zustand.einstellungen.aenderungenSeitBackup = 0;
@@ -333,6 +399,7 @@ export function erstelleSpeicher(hintergrund = standardHintergrund()) {
      * genau dem Backup, deshalb steht der Änderungszähler auf 0.
      */
     allesErsetzen(daten, { letztesBackupAm = jetzt() } = {}) {
+      vergissBannerAusblenden();
       return aendere('allesErsetzen', (zustand) => {
         const frisch = leererZustand();
         zustand.version = SCHEMA_VERSION;
@@ -352,6 +419,7 @@ export function erstelleSpeicher(hintergrund = standardHintergrund()) {
     /** Löscht alles (nur für Tests und Fehlersuche). */
     allesLoeschen() {
       hintergrund.removeItem(SPEICHER_SCHLUESSEL);
+      hintergrund.removeItem(OBERFLAECHE_SCHLUESSEL);
       melde('allesLoeschen');
     },
   };

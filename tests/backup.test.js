@@ -5,6 +5,7 @@ import {
   backupAlterInTagen,
   backupDateiname,
   backupFaellig,
+  bannerSichtbar,
   erstelleBackup,
   pruefeImport,
   spieleImportEin,
@@ -48,6 +49,37 @@ test('ein Backup ist fällig, sobald es eine Änderung gab', () => {
   assert.equal(backupFaellig({ aenderungenSeitBackup: 42 }), true);
   assert.equal(backupFaellig({}), false);
   assert.equal(backupFaellig(null), false);
+});
+
+test('der Backup-Hinweis erscheint, solange nicht ausgeblendet wurde', () => {
+  assert.equal(bannerSichtbar({ aenderungenSeitBackup: 0 }, null), false,
+    'ohne Änderung kein Hinweis');
+  assert.equal(bannerSichtbar({ aenderungenSeitBackup: 3 }, null), true);
+});
+
+test('ausgeblendet bleibt ausgeblendet, bis wieder etwas geändert wurde', () => {
+  // Beim Ausblenden stand der Zähler auf 3.
+  assert.equal(bannerSichtbar({ aenderungenSeitBackup: 3 }, 3), false);
+  assert.equal(bannerSichtbar({ aenderungenSeitBackup: 4 }, 3), true,
+    'die nächste Änderung holt den Hinweis zurück');
+  assert.equal(bannerSichtbar({ aenderungenSeitBackup: 9 }, 3), true);
+});
+
+test('ohne offene Änderungen bleibt der Hinweis weg, egal was gemerkt ist', () => {
+  assert.equal(bannerSichtbar({ aenderungenSeitBackup: 0 }, 3), false);
+});
+
+test('ein veralteter Stand über dem Zähler wird nicht beachtet', () => {
+  // Kann nach einem eingespielten Backup vorkommen.
+  assert.equal(bannerSichtbar({ aenderungenSeitBackup: 1 }, 9), false);
+  assert.equal(bannerSichtbar({ aenderungenSeitBackup: 10 }, 9), true);
+});
+
+test('unsinnige Werte gelten als nicht ausgeblendet', () => {
+  for (const wert of [undefined, null, 'drei', 1.5, Number.NaN]) {
+    assert.equal(bannerSichtbar({ aenderungenSeitBackup: 2 }, wert), true,
+      `Wert ${String(wert)} darf nicht ausblenden`);
+  }
 });
 
 test('das Alter des letzten Backups zählt ganze Tage', () => {

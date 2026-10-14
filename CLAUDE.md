@@ -1,6 +1,6 @@
 # Kindergarderobe – Projektregeln für Claude Code
 
-Stand: 13.10.2026 (nach Auftrag 01)
+Stand: 13.10.2026 (nach Auftrag 02)
 
 Inventar-App für Kleidung und Spielzeug eines Kindes. Eigenbedarf, ein Kind.
 Hauptgerät: Tablet im Querformat (1194 × 834). Die App muss zusätzlich auf dem Smartphone (390 × 844) gut bedienbar sein.
@@ -139,6 +139,7 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
 - `ausgaben`: Liste `{ id, bezeichnung, datum, betrag, anzahlTeile }`. Ein Eintrag mit `anzahlTeile > 1` ist ein **Sammelkauf** (z. B. „Flohmarkt Kita, 25 € für 6 Teile“); Einzelpreise müssen dabei nicht bekannt sein.
 - `preis` am Teil: `{ art: "einzeln", betrag }` oder `{ art: "sammelkauf", ausgabeId }`. Ein Einzelpreis legt automatisch eine verknüpfte Ausgabe mit `anzahlTeile: 1` an, damit alle Summen nur aus `ausgaben` berechnet werden.
 - Teile können einem Sammelkauf auch nachträglich zugeordnet werden.
+- **Alle Beträge intern in Cent als ganze Zahlen** (8,00 € = `800`), auch in `ausgaben`, `preis` und im Backup. Anzeige nur über `formatEuro` aus `js/costs.js`; Eingaben mit Komma werden in Cent umgerechnet.
 - Kostenansicht: Summe je Jahr, Anzahl Teile, Durchschnitt pro Teil, Einträge neueste zuerst; bei Sammelkäufen „ca. x € / Teil“. Beträge in Euro, deutsches Format (8,00 €).
 
 ### Weitere gespeicherte Daten
@@ -146,12 +147,15 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
 - `marken`: pflegbare Liste (anlegen, löschen). Gelöschte Marken bleiben an bestehenden Teilen erhalten.
 - `sollMengen`: Liste `{ id, art, jahreszeit, soll }` – Soll je Art **und** Jahreszeit, optional, nur Kleidung. Gezählt werden nur Teile mit Passform „Passt gut“ in der Jahreszeit; „Bald zu klein“ zählt **nicht** mit. Unterschrittenes Soll wird als Lücke angezeigt.
 - `einstellungen`: `{ name, letztesBackupAm, aenderungenSeitBackup }`. `name` ist der Name des Kindes und erscheint in der Begrüßung „Hallo, [Name]!“.
-- Schema-Version `version: 1` für spätere Migrationen.
+- Schema-Version `version: 1` für spätere Migrationen. Speicherschlüssel `kindergarderobe`.
+- Backup-Datei: `{ app: "kindergarderobe", version: 1, erstelltAm, daten }`, Dateiname `kindergarderobe-backup-JJJJ-MM-TT.json`. Aus `einstellungen` wird nur `name` gesichert. Nach dem Einspielen gilt: `letztesBackupAm` = Erstelldatum der Datei, `aenderungenSeitBackup = 0`.
 
 ### Backup-Erinnerung
 
 - Die Erinnerung erscheint, **sobald seit dem letzten Backup etwas hinzugefügt, bearbeitet oder geändert wurde** (`aenderungenSeitBackup > 0`). Ein regelmäßiges, zeitgesteuertes Backup ist nicht vorgesehen.
-- Nach einem erfolgreichen Export wird `aenderungenSeitBackup` auf 0 gesetzt und `letztesBackupAm` gespeichert.
+- Nach einem erfolgreichen Export (Teilen abgeschlossen oder Download) wird `aenderungenSeitBackup` auf 0 gesetzt und `letztesBackupAm` gespeichert. Ein abgebrochenes Teilen-Menü ändert nichts.
+- **Ausblenden-Knopf:** blendet den Banner aus, bis die nächste Änderung erfolgt – auch über Neuladen und App-Neustart hinweg. Dafür wird der Zählerstand beim Ausblenden unter einem eigenen Schlüssel gemerkt (Oberflächen-Zustand, zählt nicht als Datenänderung, gehört nicht ins Backup). Der Banner erscheint wieder, sobald `aenderungenSeitBackup` diesen Stand übersteigt.
+- Texte: Banner „Das letzte Backup ist n Tage alt. Zeit, die Daten zu sichern.“ bzw. ohne Backup „Es gibt noch kein Backup. Zeit, die Daten zu sichern.“ Status in den Einstellungen „vor n Tagen – es gibt Änderungen seitdem, ein neues Backup ist fällig“ bzw. „heute – alle Änderungen sind gesichert“ (freigegeben).
 - Es gibt **keine** Einstellung für ein Erinnerungsintervall. Die Auswahl „Erinnern nach“ aus dem Design entfällt (Entscheidung John, 13.10.2026).
 
 ## Zählregeln
