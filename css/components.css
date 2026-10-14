@@ -463,3 +463,474 @@
 .leiste__plus:active {
   background: var(--farbe-primaer-dunkel);
 }
+
+/* --- Formular-Bausteine --------------------------------------------------- */
+
+.abschnitt + .abschnitt {
+  margin-top: var(--abstand-5);
+}
+
+.abschnitt__label {
+  display: block;
+  margin-bottom: var(--abstand-2);
+  color: var(--farbe-text-gedaempft);
+  font-size: var(--text-xs);
+  font-weight: var(--schriftgewicht-fett);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.abschnitt__hinweis {
+  font-weight: var(--schriftgewicht-normal);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.abschnitt__leer {
+  color: var(--farbe-text-gedaempft);
+  font-size: var(--text-sm);
+}
+
+.feldfehler {
+  margin-top: var(--abstand-2);
+  color: var(--farbe-hinweis-text);
+  font-size: var(--text-sm);
+  font-weight: var(--schriftgewicht-halbfett);
+}
+
+/* Das Feld, an dem ein Fehler hängt, bekommt einen deutlichen Rahmen. */
+.abschnitt:has(> .feldfehler) .feld__eingabe,
+.abschnitt:has(> .feldfehler) .textbereich {
+  border-color: var(--farbe-hinweis-text);
+}
+
+/* --- Wahlknöpfe ----------------------------------------------------------- */
+
+.wahl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--abstand-2);
+}
+
+.wahl__knopf {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--abstand-2);
+  min-height: var(--touch-ziel);
+  padding: 0 var(--abstand-5);
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-rund);
+  background: var(--farbe-flaeche);
+  color: var(--farbe-text);
+  font-size: var(--text-md);
+  font-weight: var(--schriftgewicht-fett);
+  cursor: pointer;
+  transition: background var(--uebergang), border-color var(--uebergang);
+}
+
+.wahl__knopf:hover {
+  border-color: var(--farbe-primaer);
+}
+
+.wahl__knopf--aktiv {
+  border-color: var(--farbe-primaer);
+  background: var(--farbe-primaer);
+  color: var(--farbe-primaer-kontrast);
+}
+
+/* "Andere ..." und "Neue Marke": gestrichelt, damit sie sich abheben. */
+.wahl__knopf--neu {
+  border-style: dashed;
+  color: var(--farbe-primaer);
+}
+
+.textknopf {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--abstand-2);
+  min-height: var(--touch-ziel);
+  padding: 0 var(--abstand-3);
+  border: 0;
+  background: none;
+  color: var(--farbe-primaer);
+  font-weight: var(--schriftgewicht-fett);
+  cursor: pointer;
+}
+
+.markenliste {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--abstand-2);
+  margin-top: var(--abstand-3);
+}
+
+/* --- Umschalter ----------------------------------------------------------- */
+
+.umschalter {
+  display: inline-flex;
+  max-width: 100%;
+  /* Nur 2 px Luft: die Felder innen sollen die vollen 48 px behalten. */
+  padding: 2px;
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-rund);
+  background: var(--farbe-hintergrund);
+}
+
+.umschalter__feld {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--abstand-2);
+  min-height: var(--touch-ziel);
+  padding: 0 var(--abstand-5);
+  border: 0;
+  border-radius: var(--radius-rund);
+  background: none;
+  color: var(--farbe-text);
+  font-size: var(--text-md);
+  font-weight: var(--schriftgewicht-fett);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.umschalter__feld--aktiv {
+  background: var(--farbe-primaer);
+  color: var(--farbe-primaer-kontrast);
+}
+
+.umschalter--gesperrt .umschalter__feld {
+  cursor: default;
+}
+
+.umschalter--gesperrt .umschalter__feld:disabled {
+  color: var(--farbe-text-gedaempft);
+  opacity: 0.6;
+}
+
+/* --- Zähler --------------------------------------------------------------- */
+
+.zaehler {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--abstand-4);
+}
+
+.zaehler__knopf {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-ziel);
+  height: var(--touch-ziel);
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-rund);
+  background: var(--farbe-flaeche);
+  color: var(--farbe-text);
+  cursor: pointer;
+}
+
+.zaehler__knopf:disabled {
+  color: var(--farbe-rahmen);
+  cursor: default;
+}
+
+.zaehler__wert {
+  min-width: 2ch;
+  font-family: var(--schrift-ueberschrift);
+  font-size: var(--text-xl);
+  font-weight: var(--schriftgewicht-ueberschrift);
+  text-align: center;
+}
+
+/* --- Farbwahl ------------------------------------------------------------- */
+
+.farbwahl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--abstand-3);
+}
+
+.farbwahl__tupfer {
+  width: var(--touch-ziel);
+  height: var(--touch-ziel);
+  border: 2px solid var(--farbe-rahmen);
+  border-radius: var(--radius-rund);
+  background: var(--tupfer, #cccccc);
+  cursor: pointer;
+}
+
+.farbwahl__tupfer--aktiv {
+  border-color: var(--farbe-text);
+  border-width: 3px;
+  box-shadow: 0 0 0 3px var(--farbe-flaeche) inset;
+}
+
+.farbwahl__tupfer--gelb { --tupfer: #F0B429; }
+.farbwahl__tupfer--rot { --tupfer: #D9534F; }
+.farbwahl__tupfer--blau { --tupfer: #3B73D4; }
+.farbwahl__tupfer--gruen { --tupfer: #3E9A62; }
+.farbwahl__tupfer--grau { --tupfer: #9AA5AB; }
+.farbwahl__tupfer--weiss { --tupfer: #FFFFFF; }
+.farbwahl__tupfer--bunt {
+  background: conic-gradient(#D9534F, #F0B429, #3E9A62, #3B73D4, #8E6FD8, #D9534F);
+}
+
+/* --- Textbereich und Betragsfeld ------------------------------------------ */
+
+.textbereich {
+  width: 100%;
+  min-height: 96px;
+  padding: var(--abstand-3) var(--abstand-5);
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-feld);
+  background: var(--farbe-flaeche);
+  font-family: inherit;
+  font-size: var(--text-md);
+  resize: vertical;
+}
+
+.textbereich:focus {
+  border-color: var(--farbe-primaer);
+  outline: none;
+}
+
+.eurofeld {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-2);
+  min-height: var(--touch-ziel);
+  padding: 0 var(--abstand-5);
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-rund);
+  background: var(--farbe-flaeche);
+}
+
+.eurofeld:focus-within {
+  border-color: var(--farbe-primaer);
+}
+
+.eurofeld__eingabe {
+  flex: 1 1 auto;
+  align-self: stretch;
+  min-width: 0;
+  min-height: var(--touch-ziel);
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: var(--text-md);
+  outline: none;
+}
+
+.eurofeld__zeichen {
+  color: var(--farbe-text-gedaempft);
+  font-weight: var(--schriftgewicht-fett);
+}
+
+/* --- Chips (freie Merkmale) ----------------------------------------------- */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--abstand-2);
+  margin-top: var(--abstand-3);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--abstand-1);
+  min-height: var(--touch-ziel);
+  padding: 0 0 0 var(--abstand-4);
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-rund);
+  background: var(--farbe-flaeche);
+  font-weight: var(--schriftgewicht-halbfett);
+}
+
+.chip__entfernen {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-ziel);
+  height: var(--touch-ziel);
+  border: 0;
+  border-radius: var(--radius-rund);
+  background: none;
+  color: var(--farbe-text-gedaempft);
+  cursor: pointer;
+}
+
+.tageingabe {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-2);
+}
+
+/* --- Auswahl- und Pflegelisten im Dialog ---------------------------------- */
+
+.auswahlliste {
+  display: flex;
+  flex-direction: column;
+  max-height: 46vh;
+  margin-bottom: var(--abstand-4);
+  overflow-y: auto;
+}
+
+.auswahlliste__eintrag {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-3);
+  min-height: 56px;
+  padding: var(--abstand-2) var(--abstand-3);
+  border: 0;
+  border-radius: var(--radius-feld);
+  background: none;
+  color: var(--farbe-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.auswahlliste__eintrag:hover {
+  background: var(--farbe-hintergrund);
+}
+
+.auswahlliste__texte {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.auswahlliste__titel {
+  font-weight: var(--schriftgewicht-fett);
+}
+
+.auswahlliste__hinweis,
+.auswahlliste__zusatz {
+  color: var(--farbe-text-gedaempft);
+  font-size: var(--text-sm);
+}
+
+.auswahlliste__zusatz {
+  font-weight: var(--schriftgewicht-fett);
+}
+
+.pflegeliste {
+  display: flex;
+  flex-direction: column;
+  max-height: 46vh;
+  overflow-y: auto;
+}
+
+.pflegeliste__zeile {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-3);
+  min-height: 56px;
+}
+
+.pflegeliste__zeile + .pflegeliste__zeile {
+  border-top: 1px solid var(--farbe-rahmen);
+}
+
+.pflegeliste__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: var(--schriftgewicht-fett);
+}
+
+.pflegeliste__loeschen {
+  border-color: transparent;
+}
+
+.dialog__hinweis,
+.dialog__leer {
+  margin-bottom: var(--abstand-4);
+  color: var(--farbe-text-gedaempft);
+  font-size: var(--text-sm);
+}
+
+.dialog--breit {
+  width: min(680px, calc(100vw - 2 * var(--abstand-4)));
+}
+
+.groessenspanne {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--abstand-4);
+}
+
+.groessenspanne .abschnitt + .abschnitt {
+  margin-top: 0;
+}
+
+/* --- Vorschaukarte -------------------------------------------------------- */
+
+.vorschaukarte {
+  overflow: hidden;
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-karte);
+  background: var(--farbe-flaeche);
+}
+
+.vorschaukarte__bild {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 128px;
+  background: var(--kategorie-farbe, var(--farbe-hintergrund));
+}
+
+.vorschaukarte__kreis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-rund);
+  background: rgba(255, 255, 255, 0.65);
+  color: var(--farbe-text);
+}
+
+.vorschaukarte__koerper {
+  padding: var(--abstand-4) var(--abstand-5);
+}
+
+.vorschaukarte__name {
+  font-family: var(--schrift-ueberschrift);
+  font-size: var(--text-lg);
+  font-weight: var(--schriftgewicht-ueberschrift);
+}
+
+.vorschaukarte__name--leer {
+  color: var(--farbe-text-gedaempft);
+}
+
+.vorschaukarte__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--abstand-2);
+  margin-top: var(--abstand-3);
+}
+
+.vorschauchip {
+  padding: var(--abstand-1) var(--abstand-3);
+  border-radius: var(--radius-rund);
+  background: var(--farbe-hintergrund);
+  color: var(--farbe-text-kachel);
+  font-size: var(--text-sm);
+  font-weight: var(--schriftgewicht-halbfett);
+}
+
+/* Jedes Teil erscheint in der Farbe seiner Kategorie (Farbregel CLAUDE.md). */
+.vorschaukarte[data-kategorie="oberteile"] { --kategorie-farbe: var(--farbe-kat-oberteile); }
+.vorschaukarte[data-kategorie="unterteile"] { --kategorie-farbe: var(--farbe-kat-unterteile); }
+.vorschaukarte[data-kategorie="sets_sonstiges"] { --kategorie-farbe: var(--farbe-kat-sets-sonstiges); }
+.vorschaukarte[data-kategorie="schuhe"] { --kategorie-farbe: var(--farbe-kat-schuhe); }
+.vorschaukarte[data-kategorie="muetzen"] { --kategorie-farbe: var(--farbe-kat-muetzen); }
+
+/* Spielzeug: weiße Fläche mit Rahmen. */
+.vorschaukarte[data-kategorie="spielzeug"] .vorschaukarte__bild {
+  border-bottom: 1px solid var(--farbe-rahmen);
+  background: var(--farbe-kat-spielzeug);
+}

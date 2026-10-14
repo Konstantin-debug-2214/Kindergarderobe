@@ -230,3 +230,199 @@
     display: none;
   }
 }
+
+/* --- Teil hinzufügen / bearbeiten ----------------------------------------- */
+
+.formular__kopf {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--abstand-6);
+}
+
+.formular__titelblock {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.formular__kopf-umschalter {
+  flex: 0 1 auto;
+}
+
+.formular__kopf-aktionen {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-3);
+}
+
+/* Tablet: links Vorschau, Name, Preis, Notiz – rechts die übrigen Felder. */
+.formular__raster {
+  display: grid;
+  grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--abstand-6);
+}
+
+.formular__links,
+.formular__rechts {
+  min-width: 0;
+}
+
+.formular__rechts {
+  padding: var(--abstand-6);
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-karte);
+  background: var(--farbe-flaeche);
+  box-shadow: var(--schatten-karte);
+}
+
+.formular__links > .abschnitt:first-child {
+  margin-top: 0;
+}
+
+.sammelkauf {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-3);
+  flex-wrap: wrap;
+  margin-top: var(--abstand-3);
+  padding: var(--abstand-3) var(--abstand-4);
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-feld);
+  background: var(--farbe-hintergrund);
+}
+
+.sammelkauf__angabe {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.sammelkauf__titel {
+  font-weight: var(--schriftgewicht-fett);
+}
+
+.sammelkauf__hinweis {
+  color: var(--farbe-text-gedaempft);
+  font-size: var(--text-sm);
+}
+
+/* Tablet: Nur die rechte Spalte scrollt, der Kopf bleibt stehen. */
+@media (min-width: 768px) {
+  .formular {
+    display: flex;
+    flex-direction: column;
+    max-height: 100dvh;
+  }
+
+  .formular__raster {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .formular__links,
+  .formular__rechts {
+    max-height: 100%;
+    overflow-y: auto;
+  }
+
+  /* In der schmalen linken Spalte teilen sich die Felder des Umschalters
+     die Breite, damit nichts seitlich hinausläuft. */
+  .formular__links .umschalter {
+    display: flex;
+    width: 100%;
+  }
+
+  .formular__links .umschalter__feld {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 var(--abstand-3);
+  }
+}
+
+/* Smartphone: eine Spalte in der Reihenfolge aus CLAUDE.md. */
+@media (max-width: 767px) {
+  .formular__kopf {
+    gap: var(--abstand-3);
+    margin-bottom: var(--abstand-4);
+  }
+
+  .formular__kopf-aktionen {
+    flex: 0 0 auto;
+  }
+
+  .formular__umschalter-mobil {
+    margin-bottom: var(--abstand-5);
+  }
+
+  .formular__umschalter-mobil .umschalter {
+    display: flex;
+    width: 100%;
+  }
+
+  .formular__umschalter-mobil .umschalter__feld {
+    flex: 1 1 0;
+  }
+
+  .formular__raster {
+    display: flex;
+    flex-direction: column;
+    /* stretch zuruecksetzen: im Tablet-Layout steht hier start, sonst waeren
+       die Felder in der Spalte nur so breit wie ihr Inhalt. */
+    align-items: stretch;
+    gap: 0;
+  }
+
+  /* Die Spalten verschwinden, die Felder ordnen sich selbst ein. */
+  .formular__links,
+  .formular__rechts {
+    display: contents;
+  }
+
+  .formular__raster > * > .abschnitt {
+    order: var(--reihenfolge, 99);
+    margin-top: var(--abstand-5);
+  }
+
+  /* Vorschau als kompakte Zeile oben. */
+  .vorschaukarte {
+    display: flex;
+    align-items: center;
+    gap: var(--abstand-4);
+  }
+
+  .vorschaukarte__bild {
+    flex: none;
+    min-height: 0;
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-feld);
+  }
+
+  .vorschaukarte[data-kategorie="spielzeug"] .vorschaukarte__bild {
+    border: 1px solid var(--farbe-rahmen);
+  }
+
+  .vorschaukarte__kreis {
+    width: 44px;
+    height: 44px;
+  }
+
+  .vorschaukarte__koerper {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: var(--abstand-3) var(--abstand-4) var(--abstand-3) 0;
+  }
+
+  .vorschaukarte__name {
+    font-size: var(--text-md);
+  }
+
+  .vorschaukarte__chips {
+    margin-top: var(--abstand-2);
+  }
+
+  .groessenspanne {
+    grid-template-columns: 1fr;
+  }
+}
