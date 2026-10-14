@@ -27,16 +27,30 @@ export const STANDARD_HASH = '#/';
 /**
  * Macht aus einem Hash einen normalisierten Pfad.
  * '#/kategorie/schuhe/' -> '/kategorie/schuhe'
+ * Ein Abfrageteil hinter dem Fragezeichen bleibt außen vor.
  * @param {string} hash
  * @returns {string}
  */
 export function pfadAusHash(hash) {
-  const roh = String(hash || '').replace(/^#/, '');
+  const roh = String(hash || '').replace(/^#/, '').split('?')[0];
   const ohneEndSchraegstrich = roh.replace(/\/+$/, '');
   if (ohneEndSchraegstrich === '') return '/';
   return ohneEndSchraegstrich.startsWith('/')
     ? ohneEndSchraegstrich
     : `/${ohneEndSchraegstrich}`;
+}
+
+/**
+ * Die Werte hinter dem Fragezeichen, z. B. '#/neu?kategorie=schuhe'.
+ * Damit lässt sich ein Screen vorbelegen, ohne eine eigene Route zu brauchen.
+ * @param {string} hash
+ * @returns {Object<string, string>}
+ */
+export function abfrageAusHash(hash) {
+  const roh = String(hash || '').replace(/^#/, '');
+  const fragezeichen = roh.indexOf('?');
+  if (fragezeichen === -1) return {};
+  return Object.fromEntries(new URLSearchParams(roh.slice(fragezeichen + 1)));
 }
 
 /**
@@ -89,7 +103,11 @@ export function starteRouter({ beiWechsel }) {
       return;
     }
 
-    beiWechsel(route);
+    // Werte aus der Adresse ergänzen die Werte aus dem Pfad.
+    beiWechsel({
+      ...route,
+      parameter: { ...abfrageAusHash(window.location.hash), ...route.parameter },
+    });
   }
 
   window.addEventListener('hashchange', zeichne);
