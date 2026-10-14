@@ -812,3 +812,79 @@
     display: none;
   }
 }
+
+/* --- Kosten --------------------------------------------------------------- */
+
+.kosten__raster {
+  display: grid;
+  grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--abstand-6);
+}
+
+.kosten__links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--abstand-5);
+  min-width: 0;
+}
+
+/* Auf dem Tablet scrollt die Einträgeliste für sich. */
+@media (min-width: 768px) {
+  .kosten {
+    display: flex;
+    flex-direction: column;
+    max-height: 100dvh;
+  }
+
+  .kosten__raster {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .kosten__links,
+  .kosteneintraege {
+    max-height: 100%;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 767px) {
+  /* "+ Kosten" bleibt in der Kopfzeile, wie im Design. */
+  .kosten .kopfzeile__aktionen {
+    width: auto;
+  }
+
+  .kosten__raster {
+    display: flex;
+    flex-direction: column;
+    gap: var(--abstand-5);
+  }
+
+  .summenkarte__summe {
+    font-size: var(--text-2xl);
+  }
+
+  .kosteneintrag {
+    gap: var(--abstand-3);
+    padding: var(--abstand-3) 0;
+  }
+
+  .kosteneintrag__icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .ausgabefelder {
+    grid-template-columns: 1fr;
+  }
+
+  /* Drei Knöpfe untereinander, Speichern zuoberst. */
+  .dialog__aktionen--mehrere {
+    flex-direction: column-reverse;
+  }
+
+  .dialog__aktionen--mehrere .knopf {
+    width: 100%;
+  }
+}

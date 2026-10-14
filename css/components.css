@@ -1697,3 +1697,221 @@
   color: var(--farbe-text-gedaempft);
   font-size: var(--text-sm);
 }
+
+/* --- Summenkarte der Kosten ----------------------------------------------- */
+
+.summenkarte {
+  padding: var(--abstand-6);
+  border-radius: var(--radius-kachel);
+  background: var(--farbe-primaer);
+  color: var(--farbe-primaer-kontrast);
+}
+
+.summenkarte__kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--abstand-3);
+}
+
+.summenkarte__label {
+  font-size: var(--text-xs);
+  font-weight: var(--schriftgewicht-fett);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.summenkarte__jahre {
+  display: flex;
+  gap: var(--abstand-2);
+}
+
+/* Die Jahr-Knöpfe liegen auf der Primärfläche. */
+.summenkarte__jahre .icon-knopf {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: none;
+  color: var(--farbe-primaer-kontrast);
+}
+
+.summenkarte__jahre .icon-knopf:hover {
+  border-color: var(--farbe-primaer-kontrast);
+}
+
+.summenkarte__jahre .icon-knopf:disabled {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: default;
+}
+
+.summenkarte__summe {
+  margin-top: var(--abstand-3);
+  font-family: var(--schrift-ueberschrift);
+  font-size: var(--text-3xl);
+  font-weight: var(--schriftgewicht-ueberschrift);
+  line-height: var(--zeilenhoehe-eng);
+}
+
+.summenkarte__zusatz {
+  margin-top: var(--abstand-2);
+  font-size: var(--text-sm);
+  opacity: 0.9;
+}
+
+/* --- Formular "Kosten hinzufügen" ----------------------------------------- */
+
+.kostenformular__hinweis {
+  margin-top: var(--abstand-4);
+  color: var(--farbe-text-gedaempft);
+  font-size: var(--text-sm);
+}
+
+.kostenformular__speichern {
+  width: 100%;
+  margin-top: var(--abstand-5);
+}
+
+/* Datum und Betrag nebeneinander. minmax(0, …) laesst die Spalten schrumpfen,
+   sonst laeuft der Zaehler in der schmalen Formularspalte hinaus. */
+.ausgabefelder {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--abstand-4);
+  margin-top: var(--abstand-5);
+}
+
+.ausgabefelder .zaehler {
+  gap: var(--abstand-3);
+}
+
+.ausgabefelder .abschnitt + .abschnitt {
+  margin-top: 0;
+}
+
+/* --- Einträge der Kosten -------------------------------------------------- */
+
+.kosteneintraege__liste {
+  display: flex;
+  flex-direction: column;
+}
+
+.kosteneintrag {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-4);
+  width: 100%;
+  min-height: 72px;
+  padding: var(--abstand-3) var(--abstand-2);
+  border: 0;
+  border-radius: var(--radius-feld);
+  background: none;
+  color: var(--farbe-text);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.kosteneintrag + .kosteneintrag {
+  border-top: 1px solid var(--farbe-rahmen);
+  border-radius: 0;
+}
+
+.kosteneintrag:hover {
+  background: var(--farbe-hintergrund);
+}
+
+.kosteneintrag__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-feld);
+  background: var(--kategorie-farbe, var(--farbe-hintergrund));
+  color: var(--farbe-text);
+}
+
+/* Sammelkauf: Tüte auf Sandfarbe, wie im Design. */
+.kosteneintrag__icon[data-art="sammelkauf"] {
+  background: var(--farbe-kat-sets-sonstiges);
+}
+
+/* Ausgabe ohne verknüpftes Teil: neutral. */
+.kosteneintrag__icon[data-art="ohne"] {
+  background: var(--farbe-hintergrund);
+  color: var(--farbe-text-gedaempft);
+}
+
+.kosteneintrag__icon[data-kategorie="oberteile"] { --kategorie-farbe: var(--farbe-kat-oberteile); }
+.kosteneintrag__icon[data-kategorie="unterteile"] { --kategorie-farbe: var(--farbe-kat-unterteile); }
+.kosteneintrag__icon[data-kategorie="sets_sonstiges"] { --kategorie-farbe: var(--farbe-kat-sets-sonstiges); }
+.kosteneintrag__icon[data-kategorie="schuhe"] { --kategorie-farbe: var(--farbe-kat-schuhe); }
+.kosteneintrag__icon[data-kategorie="muetzen"] { --kategorie-farbe: var(--farbe-kat-muetzen); }
+.kosteneintrag__icon[data-kategorie="spielzeug"] {
+  border: 1px solid var(--farbe-rahmen);
+  background: var(--farbe-kat-spielzeug);
+}
+
+.kosteneintrag__texte {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.kosteneintrag__name {
+  font-weight: var(--schriftgewicht-fett);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kosteneintrag__zusatz {
+  color: var(--farbe-text-gedaempft);
+  font-size: var(--text-sm);
+}
+
+.kosteneintrag__betraege {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.kosteneintrag__betrag {
+  font-family: var(--schrift-ueberschrift);
+  font-size: var(--text-lg);
+  font-weight: var(--schriftgewicht-ueberschrift);
+}
+
+.kosteneintrag__proteil {
+  color: var(--farbe-text-gedaempft);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+
+/* --- Zuordnung im Bearbeiten-Dialog --------------------------------------- */
+
+.zuordnung {
+  margin-top: var(--abstand-4);
+  padding: var(--abstand-3) var(--abstand-4);
+  border-radius: var(--radius-feld);
+  background: var(--farbe-hintergrund);
+}
+
+.zuordnung__kopf {
+  font-size: var(--text-sm);
+  font-weight: var(--schriftgewicht-fett);
+}
+
+.zuordnung__namen {
+  margin-top: var(--abstand-1);
+  color: var(--farbe-text-gedaempft);
+  font-size: var(--text-sm);
+}
+
+/* Drei Knöpfe im Dialog: Löschen steht links. */
+.dialog__aktionen--mehrere {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}

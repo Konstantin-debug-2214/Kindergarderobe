@@ -12,6 +12,7 @@ import { icon } from '../ui/icons.js';
 import { knopf, iconKnopf } from '../ui/knoepfe.js';
 import { banner } from '../ui/banner.js';
 import { frageNach, pflegeListe, waehleAus } from '../ui/dialog.js';
+import { frageNachAusgabe } from '../ui/ausgabeDialog.js';
 import {
   abschnitt,
   chips,
@@ -923,77 +924,16 @@ async function frageNachGroesse(system, vorhanden) {
 
 /** Dialog für einen neuen Sammelkauf. Legt die Ausgabe an und gibt sie zurück. */
 async function frageNachSammelkauf() {
-  const bezeichnung = el('input', {
-    id: 'sk-wofuer', class: 'feld__eingabe', type: 'text',
-    placeholder: 'z. B. Flohmarkt Kita', autocomplete: 'off',
-  });
-  const datum = el('input', {
-    id: 'sk-datum', class: 'feld__eingabe', type: 'date',
-  });
-  datum.value = new Date().toISOString().slice(0, 10);
-
-  const betrag = el('input', {
-    id: 'sk-betrag', class: 'eurofeld__eingabe', type: 'text',
-    inputmode: 'decimal', placeholder: '0,00', 'aria-label': 'Gesamtbetrag in Euro',
-  });
-  const anzahl = el('input', {
-    id: 'sk-anzahl', class: 'feld__eingabe', type: 'number', min: '2', step: '1', value: '2',
+  const ergebnis = await frageNachAusgabe({
+    titel: 'Neuer Sammelkauf',
+    bestaetigenText: 'Anlegen',
+    // Ein Sammelkauf umfasst mehr als ein Teil – sonst ist es ein Einzelpreis.
+    minTeile: 2,
+    vorgabe: { anzahlTeile: 2 },
   });
 
-  const fehlerZeile = el('p', { class: 'feldfehler', role: 'alert' });
-
-  let ergebnis = null;
-
-  while (ergebnis === null) {
-    // eslint-disable-next-line no-await-in-loop
-    const bestaetigt = await frageNach({
-      titel: 'Neuer Sammelkauf',
-      inhalt: [
-        el('div', { class: 'abschnitt' }, [
-          el('label', { class: 'abschnitt__label', for: 'sk-wofuer', text: 'Wofür?' }),
-          bezeichnung,
-        ]),
-        el('div', { class: 'abschnitt' }, [
-          el('label', { class: 'abschnitt__label', for: 'sk-datum', text: 'Datum' }),
-          datum,
-        ]),
-        el('div', { class: 'groessenspanne' }, [
-          el('div', { class: 'abschnitt' }, [
-            el('label', { class: 'abschnitt__label', for: 'sk-betrag', text: 'Gesamtbetrag' }),
-            el('div', { class: 'eurofeld' }, [betrag, el('span', { class: 'eurofeld__zeichen', text: '€' })]),
-          ]),
-          el('div', { class: 'abschnitt' }, [
-            el('label', { class: 'abschnitt__label', for: 'sk-anzahl', text: 'Anzahl Teile' }),
-            anzahl,
-          ]),
-        ]),
-        fehlerZeile,
-      ],
-      bestaetigenText: 'Anlegen',
-    });
-
-    if (!bestaetigt) return null;
-
-    const cent = euroTextInCent(betrag.value);
-    const teile = Number.parseInt(anzahl.value, 10);
-
-    if (bezeichnung.value.trim() === '') {
-      fehlerZeile.textContent = 'Bitte angeben, wofür das Geld ausgegeben wurde.';
-    } else if (cent === null) {
-      fehlerZeile.textContent = 'Bitte einen gültigen Betrag eintragen, z. B. 25,00.';
-    } else if (!Number.isInteger(teile) || teile < 2) {
-      fehlerZeile.textContent = 'Ein Sammelkauf umfasst mindestens 2 Teile.';
-    } else {
-      ergebnis = speicher.ausgabeAnlegen({
-        bezeichnung: bezeichnung.value.trim(),
-        datum: datum.value || new Date().toISOString().slice(0, 10),
-        betrag: cent,
-        anzahlTeile: teile,
-      });
-    }
-  }
-
-  return ergebnis;
+  if (ergebnis?.aktion !== 'speichern') return null;
+  return speicher.ausgabeAnlegen(ergebnis.werte);
 }
 
 /** "2026-09-12" wird zu "12.09.2026". */

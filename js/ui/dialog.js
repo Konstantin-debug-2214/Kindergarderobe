@@ -97,6 +97,39 @@ export async function frageNach({
 }
 
 /**
+ * Rückfrage mit mehreren Antworten, z. B. Löschen / Abbrechen / Speichern.
+ * @param {{
+ *   titel: string,
+ *   inhalt?: Array<Node>,
+ *   warnung?: string,
+ *   aktionen: Array<{text: string, wert: string, variante?: 'primaer'|'leise'|'warnung'}>
+ * }} optionen
+ * @returns {Promise<string|null>} der gewählte Wert, oder null bei Abbruch
+ */
+export function frageNachWahl({ titel, inhalt = [], warnung, aktionen }) {
+  return oeffneDialog({
+    titel,
+    koerper: (schliesse) => {
+      const knoepfe = aktionen.map((aktion) => {
+        const knopfEl = knopf({
+          text: aktion.text,
+          variante: aktion.variante === 'primaer' ? 'primaer' : 'leise',
+        });
+        if (aktion.variante === 'warnung') knopfEl.classList.add('knopf--warnung');
+        knopfEl.addEventListener('click', () => schliesse(aktion.wert));
+        return knopfEl;
+      });
+
+      return [
+        ...inhalt,
+        warnung ? el('p', { class: 'dialog__warnung', text: warnung }) : null,
+        el('div', { class: 'dialog__aktionen dialog__aktionen--mehrere' }, knoepfe),
+      ].filter(Boolean);
+    },
+  });
+}
+
+/**
  * Auswahl aus einer Liste. Ein Tipp auf einen Eintrag wählt ihn aus.
  * @param {{
  *   titel: string,
