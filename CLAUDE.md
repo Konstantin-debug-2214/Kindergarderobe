@@ -24,7 +24,8 @@ index.html
 css/        tokens.css (Farben, Abstände, Schriften), base.css, components.css, screens.css
 js/         app.js (Start, Router), router.js (Hash-Routing, siehe Routen)
             storage.js, model.js (Datenmodell, Konstanten, Validierung), filters.js (reine Filter-/Zählfunktionen)
-            costs.js (reine Kostenberechnung), backup.js (Export, Import, Erinnerung), screens/*.js (je Screen ein Modul), ui/*.js (Bausteine)
+            costs.js (reine Kostenberechnung), backup.js (Export, Import, Erinnerung), formular.js (reine Formular-Logik)
+            screens/*.js (je Screen ein Modul; "Teil hinzufügen" und "Teil bearbeiten" teilen sich teilFormular.js), ui/*.js (Bausteine)
 fonts/
 icons/      App-Icons für das Manifest
 tests/        Tests der reinen Logik mit dem eingebauten Node-Testrunner (`node --test`), keine npm-Pakete
@@ -91,7 +92,7 @@ Unbekannte Routen führen zur Übersicht.
 | Feld | Typ | Pflicht | Hinweis |
 |---|---|---|---|
 | `groesse` | Objekt | ja | `{ system, von, bis }`, siehe Größensysteme |
-| `jahreszeiten` | Array | ja, min. 1 | `fruehling`, `sommer`, `herbst`, `winter`; Schnellknopf „Ganzjährig“ setzt alle vier |
+| `jahreszeiten` | Array | ja, min. 1 | `fruehling`, `sommer`, `herbst`, `winter`; kein Schnellknopf „Ganzjährig“ (entfällt, Entscheidung John) |
 
 ### Nur Spielzeug
 
