@@ -246,145 +246,159 @@ function istGanzeZahl(wert) {
   return typeof wert === 'number' && Number.isInteger(wert);
 }
 
-function pruefeGroesse(teil, fehler) {
+function pruefeGroesse(teil, melde) {
   const erwartet = groessenSystemFuer(teil.kategorie, teil.art);
 
   if (!teil.groesse || typeof teil.groesse !== 'object') {
-    fehler.push('Größe fehlt.');
+    melde('groesse', 'Größe fehlt.');
     return;
   }
 
   const { system, von, bis } = teil.groesse;
 
   if (!GROESSENSYSTEME[system]) {
-    fehler.push('Unbekanntes Größensystem.');
+    melde('groesse', 'Unbekanntes Größensystem.');
     return;
   }
 
   if (erwartet && system !== erwartet) {
-    fehler.push(
-      `Größensystem passt nicht zur Kategorie: erwartet ${GROESSENSYSTEME[erwartet].name}.`,
-    );
+    melde('groesse',
+      `Größensystem passt nicht zur Kategorie: erwartet ${GROESSENSYSTEME[erwartet].name}.`);
   }
 
   if (typeof von !== 'number' || typeof bis !== 'number') {
-    fehler.push('Größe braucht die Werte von und bis als Zahl.');
+    melde('groesse', 'Größe braucht die Werte von und bis als Zahl.');
     return;
   }
 
   if (von > bis) {
-    fehler.push('Größe: von darf nicht größer als bis sein.');
+    melde('groesse', 'Größe: von darf nicht größer als bis sein.');
   }
 
   const grenzen = GROESSENSYSTEME[system];
   if (von < grenzen.von || bis > grenzen.bis) {
-    fehler.push(
-      `Größe liegt außerhalb von ${grenzen.name} (${grenzen.von} bis ${grenzen.bis}).`,
-    );
+    melde('groesse',
+      `Größe liegt außerhalb von ${grenzen.name} (${grenzen.von} bis ${grenzen.bis}).`);
   }
 }
 
 /**
- * Prüft ein Teil gegen das Datenmodell.
+ * Prüft ein Teil gegen das Datenmodell und nennt zu jedem Fehler das Feld.
+ * Das Formular zeigt die Meldung damit direkt am betroffenen Feld an.
+ *
  * @param {Object} teil
- * @returns {Array<string>} Fehlermeldungen auf Deutsch, leer wenn alles passt
+ * @returns {Array<{feld: string, text: string}>} leer, wenn alles passt
  */
-export function pruefeTeil(teil) {
+export function pruefeTeilAusfuehrlich(teil) {
   const fehler = [];
+  const melde = (feld, text) => fehler.push({ feld, text });
 
-  if (!teil || typeof teil !== 'object') return ['Teil fehlt oder ist kein Objekt.'];
+  if (!teil || typeof teil !== 'object') {
+    return [{ feld: 'teil', text: 'Teil fehlt oder ist kein Objekt.' }];
+  }
 
-  if (typeof teil.id !== 'string' || teil.id === '') fehler.push('Das Teil hat keine id.');
+  if (typeof teil.id !== 'string' || teil.id === '') {
+    melde('id', 'Das Teil hat keine id.');
+  }
 
   const istKleidung = teil.typ === TYP.KLEIDUNG;
   const istSpielzeug = teil.typ === TYP.SPIELZEUG;
   if (!istKleidung && !istSpielzeug) {
-    fehler.push('Typ muss kleidung oder spielzeug sein.');
+    melde('typ', 'Typ muss kleidung oder spielzeug sein.');
   }
 
   if (typeof teil.name !== 'string' || teil.name.trim() === '') {
-    fehler.push('Name fehlt.');
+    melde('name', 'Name fehlt.');
   }
 
   if (!kategorie(teil.kategorie)) {
-    fehler.push('Unbekannte Kategorie.');
+    melde('kategorie', 'Unbekannte Kategorie.');
   } else if (istSpielzeug && teil.kategorie !== KATEGORIE_SPIELZEUG) {
-    fehler.push('Spielzeug gehört immer zur Kategorie Spielzeug.');
+    melde('kategorie', 'Spielzeug gehört immer zur Kategorie Spielzeug.');
   } else if (istKleidung && teil.kategorie === KATEGORIE_SPIELZEUG) {
-    fehler.push('Kleidung gehört nicht zur Kategorie Spielzeug.');
+    melde('kategorie', 'Kleidung gehört nicht zur Kategorie Spielzeug.');
   }
 
   if (typeof teil.art !== 'string' || teil.art.trim() === '') {
-    fehler.push('Art fehlt.');
+    melde('art', 'Art fehlt.');
   }
 
   if (!istGanzeZahl(teil.anzahl) || teil.anzahl < 1) {
-    fehler.push('Anzahl muss eine ganze Zahl ab 1 sein.');
+    melde('anzahl', 'Anzahl muss eine ganze Zahl ab 1 sein.');
   }
 
   if (typeof teil.aussortiert !== 'boolean') {
-    fehler.push('Das Feld aussortiert muss wahr oder falsch sein.');
+    melde('aussortiert', 'Das Feld aussortiert muss wahr oder falsch sein.');
   }
 
   if (istKleidung) {
-    pruefeGroesse(teil, fehler);
+    pruefeGroesse(teil, melde);
 
     if (!Array.isArray(teil.jahreszeiten) || teil.jahreszeiten.length === 0) {
-      fehler.push('Mindestens eine Jahreszeit angeben.');
+      melde('jahreszeiten', 'Mindestens eine Jahreszeit angeben.');
     } else if (teil.jahreszeiten.some((id) => !jahreszeit(id))) {
-      fehler.push('Unbekannte Jahreszeit.');
+      melde('jahreszeiten', 'Unbekannte Jahreszeit.');
     }
 
     if (!PASSFORM.some((p) => p.id === teil.passform)) {
-      fehler.push('Passform fehlt oder ist unbekannt.');
+      melde('passform', 'Passform fehlt oder ist unbekannt.');
     }
   }
 
   if (istSpielzeug) {
-    if (teil.groesse) fehler.push('Spielzeug hat keine Größe.');
+    if (teil.groesse) melde('groesse', 'Spielzeug hat keine Größe.');
     if (Array.isArray(teil.jahreszeiten) && teil.jahreszeiten.length > 0) {
-      fehler.push('Spielzeug hat keine Jahreszeiten.');
+      melde('jahreszeiten', 'Spielzeug hat keine Jahreszeiten.');
     }
-    if (teil.passform) fehler.push('Spielzeug hat keine Passform.');
+    if (teil.passform) melde('passform', 'Spielzeug hat keine Passform.');
     if (teil.alterAb !== null && teil.alterAb !== undefined
       && (!istGanzeZahl(teil.alterAb) || teil.alterAb < 0)) {
-      fehler.push('Alter ab muss eine ganze Zahl ab 0 sein.');
+      melde('alterAb', 'Alter ab muss eine ganze Zahl ab 0 sein.');
     }
     if (teil.tags !== undefined && !Array.isArray(teil.tags)) {
-      fehler.push('Die freien Merkmale müssen eine Liste sein.');
+      melde('tags', 'Die freien Merkmale müssen eine Liste sein.');
     }
   }
 
   if (teil.merkmal && !MERKMAL.some((m) => m.id === teil.merkmal)) {
-    fehler.push('Unbekanntes Merkmal.');
+    melde('merkmal', 'Unbekanntes Merkmal.');
   }
 
   if (teil.merkmal === 'marke') {
     if (typeof teil.marke !== 'string' || teil.marke.trim() === '') {
-      fehler.push('Bei Merkmal Marke muss eine Marke angegeben sein.');
+      melde('marke', 'Bei Merkmal Marke muss eine Marke angegeben sein.');
     }
   } else if (teil.marke) {
-    fehler.push('Eine Marke ist nur bei Merkmal Marke erlaubt.');
+    melde('marke', 'Eine Marke ist nur bei Merkmal Marke erlaubt.');
   }
 
   if (teil.aussortiert && teil.aussortiertGrund
     && !AUSSORTIER_GRUENDE.some((g) => g.id === teil.aussortiertGrund)) {
-    fehler.push('Unbekannter Grund fürs Aussortieren.');
+    melde('aussortiertGrund', 'Unbekannter Grund fürs Aussortieren.');
   }
 
   if (teil.preis) {
     if (teil.preis.art === PREIS_ART.EINZELN) {
       if (!istGanzeZahl(teil.preis.betrag) || teil.preis.betrag < 0) {
-        fehler.push('Preis muss ein Betrag in Cent als ganze Zahl ab 0 sein.');
+        melde('preis', 'Preis muss ein Betrag in Cent als ganze Zahl ab 0 sein.');
       }
     } else if (teil.preis.art === PREIS_ART.SAMMELKAUF) {
       if (typeof teil.preis.ausgabeId !== 'string' || teil.preis.ausgabeId === '') {
-        fehler.push('Beim Sammelkauf fehlt die Verknüpfung zur Ausgabe.');
+        melde('preis', 'Beim Sammelkauf fehlt die Verknüpfung zur Ausgabe.');
       }
     } else {
-      fehler.push('Preis muss einzeln oder sammelkauf sein.');
+      melde('preis', 'Preis muss einzeln oder sammelkauf sein.');
     }
   }
 
   return fehler;
+}
+
+/**
+ * Prüft ein Teil und gibt nur die Meldungen zurück.
+ * @param {Object} teil
+ * @returns {Array<string>} Fehlermeldungen auf Deutsch, leer wenn alles passt
+ */
+export function pruefeTeil(teil) {
+  return pruefeTeilAusfuehrlich(teil).map((fehler) => fehler.text);
 }
