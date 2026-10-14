@@ -581,3 +581,234 @@
 .kategorie__raster--leer {
   grid-template-columns: minmax(0, 1fr);
 }
+
+/* --- Nach Jahreszeit ------------------------------------------------------ */
+
+.jahreszeit__kategorien {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-4);
+  margin-bottom: var(--abstand-5);
+}
+
+.jahreszeit__kategorien-label {
+  flex: none;
+  color: var(--farbe-text-gedaempft);
+  font-size: var(--text-xs);
+  font-weight: var(--schriftgewicht-fett);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Vier Karten nebeneinander, wie im Design. */
+.kartenraster--vier {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* --- Detail --------------------------------------------------------------- */
+
+.detail__raster {
+  display: grid;
+  grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--abstand-6);
+}
+
+.detail__liste {
+  padding: var(--abstand-5) var(--abstand-4);
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-karte);
+  background: var(--farbe-flaeche);
+  box-shadow: var(--schatten-karte);
+}
+
+.detail__inhalt {
+  min-width: 0;
+  padding: var(--abstand-6);
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-karte);
+  background: var(--farbe-flaeche);
+  box-shadow: var(--schatten-karte);
+}
+
+.detail__kacheln {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--abstand-4);
+}
+
+.detail__bereich {
+  margin-top: var(--abstand-6);
+}
+
+.detail__wegweiser {
+  margin-top: var(--abstand-5);
+}
+
+/* Auf dem Tablet scrollt die Teileliste für sich. */
+@media (min-width: 768px) {
+  .detail {
+    display: flex;
+    flex-direction: column;
+    max-height: 100dvh;
+  }
+
+  .detail__raster {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .detail__liste,
+  .detail__inhalt {
+    max-height: 100%;
+    overflow-y: auto;
+  }
+}
+
+/* --- Smartphone ----------------------------------------------------------- */
+
+@media (max-width: 767px) {
+  .jahreszeitwahl {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--abstand-2);
+    margin-bottom: var(--abstand-5);
+  }
+
+  .jahreszeitwahl__knopf {
+    flex-direction: column;
+    gap: var(--abstand-1);
+    min-height: 72px;
+    padding: var(--abstand-3) var(--abstand-2);
+    text-align: center;
+  }
+
+  .jahreszeitwahl__name {
+    font-size: var(--text-sm);
+  }
+
+  /* Die Kategorie-Reihe darf in sich scrollen, die Seite nicht. */
+  .jahreszeit__kategorien {
+    display: block;
+  }
+
+  .jahreszeit__kategorien-label {
+    margin-bottom: var(--abstand-2);
+  }
+
+  .wahl--scrollbar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: var(--abstand-2);
+    scrollbar-width: thin;
+  }
+
+  .wahl--scrollbar .wahl__knopf {
+    flex: none;
+  }
+
+  .kartenraster--vier {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Detail: eine Spalte, Liste nur auf dem Tablet. */
+  .detail__raster {
+    display: block;
+  }
+
+  .detail__inhalt {
+    padding: var(--abstand-5) var(--abstand-4);
+  }
+
+  .detail__kacheln {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Der Passform-Umschalter teilt sich die Breite, statt hinauszulaufen. */
+  .detail__bereich .umschalter {
+    display: flex;
+    width: 100%;
+  }
+
+  .detail__bereich .umschalter__feld {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 var(--abstand-2);
+  }
+
+  .detail__kopf {
+    gap: var(--abstand-2);
+  }
+
+  .detail__stelle {
+    color: var(--farbe-text-gedaempft);
+    font-size: var(--text-sm);
+    font-weight: var(--schriftgewicht-halbfett);
+  }
+
+  .detail__blaettern {
+    display: flex;
+    gap: var(--abstand-2);
+  }
+
+  .detail__titelzeile {
+    gap: var(--abstand-4);
+    margin-bottom: var(--abstand-5);
+  }
+
+  .detail__bild {
+    width: 64px;
+    height: 64px;
+  }
+
+  .detail__name {
+    font-size: var(--text-xl);
+  }
+
+  /* Feste Aktionsleiste unten – deshalb unten Platz lassen. */
+  .detail {
+    padding-bottom: calc(var(--abstand-10) + var(--abstand-6));
+  }
+
+  .detail__aktionsleiste {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 15;
+    display: flex;
+    gap: var(--abstand-3);
+    padding: var(--abstand-3) var(--abstand-4);
+    padding-bottom: calc(var(--abstand-3) + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--farbe-rahmen);
+    background: var(--farbe-flaeche);
+    box-shadow: var(--schatten-leiste);
+  }
+
+  .detail__aktionsleiste .knopf {
+    flex: 1 1 0;
+    padding: 0 var(--abstand-3);
+  }
+
+  /* Die Bestätigung bleibt über der unteren Leiste sichtbar. */
+  .kurzhinweis {
+    bottom: calc(var(--leiste-hoehe) + var(--abstand-4) + env(safe-area-inset-bottom));
+  }
+
+  /* Aussortiert: Zeilen bleiben lesbar. */
+  .aussortiert__zeile {
+    gap: var(--abstand-3);
+    padding: var(--abstand-3) var(--abstand-4);
+  }
+
+  .aussortiert__zeile .knopf {
+    padding: 0 var(--abstand-4);
+  }
+}
+
+/* Auf dem Tablet gibt es keine Blätter-Knöpfe und keine Aktionsleiste. */
+@media (min-width: 768px) {
+  .detail__blaettern,
+  .detail__aktionsleiste {
+    display: none;
+  }
+}

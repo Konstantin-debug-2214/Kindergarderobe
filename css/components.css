@@ -1336,3 +1336,364 @@
   align-items: center;
   gap: var(--abstand-2);
 }
+
+/* --- Knopf für endgültiges Löschen ---------------------------------------- */
+
+.knopf--warnung {
+  border-color: var(--farbe-warnung);
+  color: var(--farbe-warnung-text);
+}
+
+.knopf--warnung:hover {
+  border-color: var(--farbe-warnung-text);
+}
+
+/* --- Kurze Bestätigung nach einer Aktion ---------------------------------- */
+
+.kurzhinweis {
+  position: fixed;
+  left: 50%;
+  bottom: var(--abstand-7);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-3);
+  max-width: min(520px, calc(100vw - 2 * var(--abstand-4)));
+  padding: var(--abstand-4) var(--abstand-5);
+  border-radius: var(--radius-rund);
+  background: var(--farbe-erfolg-flaeche);
+  color: var(--farbe-erfolg-text);
+  font-weight: var(--schriftgewicht-fett);
+  box-shadow: var(--schatten-karte);
+  transform: translateX(-50%);
+}
+
+.kurzhinweis--hinweis {
+  background: var(--farbe-hinweis-flaeche);
+  color: var(--farbe-hinweis-text);
+}
+
+/* --- Etikett "Bald zu klein" ---------------------------------------------- */
+
+.etikett-warnung {
+  flex: none;
+  padding: var(--abstand-1) var(--abstand-3);
+  border-radius: var(--radius-rund);
+  background: var(--farbe-text);
+  color: var(--farbe-flaeche);
+  font-size: var(--text-xs);
+  font-weight: var(--schriftgewicht-fett);
+  white-space: nowrap;
+}
+
+/* --- Wertkachel im Detail ------------------------------------------------- */
+
+.wertkachel {
+  padding: var(--abstand-4) var(--abstand-5);
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-karte);
+  background: var(--farbe-flaeche);
+}
+
+.wertkachel__label {
+  margin-bottom: var(--abstand-1);
+  color: var(--farbe-text-gedaempft);
+  font-size: var(--text-xs);
+  font-weight: var(--schriftgewicht-fett);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.wertkachel__wert {
+  font-family: var(--schrift-ueberschrift);
+  font-size: var(--text-xl);
+  font-weight: var(--schriftgewicht-ueberschrift);
+  overflow-wrap: anywhere;
+}
+
+.wertkachel__hinweis {
+  margin-top: var(--abstand-2);
+  color: var(--farbe-primaer);
+  font-size: var(--text-sm);
+}
+
+/* --- Chips der Jahreszeiten und freien Merkmale --------------------------- */
+
+.jahreszeitchips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--abstand-2);
+}
+
+.jahreszeitchip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--abstand-2);
+  min-height: 40px;
+  padding: 0 var(--abstand-4);
+  border-radius: var(--radius-rund);
+  background: var(--jahreszeit-flaeche);
+  color: var(--jahreszeit-akzent);
+  font-weight: var(--schriftgewicht-fett);
+}
+
+.jahreszeitchip[data-jahreszeit="fruehling"] {
+  --jahreszeit-akzent: var(--farbe-fruehling-akzent);
+  --jahreszeit-flaeche: var(--farbe-fruehling-flaeche);
+}
+.jahreszeitchip[data-jahreszeit="sommer"] {
+  --jahreszeit-akzent: var(--farbe-sommer-akzent);
+  --jahreszeit-flaeche: var(--farbe-sommer-flaeche);
+}
+.jahreszeitchip[data-jahreszeit="herbst"] {
+  --jahreszeit-akzent: var(--farbe-herbst-akzent);
+  --jahreszeit-flaeche: var(--farbe-herbst-flaeche);
+}
+.jahreszeitchip[data-jahreszeit="winter"] {
+  --jahreszeit-akzent: var(--farbe-winter-akzent);
+  --jahreszeit-flaeche: var(--farbe-winter-flaeche);
+}
+
+.merkmalchip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 var(--abstand-4);
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-rund);
+  background: var(--farbe-flaeche);
+  font-weight: var(--schriftgewicht-halbfett);
+}
+
+/* --- Jahreszeiten-Knöpfe (Screen "Nach Jahreszeit") ----------------------- */
+
+.jahreszeitwahl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--abstand-4);
+  margin-bottom: var(--abstand-6);
+}
+
+.jahreszeitwahl__knopf {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-3);
+  min-height: 72px;
+  padding: var(--abstand-3) var(--abstand-5);
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-kachel);
+  background: var(--farbe-flaeche);
+  color: var(--jahreszeit-akzent);
+  text-decoration: none;
+}
+
+/* Die gewählte Jahreszeit steht in ihrer Akzentfarbe mit weißer Schrift. */
+.jahreszeitwahl__knopf--aktiv {
+  border-color: var(--jahreszeit-akzent);
+  background: var(--jahreszeit-akzent);
+  color: var(--farbe-flaeche);
+}
+
+.jahreszeitwahl__texte {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.jahreszeitwahl__name {
+  font-family: var(--schrift-ueberschrift);
+  font-size: var(--text-lg);
+  font-weight: var(--schriftgewicht-ueberschrift);
+}
+
+.jahreszeitwahl__monate {
+  font-size: var(--text-sm);
+  opacity: 0.85;
+}
+
+.jahreszeitwahl__knopf[data-jahreszeit="fruehling"] { --jahreszeit-akzent: var(--farbe-fruehling-akzent); }
+.jahreszeitwahl__knopf[data-jahreszeit="sommer"] { --jahreszeit-akzent: var(--farbe-sommer-akzent); }
+.jahreszeitwahl__knopf[data-jahreszeit="herbst"] { --jahreszeit-akzent: var(--farbe-herbst-akzent); }
+.jahreszeitwahl__knopf[data-jahreszeit="winter"] { --jahreszeit-akzent: var(--farbe-winter-akzent); }
+
+/* --- Liste der Kategorie im Detail ---------------------------------------- */
+
+.detail__listenkopf {
+  margin-bottom: var(--abstand-3);
+  color: var(--farbe-text-gedaempft);
+  font-size: var(--text-xs);
+  font-weight: var(--schriftgewicht-fett);
+  letter-spacing: 0.04em;
+}
+
+.detail__eintrag {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-3);
+  min-height: 64px;
+  padding: var(--abstand-2) var(--abstand-3);
+  border-radius: var(--radius-feld);
+  color: var(--farbe-text);
+  text-decoration: none;
+}
+
+.detail__eintrag:hover {
+  background: var(--farbe-hintergrund);
+}
+
+.detail__eintrag--aktiv {
+  background: var(--farbe-primaer);
+  color: var(--farbe-primaer-kontrast);
+}
+
+.detail__eintrag--aktiv:hover {
+  background: var(--farbe-primaer);
+}
+
+.detail__eintrag-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-feld);
+  background: var(--kategorie-farbe, var(--farbe-hintergrund));
+  color: var(--farbe-text);
+}
+
+.detail__eintrag[data-kategorie="oberteile"] { --kategorie-farbe: var(--farbe-kat-oberteile); }
+.detail__eintrag[data-kategorie="unterteile"] { --kategorie-farbe: var(--farbe-kat-unterteile); }
+.detail__eintrag[data-kategorie="sets_sonstiges"] { --kategorie-farbe: var(--farbe-kat-sets-sonstiges); }
+.detail__eintrag[data-kategorie="schuhe"] { --kategorie-farbe: var(--farbe-kat-schuhe); }
+.detail__eintrag[data-kategorie="muetzen"] { --kategorie-farbe: var(--farbe-kat-muetzen); }
+.detail__eintrag[data-kategorie="spielzeug"] .detail__eintrag-icon {
+  border: 1px solid var(--farbe-rahmen);
+  background: var(--farbe-kat-spielzeug);
+}
+
+.detail__eintrag-texte {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.detail__eintrag-name {
+  font-weight: var(--schriftgewicht-fett);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail__eintrag-zusatz {
+  font-size: var(--text-sm);
+  opacity: 0.8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- Kopf der Einzelheiten ------------------------------------------------ */
+
+.detail__titelzeile {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-5);
+  margin-bottom: var(--abstand-6);
+}
+
+.detail__bild {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 84px;
+  height: 84px;
+  border-radius: var(--radius-karte);
+  background: var(--kategorie-farbe, var(--farbe-hintergrund));
+  color: var(--farbe-text);
+}
+
+.detail__bild[data-kategorie="oberteile"] { --kategorie-farbe: var(--farbe-kat-oberteile); }
+.detail__bild[data-kategorie="unterteile"] { --kategorie-farbe: var(--farbe-kat-unterteile); }
+.detail__bild[data-kategorie="sets_sonstiges"] { --kategorie-farbe: var(--farbe-kat-sets-sonstiges); }
+.detail__bild[data-kategorie="schuhe"] { --kategorie-farbe: var(--farbe-kat-schuhe); }
+.detail__bild[data-kategorie="muetzen"] { --kategorie-farbe: var(--farbe-kat-muetzen); }
+.detail__bild[data-kategorie="spielzeug"] {
+  border: 1px solid var(--farbe-rahmen);
+  background: var(--farbe-kat-spielzeug);
+}
+
+.detail__titeltexte {
+  min-width: 0;
+}
+
+.detail__name {
+  font-family: var(--schrift-ueberschrift);
+  font-size: var(--text-2xl);
+  font-weight: var(--schriftgewicht-ueberschrift);
+  overflow-wrap: anywhere;
+}
+
+.detail__untertitel {
+  margin-top: var(--abstand-1);
+  color: var(--farbe-text-gedaempft);
+}
+
+/* --- Liste der aussortierten Teile ---------------------------------------- */
+
+.aussortiert__liste {
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-karte);
+  background: var(--farbe-flaeche);
+  box-shadow: var(--schatten-karte);
+}
+
+.aussortiert__zeile {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-4);
+  padding: var(--abstand-4) var(--abstand-5);
+}
+
+.aussortiert__zeile + .aussortiert__zeile {
+  border-top: 1px solid var(--farbe-rahmen);
+}
+
+.aussortiert__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-feld);
+  background: var(--kategorie-farbe, var(--farbe-hintergrund));
+  color: var(--farbe-text);
+}
+
+.aussortiert__icon[data-kategorie="oberteile"] { --kategorie-farbe: var(--farbe-kat-oberteile); }
+.aussortiert__icon[data-kategorie="unterteile"] { --kategorie-farbe: var(--farbe-kat-unterteile); }
+.aussortiert__icon[data-kategorie="sets_sonstiges"] { --kategorie-farbe: var(--farbe-kat-sets-sonstiges); }
+.aussortiert__icon[data-kategorie="schuhe"] { --kategorie-farbe: var(--farbe-kat-schuhe); }
+.aussortiert__icon[data-kategorie="muetzen"] { --kategorie-farbe: var(--farbe-kat-muetzen); }
+.aussortiert__icon[data-kategorie="spielzeug"] {
+  border: 1px solid var(--farbe-rahmen);
+  background: var(--farbe-kat-spielzeug);
+}
+
+.aussortiert__texte {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.aussortiert__name {
+  font-weight: var(--schriftgewicht-fett);
+}
+
+.aussortiert__zusatz {
+  margin-top: var(--abstand-1);
+  color: var(--farbe-text-gedaempft);
+  font-size: var(--text-sm);
+}

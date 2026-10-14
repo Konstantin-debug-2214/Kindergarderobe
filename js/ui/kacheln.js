@@ -55,11 +55,13 @@ export function jahreszeitKachel({ id, name, monate, anzahl, jetzt }) {
 }
 
 /**
- * Karte eines Teils – für die Kategorie-Ansicht und die Suche.
+ * Karte eines Teils – für Kategorie-Ansicht, Suche und Jahreszeit.
  * @param {Object} teil
- * @param {{zeigeKategorie?: boolean}} [optionen] Kategoriename als Zusatz
+ * @param {{zeigeKategorie?: boolean, variante?: 'standard'|'jahreszeit'}} [optionen]
+ *   In der Jahreszeiten-Ansicht steht der Kategoriename links und die Größe
+ *   rechts, wie im Design.
  */
-export function teilKarte(teil, { zeigeKategorie = false } = {}) {
+export function teilKarte(teil, { zeigeKategorie = false, variante = 'standard' } = {}) {
   const kategorieId = teil.kategorie;
   const etikett = etikettText(teil);
 
@@ -79,13 +81,30 @@ export function teilKarte(teil, { zeigeKategorie = false } = {}) {
     ? (teil.groesse ? `Gr. ${groesseText(teil.groesse)}` : null)
     : (Number.isInteger(teil.alterAb) ? `ab ${teil.alterAb} J.` : null);
 
+  const zeile = variante === 'jahreszeit'
+    ? [
+      el('span', { class: 'teilkarte__zusatz', text: kategorie(kategorieId)?.name ?? '' }),
+      groesseChip ? el('span', { class: 'teilkarte__groesse', text: groesseChip }) : null,
+    ]
+    : [
+      groesseChip ? el('span', { class: 'teilkarte__groesse', text: groesseChip }) : null,
+      zusatz.length > 0 ? el('span', { class: 'teilkarte__zusatz', text: zusatz.join(' · ') }) : null,
+    ];
+
   return el(
     'a',
-    { class: 'teilkarte', href: `#/teil/${encodeURIComponent(teil.id)}`, 'data-kategorie': kategorieId },
+    {
+      class: `teilkarte${variante === 'jahreszeit' ? ' teilkarte--jahreszeit' : ''}`,
+      href: `#/teil/${encodeURIComponent(teil.id)}`,
+      'data-kategorie': kategorieId,
+    },
     [
       el('div', { class: 'teilkarte__bild' }, [
         icon(kategorieId, 36),
-        etikett ? el('span', { class: 'teilkarte__etikett', text: etikett }) : null,
+        // In der Jahreszeiten-Ansicht trägt die Karte kein Merkmal-Etikett.
+        etikett && variante !== 'jahreszeit'
+          ? el('span', { class: 'teilkarte__etikett', text: etikett })
+          : null,
         // Mehrere Stück sind sonst nicht zu erkennen.
         (teil.anzahl ?? 1) > 1
           ? el('span', { class: 'teilkarte__anzahl', text: `${teil.anzahl}×` })
@@ -93,12 +112,7 @@ export function teilKarte(teil, { zeigeKategorie = false } = {}) {
       ]),
       el('div', { class: 'teilkarte__koerper' }, [
         el('p', { class: 'teilkarte__name', text: teil.name }),
-        el('div', { class: 'teilkarte__zeile' }, [
-          groesseChip ? el('span', { class: 'teilkarte__groesse', text: groesseChip }) : null,
-          zusatz.length > 0
-            ? el('span', { class: 'teilkarte__zusatz', text: zusatz.join(' · ') })
-            : null,
-        ]),
+        el('div', { class: 'teilkarte__zeile' }, zeile),
       ]),
     ],
   );

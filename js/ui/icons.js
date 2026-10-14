@@ -43,6 +43,13 @@ const PFADE = {
   ],
   minus: ['M5 12h14'],
   filter: ['M4 6.5h16', 'M7 12h10', 'M10 17.5h4'],
+  papierkorb: [
+    'M4.5 6.8h15', 'M9.5 6.8V4.6h5v2.2',
+    'M6.6 6.8l.8 12.1a1.4 1.4 0 0 0 1.4 1.3h6.4a1.4 1.4 0 0 0 1.4-1.3l.8-12.1',
+    'M10.4 10.4v6', 'M13.6 10.4v6',
+  ],
+  // Pfeil im Kreis zurück – für "Zurückholen"
+  zurueckholen: ['M4.6 5.4v4.8h4.8', 'M4.9 10.2a7.6 7.6 0 1 1 1 7.5'],
   stift: ['M4.5 19.5h4L19 9a2.1 2.1 0 0 0-3-3L5.5 16.5z', 'M14.5 7.5l2 2'],
 
   // --- Jahreszeiten ---
