@@ -106,6 +106,8 @@ Fließkomma-Fehler entstehen.
 - **Auftrag 04 – Übersicht und Kategorie-Ansicht:** Kategorie- und
   Jahreszeiten-Kacheln mit Stückzahlen, Suche über alle Teile, Kategorie-Ansicht
   mit Karten, Filterspalte (Tablet) bzw. Filterblatt (Smartphone).
+- **Auftrag 05 – Nach Jahreszeit, Detail, Aussortiert:** Jahreszeiten-Ansicht
+  mit Kategorie-Filter, Detailansicht mit Passform und Notiz zum sofortigen
+  Speichern, Aussortieren mit Grund, Papierkorb mit Zurückholen und Leeren.
 
-Noch Platzhalter: Detailansicht, Nach Jahreszeit, Kosten-Ansicht, Statistik,
-Soll-Mengen und Aussortiert.
+Noch Platzhalter: Kosten-Ansicht, Statistik und Soll-Mengen.
