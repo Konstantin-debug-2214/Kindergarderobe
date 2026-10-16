@@ -371,6 +371,31 @@ export function erstelleSpeicher(hintergrund = standardHintergrund()) {
     /** Hebt das Ausblenden auf – nach Export und Import. */
     bannerWiederZeigen: vergissBannerAusblenden,
 
+    /**
+     * Abgehakte Einträge der Besorgen-Liste. Reine Merkhilfe: zählt nicht als
+     * Datenänderung und gehört nicht ins Backup.
+     * @returns {Array<string>} Schlüssel der Form "winter|Pullover"
+     */
+    besorgtHaken() {
+      const werte = liesOberflaeche().besorgt;
+      return Array.isArray(werte) ? werte : [];
+    },
+
+    /** Setzt oder entfernt einen Haken. */
+    besorgtSetzen(schluessel, gesetzt) {
+      const werte = new Set(this.besorgtHaken());
+      if (gesetzt) werte.add(schluessel); else werte.delete(schluessel);
+      schreibeOberflaeche({ ...liesOberflaeche(), besorgt: [...werte] });
+    },
+
+    /** Entfernt Haken, für die es nichts mehr zu besorgen gibt. */
+    besorgtAufraeumen(noetigeSchluessel) {
+      const noetig = new Set(noetigeSchluessel);
+      const werte = this.besorgtHaken().filter((schluessel) => noetig.has(schluessel));
+      if (werte.length === this.besorgtHaken().length) return;
+      schreibeOberflaeche({ ...liesOberflaeche(), besorgt: werte });
+    },
+
     /* --- Einstellungen ---------------------------------------------------- */
 
     nameSetzen(name) {

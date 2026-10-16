@@ -925,3 +925,59 @@
     height: 170px;
   }
 }
+
+/* --- Soll-Mengen & Saisonwechsel ------------------------------------------ */
+
+.saisonwechsel__raster {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+  align-items: start;
+  gap: var(--abstand-5);
+}
+
+.saisonwechsel__soll,
+.saisonwechsel__check {
+  min-width: 0;
+}
+
+/* Auf dem Tablet scrollen beide Spalten für sich. */
+@media (min-width: 768px) {
+  .saisonwechsel {
+    display: flex;
+    flex-direction: column;
+    max-height: 100dvh;
+  }
+
+  .saisonwechsel__raster {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .saisonwechsel__soll,
+  .saisonwechsel__check {
+    max-height: 100%;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 767px) {
+  .saisonwechsel__raster {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--abstand-5);
+  }
+
+  /* Auf dem Smartphone steht der Check oben, wie im Design. */
+  .saisonwechsel__check {
+    order: -1;
+  }
+
+  .check__summen {
+    gap: var(--abstand-2);
+  }
+
+  .summenkachel {
+    padding: var(--abstand-3);
+  }
+}
