@@ -1,6 +1,6 @@
 # Kindergarderobe – Projektregeln für Claude Code
 
-Stand: 13.10.2026 (nach Auftrag 07)
+Stand: 13.10.2026 (nach Auftrag 08)
 
 Inventar-App für Kleidung und Spielzeug eines Kindes. Eigenbedarf, ein Kind.
 Hauptgerät: Tablet im Querformat (1194 × 834). Die App muss zusätzlich auf dem Smartphone (390 × 844) gut bedienbar sein.
@@ -24,7 +24,7 @@ index.html
 css/        tokens.css (Farben, Abstände, Schriften), base.css, components.css, screens.css
 js/         app.js (Start, Router), router.js (Hash-Routing, siehe Routen)
             storage.js, model.js (Datenmodell, Konstanten, Validierung), filters.js (reine Filter-/Zählfunktionen)
-            costs.js (reine Kostenberechnung), backup.js (Export, Import, Erinnerung), formular.js (reine Formular-Logik)
+            costs.js (reine Kostenberechnung), backup.js (Export, Import, Erinnerung), formular.js (reine Formular-Logik), saison.js (Soll-Mengen und Saisonwechsel-Check)
             ui/diagramme.js: Balken- und Säulendiagramme
             ui/ausgabeDialog.js: Ausgaben-Formular, einmal für Kosten-Ansicht, Bearbeiten und „Neuer Sammelkauf“
             screens/*.js (je Screen ein Modul; teilFormular.js für #/neu und Bearbeiten), ui/*.js (Bausteine)
@@ -63,6 +63,7 @@ Unbekannte Routen führen zur Übersicht. Der Router liest Werte hinter `?` (z. 
   - Die Leiste erscheint nur auf Übersicht, Statistik, Aussortiert und Einstellungen.
   - Statistik, Aussortiert und Einstellungen haben auf dem Smartphone keinen Zurück-Knopf (die Leiste navigiert).
   - Ohne Leiste (mit Zurück- bzw. Schließen-Knopf): Kategorie, Detail, Nach Jahreszeit, Teil hinzufügen/bearbeiten, Kosten, Soll-Mengen & Saisonwechsel. Das Detail hat unten eine eigene Aktionsleiste mit „Aussortieren“ und „Bearbeiten“.
+  - Der Zurück-Knopf auf „Soll-Mengen & Saisonwechsel“ führt zur vorherigen Seite (Statistik oder Einstellungen/„Mehr“); ohne Vorgänger – direkt geöffnet oder nach dem Neuladen – zur Statistik.
   - Übersicht: Icon-Knopf „€“ oben rechts führt zu Kosten.
   - Statistik: Verweis-Karte „Soll-Mengen & Saisonwechsel“ mit Anzahl der Fehlenden oben.
   - „Mehr“ öffnet den Screen „Einstellungen“ mit Einträgen „Kosten“ (mit Jahressumme) und „Soll-Mengen & Saisonwechsel“, darunter Backup und Begrüßung.
@@ -159,6 +160,7 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
 - Die Erinnerung erscheint, **sobald seit dem letzten Backup etwas hinzugefügt, bearbeitet oder geändert wurde** (`aenderungenSeitBackup > 0`). Ein regelmäßiges, zeitgesteuertes Backup ist nicht vorgesehen.
 - Nach einem erfolgreichen Export (Teilen abgeschlossen oder Download) wird `aenderungenSeitBackup` auf 0 gesetzt und `letztesBackupAm` gespeichert. Ein abgebrochenes Teilen-Menü ändert nichts.
 - **Ausblenden-Knopf:** blendet den Banner aus, bis die nächste Änderung erfolgt – auch über Neuladen und App-Neustart hinweg. Dafür wird der Zählerstand beim Ausblenden unter einem eigenen Schlüssel gemerkt (Oberflächen-Zustand, zählt nicht als Datenänderung, gehört nicht ins Backup). Der Banner erscheint wieder, sobald `aenderungenSeitBackup` diesen Stand übersteigt.
+- Oberflächen-Zustand unter `kindergarderobe-oberflaeche`: ausgeblendeter Backup-Hinweis und die Haken der Besorgen-Liste (je Jahreszeit). Zählt nicht als Änderung, gehört nicht ins Backup.
 - Texte: Banner „Das letzte Backup ist n Tage alt. Zeit, die Daten zu sichern.“ bzw. ohne Backup „Es gibt noch kein Backup. Zeit, die Daten zu sichern.“ Status in den Einstellungen „vor n Tagen – es gibt Änderungen seitdem, ein neues Backup ist fällig“ bzw. „heute – alle Änderungen sind gesichert“ (freigegeben).
 - Es gibt **keine** Einstellung für ein Erinnerungsintervall. Die Auswahl „Erinnern nach“ aus dem Design entfällt (Entscheidung John, 13.10.2026).
 
@@ -171,6 +173,7 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
 - Jahreszeiten-Zahlen zählen nur Kleidung.
 - Auch die Teileliste im Detail („n TEILE“) und die Kopfzahl in „Nach Jahreszeit“ zählen nach Stück. Die Kopfzahl in „Nach Jahreszeit“ gilt für die ganze Jahreszeit, unabhängig vom Kategorie-Filter. Die Position beim Blättern („2 von 7“) zählt Einträge.
 - Die Teilezahl der Kosten-Ansicht ist die Summe der `anzahlTeile` aller Ausgaben des Jahres, nicht die Zahl der Teile im Schrank. Dadurch bleiben Kosten aussortierter und gelöschter Teile erhalten. Durchschnitt und Preis pro Teil werden kaufmännisch auf Cent gerundet.
+- Saisonwechsel: „ist da“ zählt „Passt gut“ und „Bald zu klein“, „passt“ nur „Passt gut“; beide nur über Arten mit Soll.
 - Im Größen-Diagramm zählt eine Doppelgröße bei jeder enthaltenen Größe; die Summe der Balken ist deshalb größer als die Zahl der Teile.
 
 ## Suche, Filter, Sortierung (freigegeben)

@@ -24,6 +24,19 @@ export const ROUTEN = [
 /** Route, auf die unbekannte Adressen führen. */
 export const STANDARD_HASH = '#/';
 
+/** Wie oft in dieser Sitzung schon ein Screen gezeichnet wurde. */
+let gezeichnet = 0;
+
+/**
+ * Gab es in dieser Sitzung schon eine Seite davor?
+ * Damit lässt sich entscheiden, ob history.back() in der App bleibt oder ob
+ * ein Screen ein eigenes Ziel ansteuern muss (z. B. nach dem Neuladen oder
+ * beim Einstieg über einen Link).
+ */
+export function hatVorgaenger() {
+  return gezeichnet > 1;
+}
+
 /**
  * Macht aus einem Hash einen normalisierten Pfad.
  * '#/kategorie/schuhe/' -> '/kategorie/schuhe'
@@ -102,6 +115,8 @@ export function starteRouter({ beiWechsel }) {
       window.location.replace(`${window.location.pathname}${window.location.search}${STANDARD_HASH}`);
       return;
     }
+
+    gezeichnet += 1;
 
     // Werte aus der Adresse ergänzen die Werte aus dem Pfad.
     beiWechsel({

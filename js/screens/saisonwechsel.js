@@ -14,6 +14,7 @@ import { leererZustand } from '../ui/kacheln.js';
 import { waehleAus } from '../ui/dialog.js';
 import { zeigeHinweis } from '../ui/hinweis.js';
 import { speicher, SpeicherFehler } from '../storage.js';
+import { hatVorgaenger } from '../router.js';
 import { JAHRESZEITEN, TYP, jahreszeit as jahreszeitVon } from '../model.js';
 import { imSchrank } from '../filters.js';
 import { groesseText } from '../formular.js';
@@ -259,7 +260,7 @@ export function saisonwechselScreen(parameter, { neuZeichnen = () => {}, frisch 
 
   return el('div', { class: 'inhalt saisonwechsel' }, [
     el('header', { class: 'kopfzeile' }, [
-      iconKnopf({ label: 'Zurück', iconName: 'zurueck', href: '#/statistik' }),
+      zurueckKnopf(),
       el('div', { class: 'kopfzeile__titelblock' }, [
         el('h1', { class: 'kopfzeile__titel nur-tablet', text: 'Soll-Mengen & Saisonwechsel' }),
         el('h1', { class: 'kopfzeile__titel nur-smartphone', text: 'Saisonwechsel' }),
@@ -281,6 +282,19 @@ export function saisonwechselScreen(parameter, { neuZeichnen = () => {}, frisch 
 }
 
 /* --- Bausteine ------------------------------------------------------------- */
+
+/**
+ * Zurück zur vorherigen Seite – hierher führen Statistik und Einstellungen.
+ * Ohne Vorgänger (direkt geöffnet oder neu geladen) geht es zur Statistik.
+ */
+function zurueckKnopf() {
+  const knopfEl = iconKnopf({ label: 'Zurück', iconName: 'zurueck' });
+  knopfEl.addEventListener('click', () => {
+    if (hatVorgaenger()) window.history.back();
+    else window.location.hash = '#/statistik';
+  });
+  return knopfEl;
+}
 
 function standEtikett(zeile) {
   if (zeile.stand === 'kein_soll') {
