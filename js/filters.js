@@ -7,6 +7,7 @@
  */
 
 import {
+  GROESSENSYSTEM,
   GROESSENSYSTEME,
   JAHRESZEITEN,
   KATEGORIEN,
@@ -268,4 +269,70 @@ export function nachbarn(liste = [], teilId) {
     vorher: liste[index - 1] ?? null,
     nachher: liste[index + 1] ?? null,
   };
+}
+
+/* --- Zählungen für die Statistik ------------------------------------------ */
+
+/** Gesamtzahl der Stücke im Schrank – Kleidung und Spielzeug. */
+export function gesamtImSchrank(teile = []) {
+  return stueck(imSchrank(teile));
+}
+
+/**
+ * Die häufigsten Arten, nach Stück gezählt.
+ * Bei gleicher Stückzahl entscheidet die alphabetische Reihenfolge.
+ * @param {Array<Object>} teile
+ * @param {{typ?: string, grenze?: number}} [optionen]
+ * @returns {Array<{wert: string, anzahl: number}>}
+ */
+export function haeufigsteArten(teile = [], { typ = TYP.KLEIDUNG, grenze = 7 } = {}) {
+  const zahlen = new Map();
+
+  for (const teil of imSchrank(teile)) {
+    if (teil.typ !== typ) continue;
+    if (!teil.art) continue;
+    zahlen.set(teil.art, (zahlen.get(teil.art) ?? 0) + (Number(teil.anzahl) || 0));
+  }
+
+  return [...zahlen.entries()]
+    .map(([wert, anzahl]) => ({ wert, anzahl }))
+    .sort((a, b) => b.anzahl - a.anzahl || a.wert.localeCompare(b.wert, 'de'))
+    .slice(0, grenze);
+}
+
+/**
+ * Stückzahl je Konfektionsgröße, aufsteigend.
+ * Nur Teile im Größensystem Konfektion; Doppelgrößen zählen bei jeder
+ * enthaltenen Größe mit.
+ * @returns {Array<{wert: number, anzahl: number}>}
+ */
+export function zaehleJeGroesse(teile = []) {
+  const zahlen = new Map();
+
+  for (const teil of imSchrank(teile)) {
+    if (teil.groesse?.system !== GROESSENSYSTEM.KONFEKTION) continue;
+    for (const wert of enthalteneGroessen(teil.groesse)) {
+      zahlen.set(wert, (zahlen.get(wert) ?? 0) + (Number(teil.anzahl) || 0));
+    }
+  }
+
+  return [...zahlen.entries()]
+    .map(([wert, anzahl]) => ({ wert, anzahl }))
+    .sort((a, b) => a.wert - b.wert);
+}
+
+/**
+ * Teile, die zu einem Statistik-Balken gehören – für die Trefferansicht.
+ * @param {Array<Object>} teile
+ * @param {{art?: string, groesse?: number}} filter
+ */
+export function teileZuStatistik(teile = [], { art = null, groesse = null } = {}) {
+  let gefunden = imSchrank(teile);
+
+  if (art) gefunden = gefunden.filter((teil) => teil.art === art);
+  if (Number.isFinite(groesse)) {
+    gefunden = gefunden.filter((teil) => groesseEnthaelt(teil.groesse, groesse));
+  }
+
+  return sortiereNachName(gefunden);
 }
