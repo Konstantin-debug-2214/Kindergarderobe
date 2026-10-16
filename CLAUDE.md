@@ -1,6 +1,6 @@
 # Kindergarderobe – Projektregeln für Claude Code
 
-Stand: 13.10.2026 (nach Auftrag 06)
+Stand: 13.10.2026 (nach Auftrag 07)
 
 Inventar-App für Kleidung und Spielzeug eines Kindes. Eigenbedarf, ein Kind.
 Hauptgerät: Tablet im Querformat (1194 × 834). Die App muss zusätzlich auf dem Smartphone (390 × 844) gut bedienbar sein.
@@ -14,7 +14,7 @@ Ziel: auf einen Blick sehen, was da ist, was passt, was fehlt und was es gekoste
 - Daten in `localStorage` über ein eigenes Modul `js/storage.js` (nie direkt aus anderen Modulen). Beim Start `navigator.storage.persist()` anfragen.
 - Responsive: Layout für Tablet quer (Hauptziel) und Smartphone hoch; Umbruch per CSS (Grid/Flex, Media Queries), keine getrennten Seiten.
 - Veröffentlichung über GitHub Pages aus dem `main`-Branch. Das Repository ist öffentlich: **niemals echte Daten, Backups (`*.json`), die alte CSV oder die Design-Screenshots committen.**
-- Diagramme selbst als SVG zeichnen.
+- Diagramme selbst zeichnen – als SVG oder aus HTML und CSS, keine Bibliothek. Antippbare Balken als echte Links mit `aria-label` (freigegeben).
 - Später: `manifest.webmanifest` + Service Worker, damit die App vom Startbildschirm offline läuft.
 
 ## Ordnerstruktur
@@ -25,6 +25,7 @@ css/        tokens.css (Farben, Abstände, Schriften), base.css, components.css,
 js/         app.js (Start, Router), router.js (Hash-Routing, siehe Routen)
             storage.js, model.js (Datenmodell, Konstanten, Validierung), filters.js (reine Filter-/Zählfunktionen)
             costs.js (reine Kostenberechnung), backup.js (Export, Import, Erinnerung), formular.js (reine Formular-Logik)
+            ui/diagramme.js: Balken- und Säulendiagramme
             ui/ausgabeDialog.js: Ausgaben-Formular, einmal für Kosten-Ansicht, Bearbeiten und „Neuer Sammelkauf“
             screens/*.js (je Screen ein Modul; teilFormular.js für #/neu und Bearbeiten), ui/*.js (Bausteine)
 fonts/
@@ -41,6 +42,7 @@ Reine Logik (Filtern, Zählen, Größen vergleichen, Kosten rechnen, Backup prü
 | Route | Screen |
 |---|---|
 | `#/` | Übersicht |
+| `#/?art=…`, `#/?groesse=…` | Trefferansicht der Übersicht mit Filter-Chip (aus der Statistik) |
 | `#/kategorie/:id` | Kategorie mit Filtern |
 | `#/jahreszeit/:id` | Nach Jahreszeit |
 | `#/teil/:id` | Detail |
@@ -110,7 +112,7 @@ Spielzeug hat **keine** Größe, **keine** Jahreszeiten und **keine** Passform.
 |---|---|---|
 | Oberteile `oberteile` | T-Shirt, Langarmshirt, Pullover, Strickjacke, Hemd, Weste, Jacke, Regenjacke, Winterjacke, Softshelljacke, Body, Unterhemd | Konfektion |
 | Unterteile `unterteile` | Hose, Jeans, Jogginghose, Leggings, Shorts, Latzhose, Matschhose, Strumpfhose, Unterhose, Socken, Badehose | Konfektion; Socken in EU-Schuhgröße |
-| Sets & Sonstiges `sets_sonstiges` | Set (Oberteil + Hose), Schlafanzug, Strampler, Overall, Schneeanzug, Softshellanzug, Schlafsack, Sonstiges | Konfektion |
+| Sets & Sonstiges `sets_sonstiges` | Set (Oberteil + Hose), Schlafanzug, Strampler, Overall, Schneeanzug, Softshellanzug, Schlafsack, Thermohose, Sonstiges | Konfektion |
 | Schuhe `schuhe` | Sneaker, Sandalen, Gummistiefel, Winterstiefel, Hausschuhe | EU-Schuhgröße |
 | Mützen & Co. `muetzen` | Mütze, Beanie, Cap, Sonnenhut, Regenmütze, Handschuhe, Fäustlinge, Schal, Halstuch | Kopfumfang (cm) bzw. Handschuhgröße |
 | Spielzeug `spielzeug` | Brettspiel, Puzzle, Lego, Auto, Bastelkram, Kuscheltier, Buch | keine Größe |
@@ -169,6 +171,7 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
 - Jahreszeiten-Zahlen zählen nur Kleidung.
 - Auch die Teileliste im Detail („n TEILE“) und die Kopfzahl in „Nach Jahreszeit“ zählen nach Stück. Die Kopfzahl in „Nach Jahreszeit“ gilt für die ganze Jahreszeit, unabhängig vom Kategorie-Filter. Die Position beim Blättern („2 von 7“) zählt Einträge.
 - Die Teilezahl der Kosten-Ansicht ist die Summe der `anzahlTeile` aller Ausgaben des Jahres, nicht die Zahl der Teile im Schrank. Dadurch bleiben Kosten aussortierter und gelöschter Teile erhalten. Durchschnitt und Preis pro Teil werden kaufmännisch auf Cent gerundet.
+- Im Größen-Diagramm zählt eine Doppelgröße bei jeder enthaltenen Größe; die Summe der Balken ist deshalb größer als die Zahl der Teile.
 
 ## Suche, Filter, Sortierung (freigegeben)
 
@@ -192,7 +195,7 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
    - Art und Anzahl fehlen im Design und werden im Stil der übrigen Felder gestaltet.
 6. **Kosten:** Summe des Jahres, Teile, Durchschnitt; Formular „Kosten hinzufügen“ (Wofür?, Gesamtbetrag, Anzahl Teile); Einträge neueste zuerst. Smartphone: Knopf „+ Kosten“ statt dauerhaft sichtbarem Formular. Freigegeben (nicht im Design): Jahr-Umschalter ‹ › an der Summenkarte (nur bei Ausgaben in anderen Jahren), Datumsfeld (Standard heute), Tipp auf Einzelteil → Detail des Teils, Tipp auf Sammelkauf → Dialog zum Ändern/Löschen mit zugeordneten Teilen; Löschen nur nach Rückfrage, zugeordnete Teile verlieren ihren Preis. Beim Speichern wechselt die Ansicht in das Jahr der neuen Ausgabe.
 7. **Statistik:** Gesamtzahl im Schrank (ohne Aussortiertes); Balkendiagramme nach Kategorie, **Art der Kleidung** (die häufigsten 7), **Spielzeug nach Art** (neu, nicht im Design), Jahreszeit (Hinweis: ein Teil kann zu mehreren gehören) und Größe; jeder Balken führt per Tipp zu den Teilen; Link zu „Soll-Mengen & Saisonwechsel“. Freigegeben: Kategorie → Kategorie-Ansicht, Jahreszeit → Jahreszeiten-Ansicht, Art, Spielzeug-Art und Größe → Trefferansicht der Übersicht mit Filter-Chip (`#/?art=…`, `#/?groesse=…`). Größen-Diagramm nur Konfektion; Doppelgrößen zählen bei jeder enthaltenen Größe (mit Hinweis). „Spielzeug nach Art“ als fünfte Karte im Raster. Etikett „n fehlen“ an der Soll-Mengen-Verweiskarte ab Auftrag 08.
-8. **Soll-Mengen & Saisonwechsel:** Umschalter für die vier Jahreszeiten (gewählter Knopf in der Akzentfarbe der Jahreszeit). Links Tabelle „Art · Passend · Soll (− / +) · Stand“ mit Stand „kein Soll“, „noch n fehlen“ oder „vollständig“. Rechts Saisonwechsel-Check mit Saisonbeginn („ab 1. Dezember · in 7 Wochen“), Summen „ist da / passt / fehlt“, Liste „Besorgen“ (Art + Anzahl) und Liste „Wird bald zu klein“. Nur Kleidung.
+8. **Soll-Mengen & Saisonwechsel:** Umschalter für die vier Jahreszeiten (gewählter Knopf in der Akzentfarbe der Jahreszeit). Links Tabelle „Art · Passend · Soll (− / +) · Stand“ mit Stand „kein Soll“, „noch n fehlen“ oder „vollständig“. Rechts Saisonwechsel-Check mit Saisonbeginn („ab 1. Dezember · in 7 Wochen“), Summen „ist da / passt / fehlt“, Liste „Besorgen“ (Art + Anzahl) und Liste „Wird bald zu klein“. Nur Kleidung. Freigegeben: „ist da“ = Passt gut + Bald zu klein, „passt“ = Passt gut, „fehlt“ = Summe der Fehlenden – jeweils nur über Arten mit Soll, „Zu klein“ zählt nicht. Tabelle zeigt alle Arten mit Soll oder mit passenden bzw. bald zu kleinen Teilen der Jahreszeit; weitere Arten über „+ Art“; Soll 0 entfernt das Soll. „Besorgen“-Häkchen sind eine Merkhilfe im Oberflächen-Zustand (keine Datenänderung, nicht im Backup) und verschwinden, sobald nichts mehr fehlt. Beim Öffnen ist die kommende Jahreszeit gewählt; für die laufende „läuft · noch n Wochen“. Etikett „n fehlen“ in der Statistik = Fehlende der kommenden Jahreszeit, bei 0 kein Etikett.
 9. **Aussortiert:** Liste mit Name, Kategorie, Größe bzw. Alter, Datum und Grund (zu klein, verschenkt, verkauft, kaputt); „Zurückholen“ je Teil; „Aussortiert leeren“ mit Bestätigungsdialog (endgültig, nur über ein älteres Backup wiederherstellbar); leerer Zustand mit Hinweis.
 10. **Einstellungen & Backup:** Name des Kindes mit Live-Vorschau der Begrüßung; Backup-Status (letztes Backup, fällig oder gesichert); „Backup exportieren“ (Teilen-Menü, JSON); „Backup einspielen“ mit Vorschau (Dateiname, Erstelldatum, Anzahl Teile, Aussortiert, Kosten, Marken), Warnung, dass alle aktuellen Daten ersetzt werden, und Bestätigung. Keine Auswahl „Erinnern nach“. Smartphone zusätzlich: Einträge „Kosten“ und „Soll-Mengen & Saisonwechsel“.
 

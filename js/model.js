@@ -64,7 +64,7 @@ export const KATEGORIEN = [
     name: 'Sets & Sonstiges',
     groessenSystem: GROESSENSYSTEM.KONFEKTION,
     arten: ['Set (Oberteil + Hose)', 'Schlafanzug', 'Strampler', 'Overall',
-      'Schneeanzug', 'Softshellanzug', 'Schlafsack', 'Sonstiges'],
+      'Schneeanzug', 'Softshellanzug', 'Schlafsack', 'Thermohose', 'Sonstiges'],
   },
   {
     id: 'schuhe',
