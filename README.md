@@ -81,7 +81,7 @@ node --test
 index.html
 css/      tokens.css, base.css, components.css, screens.css
 js/       app.js, router.js, model.js, storage.js, backup.js, costs.js,
-          filters.js, formular.js, screens/*.js, ui/*.js
+          filters.js, formular.js, saison.js, screens/*.js, ui/*.js
 tests/    Tests der reinen Logik (node --test)
 fonts/    Fredoka und Nunito (woff2) samt OFL-Lizenz
 icons/    App-Icons für das spätere Manifest
@@ -115,5 +115,9 @@ Fließkomma-Fehler entstehen.
 - **Auftrag 07 – Statistik:** fünf Diagramm-Karten (Kategorie, Art der
   Kleidung, Jahreszeit, Größe, Spielzeug nach Art), selbst gebaut aus HTML
   und CSS; jeder Balken führt zu den Teilen.
+- **Auftrag 08 – Soll-Mengen & Saisonwechsel:** Soll je Art und Jahreszeit,
+  Saisonwechsel-Check mit „ist da / passt / fehlt", Besorgen-Liste zum
+  Abhaken und „Wird bald zu klein".
 
-Noch Platzhalter: Soll-Mengen & Saisonwechsel.
+Damit sind alle Screens aus Version 1 gebaut. Offen: `manifest.webmanifest`
+und Service Worker für den Betrieb vom Startbildschirm.

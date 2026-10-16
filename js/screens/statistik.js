@@ -11,6 +11,7 @@ import { iconKnopf, knopf } from '../ui/knoepfe.js';
 import { balkenListe, diagrammKarte, saeulenDiagramm } from '../ui/diagramme.js';
 import { speicher } from '../storage.js';
 import { JAHRESZEITEN, KATEGORIEN, TYP } from '../model.js';
+import { fehlendeGesamt, kommendeJahreszeit } from '../saison.js';
 import {
   gesamtImSchrank,
   haeufigsteArten,
@@ -28,6 +29,8 @@ export function statistikScreen() {
   const kleidungsArten = haeufigsteArten(teile, { typ: TYP.KLEIDUNG });
   const spielzeugArten = haeufigsteArten(teile, { typ: TYP.SPIELZEUG });
   const jeGroesse = zaehleJeGroesse(teile);
+
+  const fehlen = fehlendeGesamt(teile, speicher.sollMengen(), kommendeJahreszeit());
 
   const sollMengen = knopf({
     text: 'Soll-Mengen & Saisonwechsel',
@@ -53,6 +56,13 @@ export function statistikScreen() {
     // Smartphone: die Verweis-Karte steht oben, wie im Design.
     el('a', { class: 'verweiskarte nur-smartphone', href: '#/saisonwechsel' }, [
       el('span', { class: 'verweiskarte__text', text: 'Soll-Mengen & Saisonwechsel' }),
+      // Die Fehlenden der kommenden Jahreszeit; bei 0 kein Etikett.
+      fehlen > 0
+        ? el('span', {
+          class: 'verweiskarte__etikett',
+          text: fehlen === 1 ? '1 fehlt' : `${fehlen} fehlen`,
+        })
+        : null,
     ]),
 
     el('div', { class: 'statistik__raster' }, [
