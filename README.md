@@ -112,5 +112,8 @@ Fließkomma-Fehler entstehen.
 - **Auftrag 06 – Kosten:** Summe, Teile und Durchschnitt je Jahr mit
   Jahr-Umschalter, Kosten hinzufügen, Einträge mit Preis pro Teil bei
   Sammelkäufen, Bearbeiten und Löschen.
+- **Auftrag 07 – Statistik:** fünf Diagramm-Karten (Kategorie, Art der
+  Kleidung, Jahreszeit, Größe, Spielzeug nach Art), selbst gebaut aus HTML
+  und CSS; jeder Balken führt zu den Teilen.
 
-Noch Platzhalter: Statistik und Soll-Mengen.
+Noch Platzhalter: Soll-Mengen & Saisonwechsel.

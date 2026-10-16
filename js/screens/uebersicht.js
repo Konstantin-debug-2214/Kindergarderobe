@@ -7,6 +7,7 @@
  */
 
 import { el, leeren } from '../ui/dom.js';
+import { icon } from '../ui/icons.js';
 import { iconKnopf, knopf, suchfeld } from '../ui/knoepfe.js';
 import { banner } from '../ui/banner.js';
 import { jahreszeitKachel, kategorieKachel, leererZustand, teilKarte } from '../ui/kacheln.js';
@@ -15,8 +16,10 @@ import { backupAlterInTagen, bannerSichtbar, exportiereBackup } from '../backup.
 import {
   einheit,
   imSchrank,
+  passtZurSuche,
   stueck,
   suche as sucheTeile,
+  teileZuStatistik,
   zaehleJeJahreszeit,
   zaehleJeKategorie,
 } from '../filters.js';
@@ -53,12 +56,15 @@ export function bannerText(letztesBackupAm, heute = new Date()) {
     + 'Zeit, die Daten zu sichern.';
 }
 
-export function uebersichtScreen(parameter, { neuZeichnen = () => {}, frisch = true } = {}) {
+export function uebersichtScreen(parameter = {}, { neuZeichnen = () => {}, frisch = true } = {}) {
   if (frisch) {
     suchbegriff = '';
     // Beim Zurück zur Übersicht fallen Filter und Suche einer Kategorie weg.
     setzeKategorieZustandZurueck();
   }
+
+  // Aus der Statistik kommt ein Filter in der Adresse: #/?art=… oder #/?groesse=…
+  const statistikFilter = filterAusAdresse(parameter);
 
   const einstellungen = speicher.einstellungen();
   const teile = speicher.teile();
@@ -74,7 +80,11 @@ export function uebersichtScreen(parameter, { neuZeichnen = () => {}, frisch = t
 
   function zeichneErgebnis() {
     leeren(ergebnis).append(
-      suchbegriff.trim() === '' ? kachelBereiche(teile) : trefferBereich(teile, suchbegriff),
+      statistikFilter
+        ? gefilterterBereich(teile, statistikFilter, suchbegriff)
+        : (suchbegriff.trim() === ''
+          ? kachelBereiche(teile)
+          : trefferBereich(teile, suchbegriff)),
     );
   }
 
@@ -231,4 +241,63 @@ function backupBanner(einstellungen, neuZeichnen) {
       neuZeichnen();
     },
   });
+}
+
+/* --- Trefferansicht aus der Statistik ------------------------------------- */
+
+/**
+ * Liest einen Filter aus der Adresse.
+ * @returns {{art?: string, groesse?: number, beschriftung: string}|null}
+ */
+function filterAusAdresse(parameter) {
+  const art = parameter.art ? String(parameter.art) : null;
+  const groesseRoh = parameter.groesse ? Number(parameter.groesse) : null;
+  const groesse = Number.isFinite(groesseRoh) ? groesseRoh : null;
+
+  if (!art && groesse === null) return null;
+
+  return {
+    art,
+    groesse,
+    beschriftung: art ? `Art: ${art}` : `Größe ${groesse}`,
+  };
+}
+
+function gefilterterBereich(teile, filter, begriff) {
+  const treffer = teileZuStatistik(teile, filter)
+    .filter((teil) => passtZurSuche(teil, begriff));
+
+  // Das "×" nimmt den Filter weg und bringt die Kacheln zurück.
+  const entfernen = el('a', {
+    class: 'filterchip__entfernen',
+    href: '#/',
+    'aria-label': `Filter ${filter.beschriftung} entfernen`,
+  }, [icon('schliessen', 16)]);
+
+  const chip = el('span', { class: 'filterchip' }, [
+    el('span', { text: filter.beschriftung }),
+    entfernen,
+  ]);
+
+  const gefunden = stueck(treffer);
+
+  return el('section', { class: 'bereich' }, [
+    el('div', { class: 'bereich__kopf' }, [
+      el('div', { class: 'filterchips' }, [chip]),
+      el('p', {
+        class: 'bereich__zusatz',
+        text: `${gefunden} ${einheit(null, gefunden)} gefunden`,
+      }),
+    ]),
+    treffer.length > 0
+      ? el(
+        'div',
+        { class: 'kartenraster' },
+        treffer.map((teil) => teilKarte(teil, { zeigeKategorie: true })),
+      )
+      : leererZustand({
+        text: `Nichts gefunden für „${filter.beschriftung}“.`,
+        hinweis: 'Aussortierte Teile erscheinen hier nicht.',
+      }),
+  ]);
 }
