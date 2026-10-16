@@ -1915,3 +1915,166 @@
   justify-content: space-between;
   flex-wrap: wrap;
 }
+
+/* --- Diagramm-Karte ------------------------------------------------------- */
+
+.diagramm__titel {
+  margin-bottom: var(--abstand-5);
+  font-family: var(--schrift-ueberschrift);
+  font-size: var(--text-xl);
+  font-weight: var(--schriftgewicht-ueberschrift);
+}
+
+.diagramm__zusatz {
+  color: var(--farbe-text-gedaempft);
+  font-family: var(--schrift-text);
+  font-size: var(--text-sm);
+  font-weight: var(--schriftgewicht-normal);
+}
+
+.diagramm__hinweis {
+  margin-top: var(--abstand-5);
+  color: var(--farbe-text-gedaempft);
+  font-size: var(--text-sm);
+}
+
+.diagramm__leer {
+  padding: var(--abstand-6) 0;
+  color: var(--farbe-text-gedaempft);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+/* --- Waagerechte Balken --------------------------------------------------- */
+
+.balken {
+  display: flex;
+  flex-direction: column;
+}
+
+.balken__zeile {
+  display: grid;
+  grid-template-columns: minmax(0, 150px) minmax(0, 1fr) 2.5rem;
+  align-items: center;
+  gap: var(--abstand-4);
+  min-height: var(--touch-ziel);
+  padding: 0 var(--abstand-2);
+  border-radius: var(--radius-feld);
+  color: var(--farbe-text);
+  text-decoration: none;
+}
+
+a.balken__zeile:hover {
+  background: var(--farbe-hintergrund);
+}
+
+.balken__label {
+  display: flex;
+  align-items: center;
+  gap: var(--abstand-2);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.balken__spur {
+  display: block;
+  min-width: 0;
+  height: 14px;
+  border-radius: var(--radius-rund);
+}
+
+.balken__wert {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-rund);
+  background: var(--farbe-primaer);
+}
+
+.balken__zahl {
+  font-family: var(--schrift-ueberschrift);
+  font-size: var(--text-lg);
+  font-weight: var(--schriftgewicht-ueberschrift);
+  text-align: right;
+}
+
+/* --- Senkrechte Säulen ---------------------------------------------------- */
+
+.saeulen {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--abstand-4);
+  min-height: 220px;
+  padding-bottom: var(--abstand-2);
+  border-bottom: 1px solid var(--farbe-rahmen);
+  /* Bei vielen Größen scrollt nur dieses Diagramm, nicht die Seite. */
+  overflow-x: auto;
+}
+
+.saeulen__saeule {
+  display: flex;
+  flex: 1 0 var(--touch-ziel);
+  flex-direction: column;
+  align-items: center;
+  gap: var(--abstand-2);
+  min-width: var(--touch-ziel);
+  height: 200px;
+  padding: 0 var(--abstand-1);
+  border-radius: var(--radius-feld) var(--radius-feld) 0 0;
+  color: var(--farbe-text);
+  text-decoration: none;
+}
+
+a.saeulen__saeule:hover {
+  background: var(--farbe-hintergrund);
+}
+
+.saeulen__zahl {
+  font-family: var(--schrift-ueberschrift);
+  font-size: var(--text-md);
+  font-weight: var(--schriftgewicht-ueberschrift);
+}
+
+.saeulen__spur {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: flex-end;
+  width: 100%;
+  min-height: 0;
+}
+
+.saeulen__wert {
+  display: block;
+  /* Schmaler als das Touch-Ziel: antippbar ist die ganze Säule. */
+  width: 100%;
+  max-width: 44px;
+  margin: 0 auto;
+  border-radius: 6px 6px 0 0;
+  background: var(--farbe-primaer);
+}
+
+.saeulen__label {
+  flex: none;
+  font-size: var(--text-sm);
+  font-weight: var(--schriftgewicht-halbfett);
+}
+
+/* --- Verweis-Karte (Smartphone) ------------------------------------------- */
+
+.verweiskarte {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--abstand-3);
+  min-height: var(--touch-ziel);
+  margin-bottom: var(--abstand-5);
+  padding: var(--abstand-3) var(--abstand-5);
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-karte);
+  background: var(--farbe-flaeche);
+  color: var(--farbe-text);
+  font-weight: var(--schriftgewicht-fett);
+  text-decoration: none;
+  box-shadow: var(--schatten-karte);
+}

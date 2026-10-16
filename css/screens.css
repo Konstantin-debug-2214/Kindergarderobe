@@ -888,3 +888,40 @@
     width: 100%;
   }
 }
+
+/* --- Statistik ------------------------------------------------------------ */
+
+/* Vier Karten wie im Design, die fünfte ("Spielzeug nach Art") schließt
+   unten links an. Die Seite darf dafür senkrecht scrollen. */
+.statistik__raster {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: var(--abstand-5);
+}
+
+@media (max-width: 767px) {
+  .statistik__raster {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--abstand-4);
+  }
+
+  .balken__zeile {
+    grid-template-columns: minmax(0, 132px) minmax(0, 1fr) 2rem;
+    gap: var(--abstand-2);
+    padding: 0;
+  }
+
+  .balken__label {
+    font-size: var(--text-sm);
+  }
+
+  .saeulen {
+    gap: var(--abstand-2);
+    min-height: 190px;
+  }
+
+  .saeulen__saeule {
+    height: 170px;
+  }
+}
