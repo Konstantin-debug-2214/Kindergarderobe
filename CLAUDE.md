@@ -220,6 +220,7 @@ Nicht in V1: Anlässe, Fotos, mehrere Kinder, Sync, Wetterdaten/Temperaturen, Gr
 - Hinweis-Banner (Backup): Fläche `#FBEFD5`, Text `#6B4A0E`; Erfolg: Fläche `#DDEFE3`, Text `#2F6B45`.
 - Endgültiges Löschen: Rahmen und Icon `#B3261E` (`--farbe-warnung`), Text `#8C1D18` (`--farbe-warnung-text`).
 - Kurze Bestätigung: Nach Aktionen wie Aussortieren, Zurückholen und Leeren erscheint unten eine kurze Bestätigung in den Erfolgsfarben; sie verschwindet nach etwa 3 Sekunden von selbst (Baustein `ui/hinweis.js`).
+- **Nach-oben-Knopf** (Wunsch John, nicht im Design): runder Knopf mit Pfeil nach oben, unten rechts, erscheint auf allen Screens, sobald mehr als eine Bildschirmhöhe nach unten gescrollt wurde; Tipp scrollt sanft nach oben (bei „Bewegung reduzieren“ ohne Animation). Auf dem Smartphone über der Navigationsleiste bzw. der Aktionsleiste im Detail. Gilt auch für die scrollbare Teileliste im Tablet-Detail.
 - Touch: jedes Bedienelement mindestens 48 × 48 px, keine Funktion nur per Hover, keine Doppeltipps.
 - Echte `<button>`, `<a>`, `<input>` mit `<label>`; `aria-label` an reinen Icon-Knöpfen; Kontrast mindestens 4,5:1.
 - Oberflächentexte auf Deutsch, Code und Kommentare dürfen Englisch sein.
@@ -242,6 +243,7 @@ Jedes Teil wird **überall in der Farbe seiner Kategorie** dargestellt: Karten, 
 
 ## Arbeitsweise
 
+- **CLAUDE.md nicht selbst ändern.** Nötige Änderungen schlägst du in der Zusammenfassung vor; sie werden zentral eingetragen.
 - Arbeite nur den Auftrag ab, den du bekommst. Neue Funktionen nicht eigenmächtig hinzufügen. Bei Unklarheiten nachfragen statt selbst entscheiden.
 - Elemente, die nicht im Design vorkommen (z. B. Dialoge für Aussortieren, „Aussortiert leeren“, Import-Vorschau, leere Zustände, Felder Art und Anzahl, Statistik „Spielzeug nach Art“), gestaltest du selbst im Stil der vorhandenen Screens. **Liste sie in der Zusammenfassung unter „Selbst gestaltet – bitte prüfen“ auf**, damit John sie im Design nachziehen kann.
 - Kleine, nachvollziehbare Commits mit deutschen Commit-Messages. Vor jedem Commit mit `git status` prüfen, dass keine Screenshots, JSON-Backups oder CSV-Dateien dabei sind.
