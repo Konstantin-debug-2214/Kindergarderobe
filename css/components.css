@@ -2352,3 +2352,55 @@ a.saeulen__saeule:hover {
   font-size: var(--text-sm);
   font-weight: var(--schriftgewicht-fett);
 }
+
+/* --- Nach-oben-Knopf ------------------------------------------------------ */
+
+.nachoben {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-ziel);
+  height: var(--touch-ziel);
+  border: 1px solid var(--farbe-rahmen);
+  border-radius: var(--radius-rund);
+  background: var(--farbe-flaeche);
+  color: var(--farbe-text);
+  cursor: pointer;
+  box-shadow: var(--schatten-karte);
+}
+
+.nachoben[hidden] {
+  display: none;
+}
+
+.nachoben:hover {
+  border-color: var(--farbe-primaer);
+}
+
+.nachoben:active {
+  background: var(--farbe-hintergrund);
+}
+
+/* Knopf für die Seite: über der unteren Leiste bzw. der Aktionsleiste. */
+.nachoben--seite {
+  position: fixed;
+  right: var(--abstand-5);
+  bottom: calc(var(--leisten-hoehe, 0px) + var(--abstand-5) + env(safe-area-inset-bottom));
+  z-index: 12;
+}
+
+/* Knopf in einem eigenen Scrollbereich: klebt unten rechts, ohne Platz
+   wegzunehmen. */
+.nachoben-halter {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: flex-end;
+  height: 0;
+  overflow: visible;
+}
+
+.nachoben--bereich {
+  transform: translateY(calc(-100% - var(--abstand-3)));
+}

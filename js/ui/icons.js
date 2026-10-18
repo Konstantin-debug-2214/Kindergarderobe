@@ -30,6 +30,7 @@ const PFADE = {
   liste: ['M4 7h16', 'M4 12h16', 'M4 17h16'],
   warnung: ['M12 4.5 2.8 20h18.4z', 'M12 10v4.4', 'M12 17.2v.2'],
   'pfeil-rechts': ['M9.5 5l7 7-7 7'],
+  'pfeil-oben': ['M12 19.5V5', 'M5.5 11.5 12 5l6.5 6.5'],
   haken: ['M5 12.4 9.9 17.3 19 7.2'],
   // Teilen bzw. Exportieren: Pfeil aus der Ablage heraus
   export: [
