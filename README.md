@@ -119,5 +119,9 @@ Fließkomma-Fehler entstehen.
   Saisonwechsel-Check mit „ist da / passt / fehlt", Besorgen-Liste zum
   Abhaken und „Wird bald zu klein".
 
+- **Auftrag 09b – Nach-oben-Knopf:** runder Knopf unten rechts, sobald mehr
+  als eine Bildschirmhöhe gescrollt wurde – für die Seite und für die
+  Spalten, die auf dem Tablet ihren eigenen Scrollbalken haben.
+
 Damit sind alle Screens aus Version 1 gebaut. Offen: `manifest.webmanifest`
 und Service Worker für den Betrieb vom Startbildschirm.

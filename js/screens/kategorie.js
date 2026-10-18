@@ -76,7 +76,7 @@ export function kategorieScreen({ kategorieId }, { neuZeichnen = () => {}, frisc
   }
 
   // Nur Liste und Kopfzahl werden getauscht, damit der Fokus im Suchfeld bleibt.
-  const listenbereich = el('div', { class: 'kategorie__liste' });
+  const listenbereich = el('div', { class: 'kategorie__liste', 'data-nach-oben': '' });
   const zaehlzeile = el('p', { class: 'kopfzeile__unterzeile' });
   const chipzeile = el('div', { class: 'filterchips nur-smartphone' });
   const filterKnopfText = el('span', {});

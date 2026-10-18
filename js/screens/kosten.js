@@ -261,7 +261,7 @@ export function kostenScreen(parameter, { neuZeichnen = () => {}, frisch = true 
     return zeile;
   }
 
-  const eintraege = el('section', { class: 'karte kosteneintraege' }, [
+  const eintraege = el('section', { class: 'karte kosteneintraege', 'data-nach-oben': '' }, [
     el('div', { class: 'bereich__kopf' }, [
       el('h2', { class: 'karte__titel', text: 'Einträge' }),
       desJahres.length > 0
@@ -300,7 +300,7 @@ export function kostenScreen(parameter, { neuZeichnen = () => {}, frisch = true 
     ]),
 
     el('div', { class: 'kosten__raster' }, [
-      el('div', { class: 'kosten__links' }, [summenkarte, formular]),
+      el('div', { class: 'kosten__links', 'data-nach-oben': '' }, [summenkarte, formular]),
       eintraege,
     ]),
   ]);

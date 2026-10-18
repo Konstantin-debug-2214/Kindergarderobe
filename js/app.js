@@ -10,6 +10,7 @@ import { speicher, SpeicherFehler } from './storage.js';
 import { el, leeren } from './ui/dom.js';
 import { banner } from './ui/banner.js';
 import { aktualisiereLeiste, baueLeiste } from './ui/leiste.js';
+import { aktualisiereNachOben, richteNachObenEin } from './ui/nachOben.js';
 
 import { uebersichtScreen } from './screens/uebersicht.js';
 import { kategorieScreen } from './screens/kategorie.js';
@@ -71,6 +72,7 @@ function start() {
   const leisteKnoten = document.getElementById('leiste');
 
   baueLeiste(leisteKnoten);
+  richteNachObenEin();
 
   /** Die gerade angezeigte Route – für das Neuzeichnen nach Datenänderungen. */
   let aktuelleRoute = null;
@@ -97,6 +99,8 @@ function start() {
     aktualisiereLeiste(leisteKnoten, screen);
     document.title = `${TITEL[screen]} – Kindergarderobe`;
     if (frisch) window.scrollTo(0, 0);
+    // Erst nach dem Scrollen prüfen, sonst bliebe der Knopf kurz sichtbar.
+    aktualisiereNachOben(screenKnoten);
   }
 
   function neuZeichnen() {

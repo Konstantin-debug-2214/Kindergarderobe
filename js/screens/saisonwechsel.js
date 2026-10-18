@@ -275,8 +275,8 @@ export function saisonwechselScreen(parameter, { neuZeichnen = () => {}, frisch 
 
     // Auf dem Smartphone steht der Check oben, wie im Design.
     el('div', { class: 'saisonwechsel__raster' }, [
-      el('div', { class: 'saisonwechsel__soll' }, [sollBereich]),
-      el('div', { class: 'saisonwechsel__check' }, [checkBereich]),
+      el('div', { class: 'saisonwechsel__soll', 'data-nach-oben': '' }, [sollBereich]),
+      el('div', { class: 'saisonwechsel__check', 'data-nach-oben': '' }, [checkBereich]),
     ]),
   ]);
 }

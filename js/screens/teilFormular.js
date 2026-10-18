@@ -249,7 +249,7 @@ function formular({ modus, teilId }, { neuZeichnen = () => {} }) {
     meldung ? el('div', { class: 'meldungsbereich' }, [banner(meldung)]) : null,
     el('div', { class: 'formular__raster' }, [
       el('div', { class: 'formular__links' }, links),
-      el('div', { class: 'formular__rechts' }, rechts),
+      el('div', { class: 'formular__rechts', 'data-nach-oben': '' }, rechts),
     ]),
   ]);
 

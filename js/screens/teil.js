@@ -69,9 +69,13 @@ export function teilScreen({ teilId }, { neuZeichnen = () => {} } = {}) {
     ]),
 
     el('div', { class: 'detail__raster' }, [
-      el('aside', { class: 'detail__liste nur-tablet', 'aria-label': 'Teile der Kategorie' },
-        listeAufbauen(liste, teil)),
-      el('div', { class: 'detail__inhalt' }, einzelheiten(teil, neuZeichnen)),
+      el('aside', {
+        class: 'detail__liste nur-tablet',
+        'aria-label': 'Teile der Kategorie',
+        'data-nach-oben': '',
+      }, listeAufbauen(liste, teil)),
+      el('div', { class: 'detail__inhalt', 'data-nach-oben': '' },
+        einzelheiten(teil, neuZeichnen)),
     ]),
 
     // Smartphone: feste Leiste unten statt der Kopf-Knöpfe.
