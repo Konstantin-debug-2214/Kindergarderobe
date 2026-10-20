@@ -5,6 +5,7 @@
  * fragt dauerhaften Speicher an.
  */
 
+import { richteAktualisierungEin } from './aktualisierung.js';
 import { starteRouter } from './router.js';
 import { speicher, SpeicherFehler } from './storage.js';
 import { el, leeren } from './ui/dom.js';
@@ -113,6 +114,8 @@ function start() {
   speicher.beiAenderung(neuZeichnen);
 
   dauerhaftenSpeicherAnfragen();
+  // Service Worker: Offline-Betrieb und Hinweis auf neue Versionen.
+  richteAktualisierungEin();
 }
 
 /**
