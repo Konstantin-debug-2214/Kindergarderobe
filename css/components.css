@@ -2404,3 +2404,25 @@ a.saeulen__saeule:hover {
 .nachoben--bereich {
   transform: translateY(calc(-100% - var(--abstand-3)));
 }
+
+/* --- Hinweisband über dem Screen ------------------------------------------ */
+
+/* Nimmt app-weite Hinweise auf (zurzeit nur „Neue Version verfügbar“). Es
+   liegt im Textfluss und verdeckt deshalb nichts; sticky hält es beim
+   Scrollen oben. Leer beansprucht es keinen Platz. */
+.hinweisband {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.hinweisband:empty {
+  display: none;
+}
+
+/* Als Band über die ganze Breite, deshalb ohne Radius. */
+.hinweisband .banner {
+  border-radius: 0;
+  padding-top: calc(var(--abstand-4) + env(safe-area-inset-top));
+  box-shadow: var(--schatten-karte);
+}

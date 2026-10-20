@@ -20,6 +20,7 @@ const ICON_JE_ART = {
  * @param {{
  *   art?: 'hinweis'|'erfolg'|'fehler',
  *   text: string,
+ *   iconName?: string,
  *   zusatz?: string,
  *   aktionen?: Array<Node>,
  *   beiSchliessen?: () => void,
@@ -29,13 +30,14 @@ const ICON_JE_ART = {
 export function banner({
   art = 'hinweis',
   text,
+  iconName,
   zusatz,
   aktionen = [],
   beiSchliessen,
   rolle = 'status',
 }) {
   const kinder = [
-    icon(ICON_JE_ART[art] ?? 'warnung', 22),
+    icon(iconName ?? ICON_JE_ART[art] ?? 'warnung', 22),
     el('div', { class: 'banner__texte' }, [
       el('p', { class: 'banner__text', text }),
       zusatz ? el('p', { class: 'banner__zusatz', text: zusatz }) : null,
