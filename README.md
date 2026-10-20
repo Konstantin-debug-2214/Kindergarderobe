@@ -4,15 +4,21 @@ Inventar-App für die Kleidung und das Spielzeug eines Kindes. Sie zeigt auf ein
 Blick, was da ist, was passt, was fehlt und was es gekostet hat. Schwerpunkt sind
 Kategorien, Jahreszeiten und Filter.
 
-Die App ist für den Eigenbedarf gedacht. Hauptgerät ist ein Tablet im Querformat
-(1194 × 834); auf dem Smartphone (390 × 844) ist sie ebenso bedienbar.
+Die App ist für den Eigenbedarf gedacht. Hauptgerät ist ein Android-Smartphone
+im Hochformat (390 × 844 und 412 × 915), auf dem die App als Web-App installiert
+wird; das Tablet im Querformat (1194 × 834) wird weiterhin vollständig
+unterstützt.
 
 ## Technik
 
 Reines HTML, CSS und JavaScript (ES-Module) – kein Framework, keine Bibliothek,
 kein Build-Schritt. Zur Laufzeit gibt es keine Netzwerkzugriffe: die Schriften
 (Fredoka, Nunito) liegen lokal unter `fonts/`, Icons sind Inline-SVG. Die Daten
-liegen später im `localStorage` des Browsers.
+liegen im `localStorage` des Browsers.
+
+Ein Service Worker (`sw.js`) legt beim ersten Aufruf alle App-Dateien in einen
+Cache; danach startet die App auch ohne Netz. Zusammen mit
+`manifest.webmanifest` lässt sie sich auf Android über Chrome installieren.
 
 ## Lokal starten
 
@@ -43,8 +49,8 @@ Danach `http://localhost:8000` im Browser aufrufen.
 **Tablet und Smartphone prüfen**
 
 In den Entwicklertools des Browsers (F12) die Gerätesimulation einschalten
-(Strg + Umschalt + M) und als eigene Größen `1194 × 834` (Tablet quer) und
-`390 × 844` (Smartphone) eintragen.
+(Strg + Umschalt + M) und als eigene Größen `390 × 844` und `412 × 915`
+(Smartphone) sowie `1194 × 834` (Tablet quer) eintragen.
 
 ## Veröffentlichung über GitHub Pages
 
@@ -59,12 +65,50 @@ nicht nötig:
 
 Jeder Push auf `main` aktualisiert die veröffentlichte Version.
 
+## Auf dem Android-Handy installieren
+
+1. Die veröffentlichte Adresse in **Chrome** öffnen.
+2. Im Menü (drei Punkte) **App installieren** bzw. **Zum Startbildschirm
+   hinzufügen** wählen.
+3. Die App startet danach vom Startbildschirm ohne Browserleiste und läuft
+   vollständig ohne Netz.
+
+Die Daten liegen im Speicher des Browsers auf dem Gerät. Sie werden **nicht**
+mit GitHub geteilt und gehen verloren, wenn die App deinstalliert oder der
+Browserspeicher geleert wird – deshalb regelmäßig ein Backup sichern.
+
+## Backup aufs Handy bringen
+
+1. Auf dem alten Gerät **Mehr → Backup exportieren** antippen; über das
+   Teilen-Menü (oder als Download) landet die Datei
+   `kindergarderobe-backup-JJJJ-MM-TT.json` z. B. in der Cloud, in einer
+   Nachricht an sich selbst oder im Ordner „Downloads“.
+2. Die Datei auf das Handy übertragen (Cloud, Kabel, Messenger).
+3. In der App auf dem Handy **Mehr → Backup einspielen** antippen, die Datei in
+   der Dateiauswahl wählen, die Vorschau prüfen und bestätigen. **Achtung:** Der
+   Import ersetzt alle Daten auf dem Gerät.
+
+## Neue Version veröffentlichen
+
+Beim Veröffentlichen gilt: **In `sw.js` die Zeile `const VERSION = 'v1'`
+hochzählen**, sobald sich HTML, CSS, JavaScript, Schriften oder Icons geändert
+haben. Nur dann bemerkt der Browser die neue Version.
+
+Auf dem Gerät erscheint danach oben das Band **„Neue Version verfügbar“** mit
+dem Knopf **„Neu laden“**. Nichts wird von selbst neu geladen, damit
+angefangene Eingaben nicht verloren gehen. Erst der Tipp auf „Neu laden“
+übernimmt die neue Version; der alte Cache wird dabei gelöscht.
+
+Welche Dateien zwischengespeichert werden, steht als Liste in `sw.js`. `node
+--test` prüft, dass diese Liste zum Dateibestand passt – eine neue Datei in
+`css/`, `js/`, `fonts/` oder `icons/` muss also dort eingetragen werden.
+
 ## Hinweis zum Datenschutz
 
 Das Repository ist öffentlich. Es gehören **niemals** echte Daten hinein:
 keine Backups (`*.json`), keine CSV-Dateien. Die `.gitignore` schließt diese
-Dateitypen aus. Ausgenommen ist das spätere `manifest.webmanifest`, das nicht
-auf `.json` endet.
+Dateitypen aus. Ausgenommen ist `manifest.webmanifest`, das nicht auf `.json`
+endet.
 
 ## Tests
 
@@ -79,12 +123,15 @@ node --test
 
 ```
 index.html
+manifest.webmanifest   Angaben für die Installation als App
+sw.js                  Service Worker: Cache und Offline-Betrieb
 css/      tokens.css, base.css, components.css, screens.css
 js/       app.js, router.js, model.js, storage.js, backup.js, costs.js,
-          filters.js, formular.js, saison.js, screens/*.js, ui/*.js
+          filters.js, formular.js, saison.js, aktualisierung.js,
+          screens/*.js, ui/*.js
 tests/    Tests der reinen Logik (node --test)
 fonts/    Fredoka und Nunito (woff2) samt OFL-Lizenz
-icons/    App-Icons für das spätere Manifest
+icons/    App-Icons für das Manifest
 ```
 
 Alle Daten liegen unter einem Schlüssel im `localStorage` des Browsers. Darauf
@@ -123,5 +170,8 @@ Fließkomma-Fehler entstehen.
   als eine Bildschirmhöhe gescrollt wurde – für die Seite und für die
   Spalten, die auf dem Tablet ihren eigenen Scrollbalken haben.
 
-Damit sind alle Screens aus Version 1 gebaut. Offen: `manifest.webmanifest`
-und Service Worker für den Betrieb vom Startbildschirm.
+- **Auftrag 10 – Installierbare Web-App:** `manifest.webmanifest`, Service
+  Worker mit versioniertem Cache und Offline-Betrieb, App-Icons und der
+  Hinweis „Neue Version verfügbar“ mit Knopf „Neu laden“.
+
+Damit sind alle Screens aus Version 1 gebaut und die App ist installierbar.
