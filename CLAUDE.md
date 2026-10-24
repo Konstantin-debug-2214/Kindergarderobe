@@ -1,6 +1,6 @@
 # Kindergarderobe – Projektregeln für Claude Code
 
-Stand: 20.10.2026 (vor Auftrag 10)
+Stand: 20.10.2026 (nach Auftrag 10)
 
 Inventar-App für Kleidung und Spielzeug eines Kindes. Eigenbedarf, ein Kind.
 Hauptgerät: **Android-Smartphone** im Hochformat (Chrome; Testgrößen 390 × 844 und 412 × 915). Das Tablet im Querformat (1194 × 834) wird weiterhin vollständig unterstützt, hat aber zweite Priorität (Entscheidung John, 20.10.2026). Genutzt wird die App hauptsächlich von einer Person.
@@ -10,7 +10,7 @@ Ziel: auf einen Blick sehen, was da ist, was passt, was fehlt und was es gekoste
 
 - Reines HTML, CSS und JavaScript (ES-Module, `<script type="module">`). **Kein Framework, keine Bibliothek, kein Build-Schritt, kein npm-Paket zur Laufzeit.**
 - Keine Netzwerkzugriffe zur Laufzeit. Schriften liegen lokal unter `fonts/` als Variable Fonts (Fredoka und Nunito, woff2, Teilmenge „latin“, OFL-Lizenz mitgeliefert); genutzt werden Fredoka 500/600 und Nunito 400/600/700/800.
-- Icons als Inline-SVG (Strich-Icons), keine Icon-Fonts, keine Emojis.
+- Icons als Inline-SVG (Strich-Icons), keine Icon-Fonts, keine Emojis. Abweichend vom Design (Entscheidung John): **Einstellungen/„Mehr“ = Zahnrad** (nicht Sonne), **Spielzeug = Schaukelpferd** (nicht Teddykopf).
 - Daten in `localStorage` über ein eigenes Modul `js/storage.js` (nie direkt aus anderen Modulen). Beim Start `navigator.storage.persist()` anfragen.
 - Responsive: Layout für Tablet quer (Hauptziel) und Smartphone hoch; Umbruch per CSS (Grid/Flex, Media Queries), keine getrennten Seiten.
 - Veröffentlichung über GitHub Pages aus dem `main`-Branch; Installation auf Android als Web-App über Chrome („App installieren“), kein App-Store, kein APK. Alle Pfade relativ, damit die App unter `/Kindergarderobe/` und lokal läuft. Das Repository ist öffentlich: **niemals echte Daten, Backups (`*.json`), die alte CSV oder die Design-Screenshots committen.**
@@ -20,12 +20,13 @@ Ziel: auf einen Blick sehen, was da ist, was passt, was fehlt und was es gekoste
 ## Ordnerstruktur
 
 ```
-index.html
+index.html, manifest.webmanifest, sw.js (Service Worker, Dateiliste DATEIEN und VERSION)
 css/        tokens.css (Farben, Abstände, Schriften), base.css, components.css, screens.css
 js/         app.js (Start, Router), router.js (Hash-Routing, siehe Routen)
             storage.js, model.js (Datenmodell, Konstanten, Validierung), filters.js (reine Filter-/Zählfunktionen)
             costs.js (reine Kostenberechnung), backup.js (Export, Import, Erinnerung), formular.js (reine Formular-Logik), saison.js (Soll-Mengen und Saisonwechsel-Check)
             ui/diagramme.js: Balken- und Säulendiagramme
+            aktualisierung.js: Service Worker anmelden, Hinweisband „Neue Version verfügbar“
             ui/nachOben.js: Nach-oben-Knopf für Seite und markierte Scrollbereiche (`data-nach-oben`)
             ui/ausgabeDialog.js: Ausgaben-Formular, einmal für Kosten-Ansicht, Bearbeiten und „Neuer Sammelkauf“
             screens/*.js (je Screen ein Modul; teilFormular.js für #/neu und Bearbeiten), ui/*.js (Bausteine)
@@ -220,6 +221,7 @@ Nicht in V1: Anlässe, Fotos, mehrere Kinder, Sync, Wetterdaten/Temperaturen, Gr
 - Smartphone: Kacheln zweispaltig, Suche über volle Breite, Navigation siehe oben.
 - Hinweis-Banner (Backup): Fläche `#FBEFD5`, Text `#6B4A0E`; Erfolg: Fläche `#DDEFE3`, Text `#2F6B45`.
 - Endgültiges Löschen: Rahmen und Icon `#B3261E` (`--farbe-warnung`), Text `#8C1D18` (`--farbe-warnung-text`).
+- Hinweisband (nicht im Design, freigegeben): app-weites Band am oberen Rand über dem Screen, zurzeit nur für „Neue Version verfügbar“ mit „Neu laden“; liegt im Textfluss und verdeckt nichts. Die Klasse `.meldungsbereich` gehört den Screens Einstellungen und Formular, das Band heißt `.hinweisband`.
 - Kurze Bestätigung: Nach Aktionen wie Aussortieren, Zurückholen und Leeren erscheint unten eine kurze Bestätigung in den Erfolgsfarben; sie verschwindet nach etwa 3 Sekunden von selbst (Baustein `ui/hinweis.js`).
 - **Nach-oben-Knopf** (Wunsch John, nicht im Design): runder Knopf mit Pfeil nach oben, unten rechts, erscheint auf allen Screens, sobald mehr als eine Bildschirmhöhe nach unten gescrollt wurde; Tipp scrollt sanft nach oben (bei „Bewegung reduzieren“ ohne Animation). Auf dem Smartphone über der Navigationsleiste bzw. der Aktionsleiste im Detail. Gilt auch für alle Spalten, die auf dem Tablet ihren eigenen Scrollbalken haben (Kategorie-Liste, Teileliste und Einzelheiten im Detail, Kosten, Formular, Soll-Mengen und Check). Schwelle: eine Bildschirm- bzw. Bereichshöhe; auf kurzen Seiten erscheint der Knopf nie (auf dem Tablet je nach Bestand z. B. Statistik und Formular).
 - Touch: jedes Bedienelement mindestens 48 × 48 px, keine Funktion nur per Hover, keine Doppeltipps.
@@ -241,6 +243,11 @@ Jedes Teil wird **überall in der Farbe seiner Kategorie** dargestellt: Karten, 
 - Gewählter Jahreszeiten-Knopf in Soll-Mengen in Primärfarbe → Akzentfarbe der Jahreszeit.
 - Detail (Tablet) ohne Merkmal → Merkmal-Kachel ergänzen.
 - Einstellungen mit Auswahl „Erinnern nach“ bzw. Karte „Backup-Erinnerung“ → entfällt.
+
+## Veröffentlichen
+
+- Nach jeder Änderung an HTML, CSS, JS, Schriften oder Icons die Zeile `const VERSION` in `sw.js` hochzählen und neue Dateien in die Liste `DATEIEN` eintragen. `node --test` prüft die Dateiliste; das Hochzählen der Version prüft kein Test – ohne neue Version erreicht ein Update das installierte Gerät nicht.
+- Kein `viewport-fit=cover`; Chrome hält den Inhalt selbst über der Android-Gestenleiste.
 
 ## Arbeitsweise
 
