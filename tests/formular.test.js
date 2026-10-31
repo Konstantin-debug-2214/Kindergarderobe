@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   artNachKategoriewechsel,
   einzelpreisAusEingabe,
+  markenZurAuswahl,
   artPasst,
   entwurfAusTeil,
   entwurfGeaendert,
@@ -275,4 +276,13 @@ test('ein ungültiger oder leerer Einzelpreis wird gemeldet statt 0,00 € (#5)'
 test('ein gültiger Einzelpreis wird in Cent übernommen (#5)', () => {
   assert.deepEqual(einzelpreisAusEingabe('8,50').preis, { art: 'einzeln', betrag: 850 });
   assert.deepEqual(einzelpreisAusEingabe('12', 'a1').preis, { art: 'einzeln', betrag: 1200, ausgabeId: 'a1' });
+});
+
+/* --- Marken zur Auswahl (#11) ----------------------------------------------- */
+
+test('die Marke des Teils steht zur Auswahl, auch wenn sie aus der Liste gelöscht ist (#11)', () => {
+  assert.deepEqual(markenZurAuswahl(['Frozen', 'Paw Patrol'], 'Spider-Man'), ['Frozen', 'Paw Patrol', 'Spider-Man']);
+  assert.deepEqual(markenZurAuswahl(['Frozen', 'Paw Patrol'], 'Frozen'), ['Frozen', 'Paw Patrol']);
+  assert.deepEqual(markenZurAuswahl(['Frozen'], null), ['Frozen']);
+  assert.deepEqual(markenZurAuswahl([], 'Spider-Man'), ['Spider-Man']);
 });

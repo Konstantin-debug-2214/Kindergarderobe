@@ -49,6 +49,7 @@ import {
   entwurfGeaendert,
   eigeneAusgabeId,
   einzelpreisAusEingabe,
+  markenZurAuswahl,
   entwurfMitTyp,
   gaengigeGroessen,
   groesseNachWechsel,
@@ -352,6 +353,8 @@ function formular({ modus, teilId }, { neuZeichnen = () => {} }) {
 
   function bauMarkenliste() {
     const marken = speicher.marken();
+    // Auch eine aus der Liste gelöschte Marke des Teils bleibt sichtbar.
+    const zurAuswahl = markenZurAuswahl(marken, entwurf.marke);
 
     const neueMarke = el('button', { type: 'button', class: 'wahl__knopf wahl__knopf--neu' }, [
       icon('plus', 18),
@@ -392,7 +395,7 @@ function formular({ modus, teilId }, { neuZeichnen = () => {} }) {
             meldeSpeicherfehler(fehler, 'Die Marke konnte nicht gelöscht werden.');
             return;
           }
-          if (entwurf.marke === name) entwurf = { ...entwurf, marke: null };
+          // Die Marke bleibt am Teil, auch wenn sie aus der Liste verschwindet.
         },
       });
       neuZeichnen();
@@ -400,7 +403,7 @@ function formular({ modus, teilId }, { neuZeichnen = () => {} }) {
 
     return el('div', { class: 'markenliste' }, [
       el('div', { class: 'wahl' }, [
-        ...marken.map((marke) => {
+        ...zurAuswahl.map((marke) => {
           const aktiv = marke === entwurf.marke;
           const knopfEl = el('button', {
             type: 'button',

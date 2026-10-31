@@ -187,6 +187,17 @@ export function entwurfGeaendert(entwurf, ausgangswert) {
   return sauber(entwurf) !== sauber(ausgangswert);
 }
 
+/**
+ * Marken zur Auswahl im Formular: die gepflegte Liste plus die Marke des
+ * Teils, falls sie dort inzwischen gelöscht ist. Gelöschte Marken bleiben am
+ * Teil erhalten und müssen deshalb sichtbar bleiben.
+ * @param {Array<string>} liste
+ * @param {string|null} markeDesTeils
+ */
+export function markenZurAuswahl(liste = [], markeDesTeils = null) {
+  return markeDesTeils && !liste.includes(markeDesTeils) ? [...liste, markeDesTeils] : [...liste];
+}
+
 /* --- Preis ---------------------------------------------------------------- */
 
 /** Nur Ausgaben mit mehr als einem Teil sind Sammelkäufe. */
