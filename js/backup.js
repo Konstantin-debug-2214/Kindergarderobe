@@ -5,7 +5,7 @@
  * Teilen bzw. Herunterladen braucht den Browser.
  */
 
-import { SCHEMA_VERSION, pruefeTeil } from './model.js';
+import { SCHEMA_VERSION, jahreszeit, pruefeTeil } from './model.js';
 import { gesamtsumme } from './costs.js';
 
 export const BACKUP_KENNUNG = 'kindergarderobe';
@@ -198,6 +198,18 @@ export function pruefeImport({ dateiname, text }) {
     return { ok: false, fehler: 'Die Kosten im Backup haben nicht den erwarteten Aufbau.' };
   }
 
+  // Auch Marken, Soll-Mengen, Name und die einzelnen Ausgaben prüfen: Eine
+  // fremde oder bearbeitete Datei darf die App nach dem Einspielen nicht
+  // stolpern lassen.
+  const aufbau = pruefeUebrigenAufbau(daten);
+  if (aufbau.length > 0) {
+    return {
+      ok: false,
+      fehler: 'Das Backup hat nicht den erwarteten Aufbau.',
+      einzelheiten: aufbau.slice(0, 5),
+    };
+  }
+
   const einzelheiten = [];
   daten.teile.forEach((teil, nummer) => {
     const fehler = pruefeTeil(teil);
@@ -234,6 +246,81 @@ export function pruefeImport({ dateiname, text }) {
       name: daten.einstellungen?.name ?? '',
     },
   };
+}
+
+const DATUM_MUSTER = /^\d{4}-\d{2}-\d{2}/;
+
+const istText = (wert) => typeof wert === 'string' && wert.trim() !== '';
+
+/** Doppelte Werte einer Liste, z. B. Ids. */
+function doppelte(werte) {
+  const gesehen = new Set();
+  return [...new Set(werte.filter((wert) => gesehen.has(wert) || !gesehen.add(wert)))];
+}
+
+/**
+ * Prüft alles außer den Teilen selbst (die prüft pruefeTeil).
+ * @returns {Array<string>} Beschreibungen der Fehler, leer wenn alles passt
+ */
+function pruefeUebrigenAufbau(daten) {
+  const fehler = [];
+
+  const ausgaben = daten.ausgaben ?? [];
+  ausgaben.forEach((ausgabe, nummer) => {
+    const name = `Kosten-Eintrag ${nummer + 1}`;
+    if (!ausgabe || typeof ausgabe !== 'object') {
+      fehler.push(`${name}: kein gültiger Eintrag.`);
+      return;
+    }
+    if (!istText(ausgabe.id)) fehler.push(`${name}: die Kennung fehlt.`);
+    if (typeof ausgabe.bezeichnung !== 'string') fehler.push(`${name}: die Bezeichnung fehlt.`);
+    if (!DATUM_MUSTER.test(String(ausgabe.datum ?? ''))) fehler.push(`${name}: das Datum fehlt.`);
+    if (!Number.isInteger(ausgabe.betrag) || ausgabe.betrag < 0) {
+      fehler.push(`${name}: der Betrag ist keine ganze Zahl in Cent.`);
+    }
+    if (!Number.isInteger(ausgabe.anzahlTeile) || ausgabe.anzahlTeile < 1) {
+      fehler.push(`${name}: die Anzahl der Teile muss eine ganze Zahl ab 1 sein.`);
+    }
+  });
+  for (const id of doppelte(ausgaben.map((a) => a?.id).filter(istText))) {
+    fehler.push(`Die Kennung ${id} steht bei mehreren Kosten-Einträgen.`);
+  }
+
+  for (const id of doppelte(daten.teile.map((teil) => teil?.id).filter(istText))) {
+    fehler.push(`Die Kennung ${id} steht bei mehreren Teilen.`);
+  }
+
+  if (daten.marken !== undefined
+    && (!Array.isArray(daten.marken) || !daten.marken.every(istText))) {
+    fehler.push('Die Marken müssen eine Liste von Namen sein.');
+  }
+
+  if (daten.sollMengen !== undefined) {
+    if (!Array.isArray(daten.sollMengen)) {
+      fehler.push('Die Soll-Mengen müssen eine Liste sein.');
+    } else {
+      daten.sollMengen.forEach((eintrag, nummer) => {
+        const gueltig = eintrag && typeof eintrag === 'object'
+          && istText(eintrag.art)
+          && Boolean(jahreszeit(eintrag.jahreszeit))
+          && Number.isInteger(eintrag.soll) && eintrag.soll >= 0;
+        if (!gueltig) {
+          fehler.push(`Soll-Menge ${nummer + 1}: Art, Jahreszeit und Soll (ganze Zahl) werden gebraucht.`);
+        }
+      });
+    }
+  }
+
+  const einstellungen = daten.einstellungen;
+  if (einstellungen !== undefined) {
+    if (!einstellungen || typeof einstellungen !== 'object' || Array.isArray(einstellungen)) {
+      fehler.push('Die Einstellungen haben nicht den erwarteten Aufbau.');
+    } else if (einstellungen.name !== undefined && typeof einstellungen.name !== 'string') {
+      fehler.push('Der Name des Kindes muss ein Text sein.');
+    }
+  }
+
+  return fehler;
 }
 
 /** Immer nach Stück zählen (Feld anzahl), nie nach Einträgen. */

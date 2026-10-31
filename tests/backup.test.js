@@ -216,6 +216,49 @@ test('ein leeres Backup ist gültig', () => {
   assert.equal(ergebnis.vorschau.kostenSumme, 0);
 });
 
+/* --- Aufbau aller Listen im Backup (#9) ---------------------------------- */
+
+const KAPUTTE_DATEIEN = {
+  'Marken als Text': (b) => { b.daten.marken = 'Paw Patrol'; return b; },
+  'leere Marke': (b) => { b.daten.marken = ['Paw Patrol', '  ']; return b; },
+  'Soll-Mengen als Objekt': (b) => { b.daten.sollMengen = { a: 1 }; return b; },
+  'Soll ohne Art': (b) => { b.daten.sollMengen = [{ jahreszeit: 'winter', soll: 2 }]; return b; },
+  'Soll mit fremder Jahreszeit': (b) => { b.daten.sollMengen = [{ art: 'Pullover', jahreszeit: 'regenzeit', soll: 2 }]; return b; },
+  'Soll keine ganze Zahl': (b) => { b.daten.sollMengen = [{ art: 'Pullover', jahreszeit: 'winter', soll: 'viel' }]; return b; },
+  'Name als Objekt': (b) => { b.daten.einstellungen = { name: { x: 1 } }; return b; },
+  'Einstellungen als Text': (b) => { b.daten.einstellungen = 'Mila'; return b; },
+  'Ausgabe ohne Id': (b) => { b.daten.ausgaben = [{ bezeichnung: 'Basar', datum: '2026-08-15', betrag: 1850, anzahlTeile: 4 }]; return b; },
+  'Ausgabe mit Text als Betrag': (b) => { b.daten.ausgaben = [{ id: 'a', bezeichnung: 'Basar', datum: '2026-08-15', betrag: 'viel', anzahlTeile: 4 }]; return b; },
+  'Ausgabe ohne Datum': (b) => { b.daten.ausgaben = [{ id: 'a', bezeichnung: 'Basar', datum: 7, betrag: 1850, anzahlTeile: 4 }]; return b; },
+  'Ausgabe mit 0 Teilen': (b) => { b.daten.ausgaben = [{ id: 'a', bezeichnung: 'Basar', datum: '2026-08-15', betrag: 1850, anzahlTeile: 0 }]; return b; },
+  'doppelte Ausgaben-Id': (b) => {
+    const a = { id: 'a', bezeichnung: 'Basar', datum: '2026-08-15', betrag: 1850, anzahlTeile: 4 };
+    b.daten.ausgaben = [a, { ...a }];
+    return b;
+  },
+  'doppelte Teil-Id': (b) => { b.daten.teile[1].id = b.daten.teile[0].id; return b; },
+};
+
+for (const [fall, anpassen] of Object.entries(KAPUTTE_DATEIEN)) {
+  test(`Import lehnt ab: ${fall} (#9)`, () => {
+    const ergebnis = pruefeImport({ dateiname: 'b.json', text: backupText(anpassen) });
+    assert.equal(ergebnis.ok, false);
+    assert.equal(typeof ergebnis.fehler, 'string');
+  });
+}
+
+test('ein vollständiges Backup mit Kosten und Soll-Mengen bleibt gültig (#9)', () => {
+  const speicher = neuerSpeicher();
+  speicher.teilAnlegen(kleidungsteil({ preis: { art: 'einzeln', betrag: 800 } }));
+  speicher.ausgabeAnlegen({ bezeichnung: 'Basar', datum: '2026-08-15', betrag: 1850, anzahlTeile: 4 });
+  speicher.sollMengeSetzen('Pullover', 'winter', 3);
+  speicher.markeAnlegen('Paw Patrol');
+  speicher.nameSetzen('Mila');
+
+  const { text } = erstelleBackup(speicher.zustand());
+  assert.equal(pruefeImport({ dateiname: 'b.json', text }).ok, true);
+});
+
 /* --- Import einspielen ---------------------------------------------------- */
 
 test('ein geprüftes Backup ersetzt alle aktuellen Daten', () => {
