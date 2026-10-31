@@ -151,7 +151,9 @@ function lade(dateiname, text, typ = 'application/json') {
   document.body.append(link);
   link.click();
   link.remove();
-  URL.revokeObjectURL(adresse);
+  // Erst nach einem Moment freigeben: Manche Browser brechen den Download
+  // sonst ab, weil die Adresse schon ungültig ist, bevor er beginnt.
+  setTimeout(() => URL.revokeObjectURL(adresse), 60_000);
 }
 
 /* --- Import prüfen -------------------------------------------------------- */
