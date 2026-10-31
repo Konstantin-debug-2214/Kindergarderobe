@@ -12,6 +12,7 @@ import { el } from '../ui/dom.js';
 import { kopfzeile } from '../ui/kopfzeile.js';
 import { banner } from '../ui/banner.js';
 import { frageNach } from '../ui/dialog.js';
+import { zeigeHinweis } from '../ui/hinweis.js';
 import { anzeigeKasten, grosserKnopf, karte, listenZeile, textfeld } from '../ui/felder.js';
 import { speicher, SpeicherFehler } from '../storage.js';
 import {
@@ -123,7 +124,14 @@ function begruessungsKarte(einstellungen) {
     beiEingabe: (wert) => vorschau.setzeWert(begruessung(wert)),
     beiAenderung: (wert) => {
       if (wert === einstellungen.name) return;
-      speicher.nameSetzen(wert);
+      try {
+        speicher.nameSetzen(wert);
+      } catch (fehler) {
+        zeigeHinweis(
+          fehler instanceof SpeicherFehler ? fehler.message : 'Der Name konnte nicht gespeichert werden.',
+          { art: 'hinweis' },
+        );
+      }
     },
   });
 

@@ -13,6 +13,7 @@ import { knopf, iconKnopf } from '../ui/knoepfe.js';
 import { banner } from '../ui/banner.js';
 import { frageNach, pflegeListe, waehleAus } from '../ui/dialog.js';
 import { frageNachAusgabe } from '../ui/ausgabeDialog.js';
+import { zeigeHinweis } from '../ui/hinweis.js';
 import {
   abschnitt,
   chips,
@@ -363,7 +364,12 @@ function formular({ modus, teilId }, { neuZeichnen = () => {} }) {
         platzhalter: 'z. B. Paw Patrol',
       });
       if (!name) return;
-      speicher.markeAnlegen(name);
+      try {
+        speicher.markeAnlegen(name);
+      } catch (fehler) {
+        meldeSpeicherfehler(fehler, 'Die Marke konnte nicht angelegt werden.');
+        return;
+      }
       // Die neue Marke ist gleich ausgewählt.
       entwurf = { ...entwurf, marke: name };
       neuZeichnen();
@@ -380,7 +386,12 @@ function formular({ modus, teilId }, { neuZeichnen = () => {} }) {
         leerText: 'Noch keine Marke angelegt.',
         eintraege: () => speicher.marken(),
         beiLoeschen: (name) => {
-          speicher.markeLoeschen(name);
+          try {
+            speicher.markeLoeschen(name);
+          } catch (fehler) {
+            meldeSpeicherfehler(fehler, 'Die Marke konnte nicht gelöscht werden.');
+            return;
+          }
           if (entwurf.marke === name) entwurf = { ...entwurf, marke: null };
         },
       });
@@ -952,7 +963,17 @@ async function frageNachSammelkauf() {
   });
 
   if (ergebnis?.aktion !== 'speichern') return null;
-  return speicher.ausgabeAnlegen(ergebnis.werte);
+  try {
+    return speicher.ausgabeAnlegen(ergebnis.werte);
+  } catch (fehler) {
+    meldeSpeicherfehler(fehler, 'Der Sammelkauf konnte nicht angelegt werden.');
+    return null;
+  }
+}
+
+/** Kurzer Hinweis, wenn der Speicher eine Änderung nicht annimmt. */
+function meldeSpeicherfehler(fehler, ersatztext) {
+  zeigeHinweis(fehler instanceof SpeicherFehler ? fehler.message : ersatztext, { art: 'hinweis' });
 }
 
 /** "2026-09-12" wird zu "12.09.2026". */

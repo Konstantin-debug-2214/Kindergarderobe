@@ -271,7 +271,14 @@ function passformBereich(teil) {
       wert: teil.passform,
       beiWahl: (passform) => {
         if (passform === teil.passform) return;
-        speicher.teilAendern(teil.id, { passform });
+        try {
+          speicher.teilAendern(teil.id, { passform });
+        } catch (fehler) {
+          zeigeHinweis(
+            fehler instanceof SpeicherFehler ? fehler.message : 'Die Passform konnte nicht gespeichert werden.',
+            { art: 'hinweis' },
+          );
+        }
       },
     }),
   ]);
