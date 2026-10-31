@@ -99,8 +99,12 @@
   outline: none;
 }
 
+/* Das Eingabefeld selbst hat keinen Rahmen; der Fokusring sitzt am Feld
+   drumherum, so kräftig wie bei den übrigen Feldern. */
 .suchfeld:focus-within {
   border-color: var(--farbe-primaer);
+  outline: 3px solid var(--farbe-fokus);
+  outline-offset: 2px;
 }
 
 /* --- Kopfzeile eines Screens --------------------------------------------- */
@@ -694,6 +698,11 @@
   outline: none;
 }
 
+.textbereich:focus-visible {
+  outline: 3px solid var(--farbe-fokus);
+  outline-offset: 2px;
+}
+
 .eurofeld {
   display: flex;
   align-items: center;
@@ -707,6 +716,8 @@
 
 .eurofeld:focus-within {
   border-color: var(--farbe-primaer);
+  outline: 3px solid var(--farbe-fokus);
+  outline-offset: 2px;
 }
 
 .eurofeld__eingabe {
