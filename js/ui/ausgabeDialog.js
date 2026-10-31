@@ -10,14 +10,11 @@
 import { el, leeren } from './dom.js';
 import { frageNachWahl } from './dialog.js';
 import { zaehler } from './formularteile.js';
-import { euroTextInCent } from '../costs.js';
+import { datumAlsText, euroTextInCent } from '../costs.js';
 
 /** Heute als "JJJJ-MM-TT" für das Datumsfeld. */
 export function heuteAlsDatum() {
-  const jetzt = new Date();
-  const monat = String(jetzt.getMonth() + 1).padStart(2, '0');
-  const tag = String(jetzt.getDate()).padStart(2, '0');
-  return `${jetzt.getFullYear()}-${monat}-${tag}`;
+  return datumAlsText();
 }
 
 /** Cent als Text fürs Eingabefeld: 1250 -> "12,50". */

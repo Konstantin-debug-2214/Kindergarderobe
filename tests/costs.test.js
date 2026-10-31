@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { euroTextInCent, formatEuro, gesamtsumme, jahressumme, jahrVon } from '../js/costs.js';
+import { datumAlsText, euroTextInCent, formatEuro, gesamtsumme, jahressumme, jahrVon } from '../js/costs.js';
 
 const AUSGABEN = [
   { id: '1', bezeichnung: 'Flohmarkt Kita', datum: '2026-09-12', betrag: 2500, anzahlTeile: 6 },
@@ -78,4 +78,10 @@ test('das Jahr wird aus dem Datum gelesen', () => {
   assert.equal(jahrVon('2026-08-14T10:00:00.000Z'), 2026);
   assert.equal(jahrVon(''), null);
   assert.equal(jahrVon(null), null);
+});
+
+test('datumAlsText rechnet in Ortszeit, nicht in UTC (#6)', () => {
+  assert.equal(datumAlsText(new Date(2027, 0, 1, 0, 30)), '2027-01-01');
+  assert.equal(datumAlsText(new Date(2026, 11, 31, 23, 59)), '2026-12-31');
+  assert.equal(datumAlsText(new Date(2026, 2, 5, 12)), '2026-03-05');
 });

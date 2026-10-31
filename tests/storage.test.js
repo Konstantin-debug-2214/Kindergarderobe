@@ -508,3 +508,27 @@ test('ein kaputter Oberflächen-Zustand stört nicht', () => {
 
   assert.equal(speicher.bannerAusgeblendetBei(), null);
 });
+
+/* --- Datum der Einzelpreis-Ausgabe (#6) ----------------------------------- */
+
+test('eine Einzelpreis-Ausgabe kurz nach Mitternacht trägt das lokale Datum (#6)', () => {
+  const zeitzoneVorher = process.env.TZ;
+  const EchtesDate = globalThis.Date;
+  process.env.TZ = 'Europe/Berlin';
+  // 1.1.2027, 00:30 Uhr in Berlin – in UTC noch der 31.12.2026.
+  const fest = new EchtesDate(2027, 0, 1, 0, 30).getTime();
+  globalThis.Date = class extends EchtesDate {
+    constructor(...werte) { if (werte.length === 0) super(fest); else super(...werte); }
+    static now() { return fest; }
+  };
+
+  try {
+    const speicher = neuerSpeicher();
+    speicher.teilAnlegen(kleidungsteil({ preis: { art: 'einzeln', betrag: 800 } }));
+    assert.equal(speicher.ausgaben()[0].datum, '2027-01-01');
+  } finally {
+    globalThis.Date = EchtesDate;
+    if (zeitzoneVorher === undefined) delete process.env.TZ;
+    else process.env.TZ = zeitzoneVorher;
+  }
+});

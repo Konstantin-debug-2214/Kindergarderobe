@@ -56,6 +56,17 @@ export function euroTextInCent(text) {
   return Math.round(zahl * 100);
 }
 
+/**
+ * Datum als "JJJJ-MM-TT" in Ortszeit. Nicht toISOString(): Das rechnet in UTC
+ * und lieferte kurz nach Mitternacht den Vortag – am 1.1. sogar das Vorjahr.
+ * @param {Date} [datum]
+ */
+export function datumAlsText(datum = new Date()) {
+  const monat = String(datum.getMonth() + 1).padStart(2, '0');
+  const tag = String(datum.getDate()).padStart(2, '0');
+  return `${datum.getFullYear()}-${monat}-${tag}`;
+}
+
 /** Das Jahr aus einem ISO-Datum ("2026-08-14" oder voller Zeitstempel). */
 export function jahrVon(datum) {
   const anfang = String(datum ?? '').slice(0, 4);

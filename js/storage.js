@@ -12,6 +12,7 @@
  */
 
 import { SCHEMA_VERSION } from './model.js';
+import { datumAlsText } from './costs.js';
 
 export const SPEICHER_SCHLUESSEL = 'kindergarderobe';
 
@@ -401,7 +402,7 @@ export function erstelleSpeicher(hintergrund = null, { dauerhaft = true } = {}) 
         const ausgabe = {
           id: neueId(),
           bezeichnung,
-          datum: datum ?? jetzt().slice(0, 10),
+          datum: datum ?? datumAlsText(),
           betrag,
           anzahlTeile,
         };
@@ -619,7 +620,7 @@ function verknuepfeEinzelpreis(zustand, teil) {
   const ausgabe = {
     id: neueId(),
     bezeichnung: teil.name,
-    datum: jetzt().slice(0, 10),
+    datum: datumAlsText(),
     betrag,
     anzahlTeile: 1,
   };
