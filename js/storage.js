@@ -342,8 +342,17 @@ export function erstelleSpeicher(hintergrund = null, { dauerhaft = true } = {}) 
     teilAendern(id, aenderungen) {
       return aendere('teilAendern', (zustand) => {
         const teil = findeTeil(zustand, id);
+        const bisherigeEigene = teil.preis?.art === 'einzeln' ? teil.preis.ausgabeId : null;
+
         Object.assign(teil, aenderungen, { geaendertAm: jetzt() });
         verknuepfeEinzelpreis(zustand, teil);
+
+        // Weg vom Einzelpreis (kein Preis, Sammelkauf, neue eigene Ausgabe):
+        // die bisherige eigene Ausgabe fällt weg, sonst zählte sie doppelt.
+        // Ein Sammelkauf ist nie eine eigene Ausgabe und bleibt bestehen.
+        if (bisherigeEigene && teil.preis?.ausgabeId !== bisherigeEigene) {
+          entferneEigeneAusgabe(zustand, bisherigeEigene);
+        }
         return teil;
       });
     },
@@ -626,6 +635,16 @@ function verknuepfeEinzelpreis(zustand, teil) {
 function istEigeneAusgabe(zustand, ausgabe, teilId) {
   if ((ausgabe.anzahlTeile ?? 1) > 1) return false;
   return !zustand.teile.some((t) => t.id !== teilId && t.preis?.ausgabeId === ausgabe.id);
+}
+
+/**
+ * Löscht die Ausgabe eines früheren Einzelpreises – aber nur, wenn sie für
+ * ein Teil steht und kein Teil mehr an ihr hängt.
+ */
+function entferneEigeneAusgabe(zustand, ausgabeId) {
+  const ausgabe = zustand.ausgaben.find((a) => a.id === ausgabeId);
+  if (!ausgabe || !istEigeneAusgabe(zustand, ausgabe, null)) return;
+  zustand.ausgaben = zustand.ausgaben.filter((a) => a.id !== ausgabeId);
 }
 
 /** Die Instanz, mit der die App arbeitet. */
