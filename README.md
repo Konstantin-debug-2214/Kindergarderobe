@@ -90,9 +90,14 @@ Browserspeicher geleert wird – deshalb regelmäßig ein Backup sichern.
 
 ## Neue Version veröffentlichen
 
-Beim Veröffentlichen gilt: **In `sw.js` die Zeile `const VERSION = 'v1'`
+Beim Veröffentlichen gilt: **In `sw.js` die Zeile `const VERSION = 'v3'`
 hochzählen**, sobald sich HTML, CSS, JavaScript, Schriften oder Icons geändert
 haben. Nur dann bemerkt der Browser die neue Version.
+
+`node --test` wacht darüber: `tests/sw-versionen.txt` hält zu jeder Version
+einen Fingerabdruck der App-Dateien fest. Haben sich Dateien geändert und
+`VERSION` steht noch auf dem alten Wert, schlägt der Test an und nennt die
+Zeile, die nach dem Hochzählen in `tests/sw-versionen.txt` einzutragen ist.
 
 Auf dem Gerät erscheint danach oben das Band **„Neue Version verfügbar“** mit
 dem Knopf **„Neu laden“**. Nichts wird von selbst neu geladen, damit
