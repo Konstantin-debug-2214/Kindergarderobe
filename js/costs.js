@@ -3,8 +3,6 @@
  *
  * Alle Beträge sind ganze Zahlen in Cent (8,00 € = 800). Dadurch gibt es
  * keine Fließkomma-Fehler; erst formatEuro macht daraus einen Text.
- *
- * Durchschnitt, Sammelkäufe und die Kosten-Ansicht folgen in Auftrag 06.
  */
 
 const EURO_FORMAT = new Intl.NumberFormat('de-DE', {

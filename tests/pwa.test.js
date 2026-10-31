@@ -18,8 +18,8 @@ const WURZEL = fileURLToPath(new URL('..', import.meta.url));
 /** Ordner, deren Inhalt vollständig im Cache liegen muss. */
 const APP_ORDNER = ['css', 'js', 'fonts', 'icons'];
 
-/** Keine App-Datei, nur ein Platzhalter für Git. */
-const NICHT_IM_CACHE = new Set(['icons/.gitkeep']);
+/** Dateien in den App-Ordnern, die nicht in den Cache gehören (zurzeit keine). */
+const NICHT_IM_CACHE = new Set();
 
 const swQuelle = readFileSync(join(WURZEL, 'sw.js'), 'utf8');
 const manifest = JSON.parse(readFileSync(join(WURZEL, 'manifest.webmanifest'), 'utf8'));

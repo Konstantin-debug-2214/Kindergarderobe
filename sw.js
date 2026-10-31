@@ -16,7 +16,7 @@
  */
 
 /** Bei jeder Änderung an den App-Dateien hochzählen. */
-const VERSION = 'v6';
+const VERSION = 'v7';
 const CACHE_NAME = `kindergarderobe-${VERSION}`;
 
 /** Alle Dateien, die die App zum Laufen braucht. */
@@ -51,7 +51,6 @@ const DATEIEN = [
   './js/screens/kategorie.js',
   './js/screens/kosten.js',
   './js/screens/notfall.js',
-  './js/screens/platzhalter.js',
   './js/screens/saisonwechsel.js',
   './js/screens/statistik.js',
   './js/screens/teil.js',
