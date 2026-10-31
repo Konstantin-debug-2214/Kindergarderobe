@@ -460,7 +460,8 @@ function verknuepfeEinzelpreis(zustand, teil) {
 
   const betrag = teil.preis.betrag;
   const vorhanden = teil.preis.ausgabeId
-    ? zustand.ausgaben.find((a) => a.id === teil.preis.ausgabeId)
+    ? zustand.ausgaben.find((a) => a.id === teil.preis.ausgabeId
+      && istEigeneAusgabe(zustand, a, teil.id))
     : null;
 
   if (vorhanden) {
@@ -479,6 +480,16 @@ function verknuepfeEinzelpreis(zustand, teil) {
   };
   zustand.ausgaben.push(ausgabe);
   teil.preis = { art: 'einzeln', betrag, ausgabeId: ausgabe.id };
+}
+
+/**
+ * Darf ein Einzelpreis diese Ausgabe als seine eigene weiterführen?
+ * Nur wenn sie für genau ein Teil steht und kein anderes Teil an ihr hängt.
+ * Ein Sammelkauf wird dadurch nie von einem Einzelpreis überschrieben.
+ */
+function istEigeneAusgabe(zustand, ausgabe, teilId) {
+  if ((ausgabe.anzahlTeile ?? 1) > 1) return false;
+  return !zustand.teile.some((t) => t.id !== teilId && t.preis?.ausgabeId === ausgabe.id);
 }
 
 /** Die Instanz, mit der die App arbeitet. */

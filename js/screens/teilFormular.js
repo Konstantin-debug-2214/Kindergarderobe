@@ -45,6 +45,7 @@ import {
   artNachKategoriewechsel,
   entwurfAusTeil,
   entwurfGeaendert,
+  eigeneAusgabeId,
   entwurfMitTyp,
   gaengigeGroessen,
   groesseNachWechsel,
@@ -419,7 +420,7 @@ function formular({ modus, teilId }, { neuZeichnen = () => {} }) {
             betragText = '';
             setze({ preis: null });
           } else if (neueArt === 'einzeln') {
-            setze({ preis: preisEinzeln(euroTextInCent(betragText) ?? 0, entwurf.preis?.ausgabeId) });
+            setze({ preis: preisEinzeln(euroTextInCent(betragText) ?? 0, eigeneAusgabeId(entwurf.preis)) });
           } else {
             waehleSammelkauf();
           }
@@ -434,7 +435,7 @@ function formular({ modus, teilId }, { neuZeichnen = () => {} }) {
         beiEingabe: (wert) => {
           betragText = wert;
           const cent = euroTextInCent(wert);
-          setzeStill({ preis: preisEinzeln(cent ?? 0, entwurf.preis?.ausgabeId) });
+          setzeStill({ preis: preisEinzeln(cent ?? 0, eigeneAusgabeId(entwurf.preis)) });
         },
       }));
     }

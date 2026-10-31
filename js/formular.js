@@ -206,3 +206,12 @@ export function preisEinzeln(betragInCent, ausgabeId = null) {
 export function preisSammelkauf(ausgabeId) {
   return { art: PREIS_ART.SAMMELKAUF, ausgabeId };
 }
+
+/**
+ * Die eigene Ausgabe eines Einzelpreises – oder null. Ein Sammelkauf ist nie
+ * die eigene Ausgabe eines Teils: Wer von dort auf Einzelpreis wechselt,
+ * bekommt eine neue Ausgabe, der Sammelkauf bleibt unberührt.
+ */
+export function eigeneAusgabeId(preis) {
+  return preis?.art === PREIS_ART.EINZELN ? preis.ausgabeId ?? null : null;
+}
