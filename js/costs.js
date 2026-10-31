@@ -101,7 +101,7 @@ export function preisHinweis(teil, ausgaben = []) {
   if (teil?.preis?.art !== 'sammelkauf') return null;
   const ausgabe = ausgaben.find((a) => a.id === teil.preis.ausgabeId);
   if (!ausgabe) return null;
-  return `${ausgabe.bezeichnung} · ${formatEuro(ausgabe.betrag)} für ${ausgabe.anzahlTeile} Teile`;
+  return `${ausgabe.bezeichnung} · ${formatEuro(ausgabe.betrag)} für ${anzahlTeileText(ausgabe.anzahlTeile)}`;
 }
 
 /* --- Zahlen für die Kosten-Ansicht ---------------------------------------- */
@@ -161,4 +161,20 @@ function teilezahl(ausgabe) {
 /** Ein Sammelkauf umfasst mehr als ein Teil. */
 export function istSammelkauf(ausgabe) {
   return teilezahl(ausgabe) > 1;
+}
+
+/** "1 Teil", "6 Teile". */
+export function anzahlTeileText(anzahl) {
+  return anzahl === 1 ? '1 Teil' : `${anzahl} Teile`;
+}
+
+/**
+ * Kleinste erlaubte Anzahl Teile beim Bearbeiten einer Ausgabe: Ein
+ * Sammelkauf bleibt ein Sammelkauf (mindestens 2), und keine Ausgabe kann
+ * weniger Teile haben, als ihr zugeordnet sind.
+ * @param {Object} ausgabe
+ * @param {number} anzahlZugeordnet Teile, deren Preis an der Ausgabe hängt
+ */
+export function mindestTeile(ausgabe, anzahlZugeordnet = 0) {
+  return Math.max(istSammelkauf(ausgabe) ? 2 : 1, anzahlZugeordnet);
 }

@@ -1,7 +1,17 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { datumAlsText, euroTextInCent, formatEuro, gesamtsumme, jahressumme, jahrVon } from '../js/costs.js';
+import {
+  anzahlTeileText,
+  datumAlsText,
+  euroTextInCent,
+  formatEuro,
+  gesamtsumme,
+  jahressumme,
+  jahrVon,
+  mindestTeile,
+  preisHinweis,
+} from '../js/costs.js';
 
 const AUSGABEN = [
   { id: '1', bezeichnung: 'Flohmarkt Kita', datum: '2026-09-12', betrag: 2500, anzahlTeile: 6 },
@@ -84,4 +94,23 @@ test('datumAlsText rechnet in Ortszeit, nicht in UTC (#6)', () => {
   assert.equal(datumAlsText(new Date(2027, 0, 1, 0, 30)), '2027-01-01');
   assert.equal(datumAlsText(new Date(2026, 11, 31, 23, 59)), '2026-12-31');
   assert.equal(datumAlsText(new Date(2026, 2, 5, 12)), '2026-03-05');
+});
+
+test('ein Sammelkauf behält mindestens 2 Teile und nie weniger als zugeordnet (#14)', () => {
+  const sammelkauf = { betrag: 2500, anzahlTeile: 6 };
+  assert.equal(mindestTeile(sammelkauf, 0), 2);
+  assert.equal(mindestTeile(sammelkauf, 4), 4);
+  const ohneTeil = { betrag: 800, anzahlTeile: 1 };
+  assert.equal(mindestTeile(ohneTeil, 0), 1);
+  assert.equal(mindestTeile(ohneTeil, 1), 1);
+});
+
+test('"1 Teil", aber "6 Teile" (#14)', () => {
+  assert.equal(anzahlTeileText(1), '1 Teil');
+  assert.equal(anzahlTeileText(6), '6 Teile');
+  assert.equal(
+    preisHinweis({ preis: { art: 'sammelkauf', ausgabeId: 'a' } },
+      [{ id: 'a', bezeichnung: 'Basar', betrag: 800, anzahlTeile: 1 }]),
+    `Basar · ${formatEuro(800)} für 1 Teil`,
+  );
 });

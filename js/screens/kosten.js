@@ -21,6 +21,7 @@ import {
   jahreMitAusgaben,
   jahresZahlen,
   jahrVon,
+  mindestTeile,
   proTeil,
 } from '../costs.js';
 
@@ -313,6 +314,8 @@ async function bearbeite(ausgabe, verknuepfte, neuZeichnen) {
     titel: 'Eintrag bearbeiten',
     vorgabe: ausgabe,
     zugeordneteTeile: verknuepfte.map((teil) => teil.name),
+    // Ein Sammelkauf bleibt einer und hat nie weniger Teile als zugeordnet.
+    minTeile: mindestTeile(ausgabe, verknuepfte.length),
     mitLoeschen: true,
   });
 

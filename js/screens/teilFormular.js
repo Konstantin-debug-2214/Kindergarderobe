@@ -60,7 +60,7 @@ import {
   sammelkaeufe,
   teilAusEntwurf,
 } from '../formular.js';
-import { euroTextInCent, formatEuro } from '../costs.js';
+import { anzahlTeileText, euroTextInCent, formatEuro } from '../costs.js';
 
 /** Felder, deren Meldung an einer anderen Stelle steht als ihr Name sagt. */
 const ANZEIGE_FELD = { marke: 'merkmal' };
@@ -469,7 +469,7 @@ function formular({ modus, teilId }, { neuZeichnen = () => {} }) {
             el('p', {
               class: 'sammelkauf__hinweis',
               text: `${datumText(ausgabe.datum)} · ${formatEuro(ausgabe.betrag)} für `
-                + `${ausgabe.anzahlTeile} Teile · ca. ${formatEuro(
+                + `${anzahlTeileText(ausgabe.anzahlTeile)} · ca. ${formatEuro(
                   Math.round(ausgabe.betrag / ausgabe.anzahlTeile),
                 )} / Teil`,
             }),
@@ -497,7 +497,7 @@ function formular({ modus, teilId }, { neuZeichnen = () => {} }) {
       eintraege: vorhandene.map((ausgabe) => ({
         wert: ausgabe.id,
         titel: ausgabe.bezeichnung,
-        hinweis: `${datumText(ausgabe.datum)} · ${ausgabe.anzahlTeile} Teile`,
+        hinweis: `${datumText(ausgabe.datum)} · ${anzahlTeileText(ausgabe.anzahlTeile)}`,
         zusatz: formatEuro(ausgabe.betrag),
       })),
       weitereAktion: { text: 'Neuer Sammelkauf', wert: '__neu__' },
