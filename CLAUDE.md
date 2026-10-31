@@ -1,6 +1,6 @@
 # Kindergarderobe – Projektregeln für Claude Code
 
-Stand: 20.10.2026 (nach Auftrag 10)
+Stand: 20.10.2026 (nach Auftrag 11)
 
 Inventar-App für Kleidung und Spielzeug eines Kindes. Eigenbedarf, ein Kind.
 Hauptgerät: **Android-Smartphone** im Hochformat (Chrome; Testgrößen 390 × 844 und 412 × 915). Das Tablet im Querformat (1194 × 834) wird weiterhin vollständig unterstützt, hat aber zweite Priorität (Entscheidung John, 20.10.2026). Genutzt wird die App hauptsächlich von einer Person.
@@ -10,7 +10,7 @@ Ziel: auf einen Blick sehen, was da ist, was passt, was fehlt und was es gekoste
 
 - Reines HTML, CSS und JavaScript (ES-Module, `<script type="module">`). **Kein Framework, keine Bibliothek, kein Build-Schritt, kein npm-Paket zur Laufzeit.**
 - Keine Netzwerkzugriffe zur Laufzeit. Schriften liegen lokal unter `fonts/` als Variable Fonts (Fredoka und Nunito, woff2, Teilmenge „latin“, OFL-Lizenz mitgeliefert); genutzt werden Fredoka 500/600 und Nunito 400/600/700/800.
-- Icons als Inline-SVG (Strich-Icons), keine Icon-Fonts, keine Emojis. Abweichend vom Design (Entscheidung John): **Einstellungen/„Mehr“ = Zahnrad** (nicht Sonne), **Spielzeug = Schaukelpferd** (nicht Teddykopf).
+- Icons als Inline-SVG (Strich-Icons), keine Icon-Fonts, keine Emojis. Abweichend vom Design (Entscheidung John): **Einstellungen/„Mehr“ = Zahnrad** (nicht Sonne), **Spielzeug = Schaukelpferd** (nicht Teddykopf). Alle Icons liegen in `js/ui/icons.js` auf einem 24er-Raster mit Strichstärke 1,8, runden Enden und `currentColor`; neue Motive werden groß und bei 24 px gegengeprüft, bevor sie dort aufgenommen werden.
 - Daten in `localStorage` über ein eigenes Modul `js/storage.js` (nie direkt aus anderen Modulen). Beim Start `navigator.storage.persist()` anfragen.
 - Responsive: Layout für Tablet quer (Hauptziel) und Smartphone hoch; Umbruch per CSS (Grid/Flex, Media Queries), keine getrennten Seiten.
 - Veröffentlichung über GitHub Pages aus dem `main`-Branch; Installation auf Android als Web-App über Chrome („App installieren“), kein App-Store, kein APK. Alle Pfade relativ, damit die App unter `/Kindergarderobe/` und lokal läuft. Das Repository ist öffentlich: **niemals echte Daten, Backups (`*.json`), die alte CSV oder die Design-Screenshots committen.**
