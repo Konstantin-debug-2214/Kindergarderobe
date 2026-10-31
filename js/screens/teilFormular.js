@@ -11,6 +11,7 @@ import { el } from '../ui/dom.js';
 import { icon } from '../ui/icons.js';
 import { knopf, iconKnopf } from '../ui/knoepfe.js';
 import { banner } from '../ui/banner.js';
+import { kopfzeile } from '../ui/kopfzeile.js';
 import { frageNach, pflegeListe, waehleAus } from '../ui/dialog.js';
 import { frageNachAusgabe } from '../ui/ausgabeDialog.js';
 import { zeigeHinweis } from '../ui/hinweis.js';
@@ -86,10 +87,11 @@ export function neuScreen(parameter = {}, optionen = {}) {
 export function teilBearbeitenScreen({ teilId }, optionen = {}) {
   if (optionen.frisch !== false) {
     const teil = speicher.teil(teilId);
-    if (!teil) return unbekanntesTeil();
-    starteBearbeiten(teil);
+    // Aussortierte Teile zeigt auch das Detail nur als Hinweis.
+    if (teil && !teil.aussortiert) starteBearbeiten(teil);
+    else entwurf = null;
   }
-  if (!entwurf) return unbekanntesTeil();
+  if (!entwurf) return hinweisStattFormular(speicher.teil(teilId));
   return formular({ modus: 'bearbeiten', teilId }, optionen);
 }
 
@@ -115,9 +117,31 @@ function starteBearbeiten(teil) {
   meldung = null;
 }
 
-function unbekanntesTeil() {
+/** Statt des Formulars: Teil gibt es nicht (mehr) oder es ist aussortiert. */
+function hinweisStattFormular(teil) {
   entwurf = null;
+
+  if (teil?.aussortiert) {
+    return el('div', { class: 'inhalt' }, [
+      kopfzeile({ titel: teil.name, zurueckZu: '#/aussortiert' }),
+      banner({
+        art: 'hinweis',
+        text: 'Dieses Teil ist aussortiert.',
+        zusatz: 'Zum Bearbeiten erst unter „Aussortiert“ zurückholen.',
+      }),
+      el('div', { class: 'testlinks' }, [
+        knopf({
+          text: 'Zu den aussortierten Teilen',
+          href: '#/aussortiert',
+          variante: 'primaer',
+          iconName: 'aussortiert',
+        }),
+      ]),
+    ]);
+  }
+
   return el('div', { class: 'inhalt' }, [
+    kopfzeile({ titel: 'Teil bearbeiten', zurueckZu: '#/' }),
     banner({
       art: 'fehler',
       rolle: 'alert',
