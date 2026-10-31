@@ -22,12 +22,25 @@ export const SPEICHER_SCHLUESSEL = 'kindergarderobe';
  */
 export const OBERFLAECHE_SCHLUESSEL = 'kindergarderobe-oberflaeche';
 
-/** Fehler beim Schreiben – trägt eine Meldung für die Oberfläche. */
+/**
+ * Sicherung beschädigter Daten. Kann der Hauptschlüssel nicht gelesen werden,
+ * landet sein Rohinhalt hier, bevor irgendetwas anderes geschieht. Eine
+ * weitere, andere Fassung bekommt einen Zeitstempel angehängt.
+ */
+export const ROHDATEN_SCHLUESSEL = 'kindergarderobe-rohdaten';
+
+/** Fehler beim Lesen oder Schreiben – trägt eine Meldung für die Oberfläche. */
 export class SpeicherFehler extends Error {
-  constructor(meldung, ursache) {
+  /**
+   * @param {string} meldung
+   * @param {*} [ursache]
+   * @param {'beschaedigt'|null} [art] 'beschaedigt': gespeicherte Daten unlesbar
+   */
+  constructor(meldung, ursache, art = null) {
     super(meldung);
     this.name = 'SpeicherFehler';
     this.cause = ursache;
+    this.art = art;
   }
 }
 
@@ -54,7 +67,26 @@ export function speicherImArbeitsspeicher() {
     getItem: (schluessel) => (werte.has(schluessel) ? werte.get(schluessel) : null),
     setItem: (schluessel, wert) => { werte.set(schluessel, String(wert)); },
     removeItem: (schluessel) => { werte.delete(schluessel); },
+    schluessel: () => [...werte.keys()],
   };
+}
+
+/** Alle Schlüssel eines Hintergrundspeichers (Web Storage oder Testspeicher). */
+function alleSchluessel(hintergrund) {
+  if (typeof hintergrund.schluessel === 'function') return hintergrund.schluessel();
+  const liste = [];
+  for (let i = 0; i < (hintergrund.length ?? 0); i += 1) liste.push(hintergrund.key(i));
+  return liste;
+}
+
+/** Hat der gelesene Zustand den Aufbau, mit dem die App arbeiten kann? */
+function istGueltigerAufbau(zustand) {
+  if (!zustand || typeof zustand !== 'object' || Array.isArray(zustand)) return false;
+  const listen = ['teile', 'ausgaben', 'marken', 'sollMengen'];
+  if (listen.some((name) => zustand[name] !== undefined && !Array.isArray(zustand[name]))) return false;
+  const einstellungen = zustand.einstellungen;
+  return einstellungen === undefined
+    || (einstellungen !== null && typeof einstellungen === 'object' && !Array.isArray(einstellungen));
 }
 
 function standardHintergrund() {
@@ -97,19 +129,88 @@ export function erstelleSpeicher(hintergrund = standardHintergrund()) {
 
     if (!roh) return leererZustand();
 
+    let zustand;
     try {
-      const zustand = JSON.parse(roh);
-      // Fehlende Felder ergänzen, damit ältere Stände weiter funktionieren.
-      return { ...leererZustand(), ...zustand, einstellungen: {
-        ...leererZustand().einstellungen,
-        ...(zustand.einstellungen || {}),
-      } };
+      zustand = JSON.parse(roh);
     } catch (ursache) {
+      throw beschaedigt(roh, ursache);
+    }
+    if (!istGueltigerAufbau(zustand)) throw beschaedigt(roh);
+
+    // Fehlende Felder ergänzen, damit ältere Stände weiter funktionieren.
+    return { ...leererZustand(), ...zustand, einstellungen: {
+      ...leererZustand().einstellungen,
+      ...(zustand.einstellungen || {}),
+    } };
+  }
+
+  /**
+   * Unlesbare Daten: erst den Rohinhalt sichern, dann den Fehler melden.
+   * Der Hauptschlüssel bleibt unberührt – jede Änderung liest zuerst und
+   * bricht damit vor dem Schreiben ab.
+   */
+  function beschaedigt(roh, ursache) {
+    sichereRohdaten(roh);
+    return new SpeicherFehler(
+      'Die gespeicherten Daten sind beschädigt und konnten nicht gelesen werden.',
+      ursache,
+      'beschaedigt',
+    );
+  }
+
+  /**
+   * Legt den Rohinhalt unter ROHDATEN_SCHLUESSEL ab, falls er dort noch nicht
+   * liegt. Eine ältere, andere Sicherung bleibt erhalten.
+   * @returns {boolean} liegt der Rohinhalt jetzt gesichert vor?
+   */
+  function sichereRohdaten(roh) {
+    try {
+      const schluessel = alleSchluessel(hintergrund)
+        .filter((s) => s === ROHDATEN_SCHLUESSEL || s.startsWith(`${ROHDATEN_SCHLUESSEL}-`));
+      if (schluessel.some((s) => hintergrund.getItem(s) === roh)) return true;
+
+      const ziel = schluessel.includes(ROHDATEN_SCHLUESSEL)
+        ? `${ROHDATEN_SCHLUESSEL}-${Date.now()}`
+        : ROHDATEN_SCHLUESSEL;
+      hintergrund.setItem(ziel, roh);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Vor dem Überschreiben (Backup einspielen, neu beginnen): sind die
+   * aktuellen Daten unlesbar, müssen sie zuerst gesichert sein.
+   */
+  function sichereVorDemUeberschreiben() {
+    let roh = null;
+    try {
+      roh = hintergrund.getItem(SPEICHER_SCHLUESSEL);
+    } catch (ursache) {
+      throw new SpeicherFehler('Die Daten konnten nicht gelesen werden.', ursache);
+    }
+    if (!roh) return;
+
+    let lesbar = false;
+    try {
+      lesbar = istGueltigerAufbau(JSON.parse(roh));
+    } catch {
+      lesbar = false;
+    }
+    if (!lesbar && !sichereRohdaten(roh)) {
       throw new SpeicherFehler(
-        'Die gespeicherten Daten sind beschädigt und konnten nicht gelesen werden.',
-        ursache,
+        'Die beschädigten Daten konnten nicht gesichert werden. Bitte zuerst die '
+          + 'Rohdaten herunterladen, dann erneut versuchen.',
       );
     }
+  }
+
+  /** Schreibt einen vollständigen neuen Zustand, ohne den alten zu lesen. */
+  function ersetzeZustand(art, zustand) {
+    sichereVorDemUeberschreiben();
+    schreibe(zustand);
+    melde(art);
   }
 
   function schreibe(zustand) {
@@ -424,21 +525,41 @@ export function erstelleSpeicher(hintergrund = standardHintergrund()) {
      * genau dem Backup, deshalb steht der Änderungszähler auf 0.
      */
     allesErsetzen(daten, { letztesBackupAm = jetzt() } = {}) {
-      vergissBannerAusblenden();
-      return aendere('allesErsetzen', (zustand) => {
-        const frisch = leererZustand();
-        zustand.version = SCHEMA_VERSION;
-        zustand.teile = daten.teile ?? frisch.teile;
-        zustand.ausgaben = daten.ausgaben ?? frisch.ausgaben;
-        zustand.marken = daten.marken ?? frisch.marken;
-        zustand.sollMengen = daten.sollMengen ?? frisch.sollMengen;
-        zustand.einstellungen = {
+      // Der alte Stand wird nicht gelesen: So klappt das Einspielen auch, wenn
+      // er beschädigt ist. In dem Fall wird er vorher als Rohdaten gesichert.
+      const frisch = leererZustand();
+      ersetzeZustand('allesErsetzen', {
+        version: SCHEMA_VERSION,
+        teile: daten.teile ?? frisch.teile,
+        ausgaben: daten.ausgaben ?? frisch.ausgaben,
+        marken: daten.marken ?? frisch.marken,
+        sollMengen: daten.sollMengen ?? frisch.sollMengen,
+        einstellungen: {
           ...frisch.einstellungen,
           name: daten.einstellungen?.name ?? '',
           letztesBackupAm,
           aenderungenSeitBackup: 0,
-        };
-      }, { zaehlen: false });
+        },
+      });
+      vergissBannerAusblenden();
+    },
+
+    /**
+     * Beginnt mit leeren Daten – der Ausweg bei beschädigten Daten ohne
+     * Backup. Der beschädigte Stand bleibt als Rohdaten gesichert.
+     */
+    neuBeginnen() {
+      ersetzeZustand('neuBeginnen', leererZustand());
+      vergissBannerAusblenden();
+    },
+
+    /**
+     * Rohinhalt des Hauptschlüssels, z. B. zum Herunterladen, wenn er
+     * beschädigt ist.
+     * @returns {string|null}
+     */
+    rohdaten() {
+      return hintergrund.getItem(SPEICHER_SCHLUESSEL);
     },
 
     /** Löscht alles (nur für Tests und Fehlersuche). */

@@ -255,7 +255,12 @@ function waehleDatei() {
   });
 }
 
-async function starteImport(zeigeMeldung) {
+/**
+ * Datei wählen, prüfen, Vorschau zeigen und nach Bestätigung einspielen.
+ * Wird auch von der Notfallansicht bei beschädigten Daten genutzt.
+ * @param {(meldung: Object) => void} zeigeMeldung
+ */
+export async function starteImport(zeigeMeldung) {
   const datei = await waehleDatei();
   if (!datei) return;
 

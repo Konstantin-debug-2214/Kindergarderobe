@@ -24,6 +24,7 @@ import { statistikScreen } from './screens/statistik.js';
 import { saisonwechselScreen } from './screens/saisonwechsel.js';
 import { aussortiertScreen } from './screens/aussortiert.js';
 import { einstellungenScreen } from './screens/einstellungen.js';
+import { notfallScreen } from './screens/notfall.js';
 
 /** Screen-Name aus router.js -> Funktion, die den Inhalt baut. */
 const SCREENS = {
@@ -94,7 +95,10 @@ function start() {
       // neuZeichnen erlaubt einem Screen, sich selbst neu aufzubauen.
       leeren(screenKnoten).append(bauen(parameter, { neuZeichnen, frisch }));
     } catch (fehler) {
-      leeren(screenKnoten).append(fehlerSeite(fehler));
+      // Unlesbare Daten: statt einer Sackgasse die Notfallansicht mit
+      // "Backup einspielen" – auf jeder Route.
+      const beschaedigt = fehler instanceof SpeicherFehler && fehler.art === 'beschaedigt';
+      leeren(screenKnoten).append(beschaedigt ? notfallScreen({ neuZeichnen }) : fehlerSeite(fehler));
     }
 
     aktualisiereLeiste(leisteKnoten, screen);

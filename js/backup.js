@@ -127,8 +127,23 @@ async function teileOderLade(dateiname, text) {
   return 'heruntergeladen';
 }
 
-function lade(dateiname, text) {
-  const blob = new Blob([text], { type: 'application/json' });
+/**
+ * Lädt die Rohdaten beschädigter Daten als Textdatei herunter – damit nichts
+ * verloren geht und sich die Daten notfalls von Hand retten lassen.
+ * Bewusst .txt: Die Datei ist kein Backup und lässt sich nicht einspielen.
+ * @param {string} text
+ * @returns {string} Dateiname
+ */
+export function ladeRohdatenHerunter(text, datum = new Date()) {
+  const dateiname = backupDateiname(datum)
+    .replace('-backup-', '-rohdaten-')
+    .replace(/\.json$/, '.txt');
+  lade(dateiname, text, 'text/plain');
+  return dateiname;
+}
+
+function lade(dateiname, text, typ = 'application/json') {
+  const blob = new Blob([text], { type: typ });
   const adresse = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = adresse;

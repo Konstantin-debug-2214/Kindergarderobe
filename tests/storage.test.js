@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   erstelleSpeicher,
   OBERFLAECHE_SCHLUESSEL,
+  ROHDATEN_SCHLUESSEL,
   speicherImArbeitsspeicher,
   SPEICHER_SCHLUESSEL,
   SpeicherFehler,
@@ -300,6 +301,94 @@ test('beschädigte Daten im Speicher geben eine verständliche Meldung', () => {
     () => speicher.zustand(),
     (fehler) => fehler instanceof SpeicherFehler && fehler.message.includes('beschädigt'),
   );
+});
+
+/* --- Beschädigte Daten (#2) ----------------------------------------------- */
+
+const KAPUTT = '{"teile":[{"name":"Regenjacke"';
+
+function beschaedigterSpeicher(roh = KAPUTT) {
+  const hintergrund = speicherImArbeitsspeicher();
+  hintergrund.setItem(SPEICHER_SCHLUESSEL, roh);
+  return { hintergrund, speicher: erstelleSpeicher(hintergrund) };
+}
+
+test('beschädigte Daten werden erkannt und als Rohdaten gesichert (#2)', () => {
+  const { hintergrund, speicher } = beschaedigterSpeicher();
+
+  assert.throws(
+    () => speicher.teile(),
+    (fehler) => fehler instanceof SpeicherFehler && fehler.art === 'beschaedigt',
+  );
+  // Nichts überschrieben, zusätzlich eine Kopie unter eigenem Schlüssel.
+  assert.equal(hintergrund.getItem(SPEICHER_SCHLUESSEL), KAPUTT);
+  assert.equal(hintergrund.getItem(ROHDATEN_SCHLUESSEL), KAPUTT);
+  assert.equal(speicher.rohdaten(), KAPUTT);
+});
+
+test('lesbares JSON mit falschem Aufbau gilt ebenfalls als beschädigt (#2)', () => {
+  for (const roh of ['null', '[]', '42', '{"teile":"nichts"}', '{"teile":[],"marken":{}}']) {
+    const { speicher } = beschaedigterSpeicher(roh);
+    assert.throws(
+      () => speicher.zustand(),
+      (fehler) => fehler instanceof SpeicherFehler && fehler.art === 'beschaedigt',
+      roh,
+    );
+  }
+});
+
+test('eine Änderung überschreibt beschädigte Daten nicht (#2)', () => {
+  const { hintergrund, speicher } = beschaedigterSpeicher();
+  assert.throws(() => speicher.teilAnlegen(kleidungsteil()), SpeicherFehler);
+  assert.throws(() => speicher.backupNotieren(), SpeicherFehler);
+  assert.equal(hintergrund.getItem(SPEICHER_SCHLUESSEL), KAPUTT);
+});
+
+test('ein Backup lässt sich trotz beschädigter Daten einspielen (#2)', () => {
+  const { hintergrund, speicher } = beschaedigterSpeicher();
+
+  speicher.allesErsetzen({ teile: [kleidungsteil({ name: 'Aus dem Backup' })], einstellungen: { name: 'Mila' } });
+
+  assert.equal(speicher.teile()[0].name, 'Aus dem Backup');
+  // Die Rohdaten bleiben trotzdem erhalten.
+  assert.equal(hintergrund.getItem(ROHDATEN_SCHLUESSEL), KAPUTT);
+});
+
+test('neu beginnen leert die Daten, die Rohdaten bleiben gesichert (#2)', () => {
+  const { hintergrund, speicher } = beschaedigterSpeicher();
+
+  speicher.neuBeginnen();
+
+  assert.deepEqual(speicher.teile(), []);
+  assert.equal(hintergrund.getItem(ROHDATEN_SCHLUESSEL), KAPUTT);
+});
+
+test('eine zweite Beschädigung überschreibt die erste Sicherung nicht (#2)', () => {
+  const { hintergrund, speicher } = beschaedigterSpeicher();
+  assert.throws(() => speicher.zustand(), SpeicherFehler);
+
+  hintergrund.setItem(SPEICHER_SCHLUESSEL, '{"ganz":"anders"');
+  assert.throws(() => speicher.zustand(), SpeicherFehler);
+
+  assert.equal(hintergrund.getItem(ROHDATEN_SCHLUESSEL), KAPUTT);
+  assert.ok(
+    hintergrund.schluessel().some((s) => s.startsWith(`${ROHDATEN_SCHLUESSEL}-`)
+      && hintergrund.getItem(s) === '{"ganz":"anders"'),
+    'die zweite Fassung liegt unter einem eigenen Schlüssel',
+  );
+});
+
+test('kann die Kopie nicht gesichert werden, bleibt alles unangetastet (#2)', () => {
+  const { hintergrund, speicher } = beschaedigterSpeicher();
+  const original = hintergrund.setItem;
+  hintergrund.setItem = (schluessel, wert) => {
+    if (schluessel.startsWith(ROHDATEN_SCHLUESSEL)) throw new Error('voll');
+    original(schluessel, wert);
+  };
+
+  assert.throws(() => speicher.allesErsetzen({ teile: [] }), SpeicherFehler);
+  assert.throws(() => speicher.neuBeginnen(), SpeicherFehler);
+  assert.equal(hintergrund.getItem(SPEICHER_SCHLUESSEL), KAPUTT);
 });
 
 test('alles ersetzen übernimmt die Daten und setzt den Zähler auf 0', () => {
