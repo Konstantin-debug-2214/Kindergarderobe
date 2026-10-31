@@ -855,9 +855,12 @@
     width: auto;
   }
 
+  /* align-items aus dem Tablet-Raster (start) gälte sonst weiter: Karten
+     würden so breit wie ihr Inhalt, ein langes Wort sprengte die Seite. */
   .kosten__raster {
     display: flex;
     flex-direction: column;
+    align-items: stretch;
     gap: var(--abstand-5);
   }
 
