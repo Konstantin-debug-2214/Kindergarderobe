@@ -114,3 +114,18 @@ test('"1 Teil", aber "6 Teile" (#14)', () => {
     `Basar · ${formatEuro(800)} für 1 Teil`,
   );
 });
+
+test('Beträge: nur Ziffern mit höchstens zwei Nachkommastellen (#15)', () => {
+  for (const text of ['1e3', '0x10', '8,505', 'Infinity', '8,5o', '1,234.56', '1.2.3', ',50', '8,', '12.345.6']) {
+    assert.equal(euroTextInCent(text), null, text);
+  }
+});
+
+test('Beträge: Tausenderpunkt und eine Nachkommastelle (#15)', () => {
+  assert.equal(euroTextInCent('1.234,56'), 123456);
+  assert.equal(euroTextInCent('1.234'), 123400);
+  assert.equal(euroTextInCent('12.345.678,90'), 1234567890);
+  assert.equal(euroTextInCent('8,5'), 850);
+  assert.equal(euroTextInCent('0,1'), 10);
+  assert.equal(euroTextInCent('1 234,50'), 123450);
+});

@@ -44,16 +44,26 @@ export function formatEuro(betragInCent) {
   return EURO_FORMAT.format(ganzeZahl(betragInCent) / 100);
 }
 
+/** "8", "8,5", "8.50", "1234,56" – Komma oder Punkt, höchstens zwei Stellen. */
+const BETRAG_EINFACH = /^(\d+)(?:[.,](\d{1,2}))?$/;
+
+/** "1.234" oder "1.234,56" – Punkte als Tausendertrenner, Komma vor den Cent. */
+const BETRAG_TAUSENDER = /^(\d{1,3}(?:\.\d{3})+)(?:,(\d{1,2}))?$/;
+
 /**
- * Wandelt eine Eingabe wie "8,50" oder "8.5" in Cent um.
- * @returns {number|null} Cent, oder null wenn die Eingabe keine Zahl ist
+ * Wandelt eine Eingabe wie "8,50", "8.5" oder "1.234,56" in Cent um.
+ * Gerechnet wird mit ganzen Zahlen, ohne Gleitkomma. Exoten wie "1e3" oder
+ * "0x10" gelten nicht als Betrag.
+ * @returns {number|null} Cent, oder null wenn die Eingabe kein Betrag ist
  */
 export function euroTextInCent(text) {
-  const sauber = String(text ?? '').trim().replace(/\s/g, '').replace(',', '.');
-  if (sauber === '') return null;
-  const zahl = Number(sauber);
-  if (!Number.isFinite(zahl) || zahl < 0) return null;
-  return Math.round(zahl * 100);
+  const sauber = String(text ?? '').replace(/\s/g, '');
+  const treffer = sauber.match(BETRAG_EINFACH) ?? sauber.match(BETRAG_TAUSENDER);
+  if (!treffer) return null;
+
+  const euro = Number(treffer[1].replace(/\./g, ''));
+  const cent = Number((treffer[2] ?? '').padEnd(2, '0'));
+  return euro * 100 + cent;
 }
 
 /**
