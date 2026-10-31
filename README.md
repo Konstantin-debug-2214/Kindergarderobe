@@ -178,5 +178,12 @@ Fließkomma-Fehler entstehen.
 - **Auftrag 10 – Installierbare Web-App:** `manifest.webmanifest`, Service
   Worker mit versioniertem Cache und Offline-Betrieb, App-Icons und der
   Hinweis „Neue Version verfügbar“ mit Knopf „Neu laden“.
+- **Auftrag 11 – Icons:** Zahnrad für Einstellungen bzw. „Mehr“, Schaukelpferd
+  für Spielzeug, beide als eigene Strich-Icons.
+- **Auftrag 12 – Qualitätsprüfung:** Prüfbericht mit 22 Befunden
+  (`Claude-Code-Uebergabe/Pruefbericht-12.md`); behoben u. a. das Überschreiben
+  eines Sammelkaufs, doppelt gezählte Einzelpreise, eine Notfallansicht bei
+  beschädigten Daten und ein Zurück-Knopf, der sich wie die Zurück-Geste
+  verhält.
 
 Damit sind alle Screens aus Version 1 gebaut und die App ist installierbar.
