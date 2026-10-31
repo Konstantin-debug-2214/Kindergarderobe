@@ -24,17 +24,63 @@ export const ROUTEN = [
 /** Route, auf die unbekannte Adressen führen. */
 export const STANDARD_HASH = '#/';
 
-/** Wie oft in dieser Sitzung schon ein Screen gezeichnet wurde. */
-let gezeichnet = 0;
+/**
+ * Tiefe des aktuellen Verlaufseintrags innerhalb der App: 0 ist der Einstieg
+ * (Startbildschirm, Link), jeder neue Eintrag zählt eins weiter. Die Tiefe
+ * steht zusätzlich in history.state und ist damit auch nach der Zurück-Geste
+ * und nach dem Neuladen richtig.
+ */
+let tiefe = 0;
+
+/** Ist der Router schon gestartet? Vorher gibt es keinen Eintrag davor. */
+let gestartet = false;
+
+/** Gesetzt von ersetzeRoute: Der nächste Eintrag ersetzt den aktuellen. */
+let ersetztGerade = false;
 
 /**
- * Gab es in dieser Sitzung schon eine Seite davor?
- * Damit lässt sich entscheiden, ob history.back() in der App bleibt oder ob
- * ein Screen ein eigenes Ziel ansteuern muss (z. B. nach dem Neuladen oder
- * beim Einstieg über einen Link).
+ * Tiefe eines Verlaufseintrags. Rein, damit testbar.
+ * @param {*} state history.state des Eintrags
+ * @param {number|null} bisher Tiefe des vorigen Eintrags, null beim Start
+ * @param {boolean} ersetzt wurde der vorige Eintrag ersetzt statt ergänzt?
+ * @returns {number}
+ */
+export function tiefeFuer(state, bisher, ersetzt) {
+  // Zurück, vor oder neu geladen: der Eintrag kennt seine Tiefe.
+  if (Number.isInteger(state?.tiefe)) return state.tiefe;
+  if (bisher === null) return 0;
+  return ersetzt ? bisher : bisher + 1;
+}
+
+/**
+ * Gibt es innerhalb der App eine Seite davor? Dann führt history.back()
+ * dorthin; sonst würde es die App verlassen.
  */
 export function hatVorgaenger() {
-  return gezeichnet > 1;
+  return tiefe > 0;
+}
+
+/**
+ * Wechselt die Route, ohne einen Verlaufseintrag hinzuzufügen – etwa nach
+ * dem Speichern oder beim Blättern, damit „Zurück“ nicht jeden Zwischenschritt
+ * wiederholt.
+ * @param {string} hash z. B. '#/teil/abc'
+ */
+export function ersetzeRoute(hash) {
+  if (window.location.hash === hash) return;
+  ersetztGerade = true;
+  window.location.replace(`${window.location.pathname}${window.location.search}${hash}`);
+}
+
+/**
+ * Zurück wie mit der Zurück-Geste. Gibt es in der App keine Seite davor
+ * (Einstieg über Startbildschirm oder Link), geht es zur logischen
+ * Elternseite – nie aus der App heraus.
+ * @param {string} elternZiel z. B. '#/kategorie/schuhe'
+ */
+export function zurueck(elternZiel) {
+  if (hatVorgaenger()) window.history.back();
+  else ersetzeRoute(elternZiel);
 }
 
 /**
@@ -112,11 +158,16 @@ export function starteRouter({ beiWechsel }) {
 
     if (!route) {
       // Unbekannte Route: ohne neuen History-Eintrag zur Übersicht.
-      window.location.replace(`${window.location.pathname}${window.location.search}${STANDARD_HASH}`);
+      ersetzeRoute(STANDARD_HASH);
       return;
     }
 
-    gezeichnet += 1;
+    tiefe = tiefeFuer(window.history.state, gestartet ? tiefe : null, ersetztGerade);
+    ersetztGerade = false;
+    gestartet = true;
+    if (window.history.state?.tiefe !== tiefe) {
+      window.history.replaceState({ ...(window.history.state ?? {}), tiefe }, '');
+    }
 
     // Werte aus der Adresse ergänzen die Werte aus dem Pfad.
     beiWechsel({

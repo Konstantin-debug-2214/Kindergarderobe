@@ -24,6 +24,7 @@ import {
   zaehler,
 } from '../ui/formularteile.js';
 import { speicher, SpeicherFehler } from '../storage.js';
+import { ersetzeRoute, zurueck } from '../router.js';
 import {
   ALTER_AB_VORGABEN,
   FARBEN,
@@ -174,7 +175,8 @@ function formular({ modus, teilId }, { neuZeichnen = () => {} }) {
       if (!verwerfen) return;
     }
     entwurf = null;
-    window.location.hash = zurueckZiel;
+    // Abbrechen geht zurück, woher man kam.
+    zurueck(zurueckZiel);
   }
 
   // Die Vorschau wird beim Tippen ausgetauscht, ohne den Screen neu zu bauen.
@@ -831,7 +833,12 @@ function formular({ modus, teilId }, { neuZeichnen = () => {} }) {
       else speicher.teilAendern(teilId, teil);
 
       entwurf = null;
-      window.location.hash = `#/teil/${encodeURIComponent(teil.id)}`;
+      const detail = `#/teil/${encodeURIComponent(teil.id)}`;
+      // Neues Teil: das Formular wird durch das Detail ersetzt. Bearbeiten:
+      // zurück zum Detail, von dem man kam. So führt "Zurück" danach nie
+      // ins Formular.
+      if (modus === 'neu') ersetzeRoute(detail);
+      else zurueck(detail);
     } catch (ausnahme) {
       meldung = {
         art: 'fehler',

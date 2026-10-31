@@ -7,7 +7,7 @@
  */
 
 import { el } from '../ui/dom.js';
-import { iconKnopf, knopf } from '../ui/knoepfe.js';
+import { knopf, zurueckKnopf } from '../ui/knoepfe.js';
 import { balkenListe, diagrammKarte, saeulenDiagramm } from '../ui/diagramme.js';
 import { speicher } from '../storage.js';
 import { JAHRESZEITEN, KATEGORIEN, TYP } from '../model.js';
@@ -41,7 +41,7 @@ export function statistikScreen() {
   return el('div', { class: 'inhalt statistik' }, [
     el('header', { class: 'kopfzeile' }, [
       // Auf dem Smartphone navigiert die untere Leiste (CLAUDE.md).
-      zurueckKnopf(),
+      zurueckKnopfTablet(),
       el('div', { class: 'kopfzeile__titelblock' }, [
         el('h1', { class: 'kopfzeile__titel', text: 'Statistik' }),
         el('p', {
@@ -133,8 +133,8 @@ export function statistikScreen() {
 }
 
 /** Zurück-Knopf nur für das Tablet. */
-function zurueckKnopf() {
-  const knopfEl = iconKnopf({ label: 'Zurück', iconName: 'zurueck', href: '#/' });
+function zurueckKnopfTablet() {
+  const knopfEl = zurueckKnopf({ elternZiel: '#/' });
   knopfEl.classList.add('nur-tablet');
   return knopfEl;
 }

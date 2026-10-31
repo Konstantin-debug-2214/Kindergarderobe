@@ -7,7 +7,7 @@
 
 import { el, leeren } from '../ui/dom.js';
 import { icon } from '../ui/icons.js';
-import { iconKnopf, knopf } from '../ui/knoepfe.js';
+import { iconKnopf, knopf, zurueckKnopf } from '../ui/knoepfe.js';
 import { zaehler } from '../ui/formularteile.js';
 import { leererZustand } from '../ui/kacheln.js';
 import { zeigeHinweis } from '../ui/hinweis.js';
@@ -292,7 +292,7 @@ export function kostenScreen(parameter, { neuZeichnen = () => {}, frisch = true 
 
   return el('div', { class: 'inhalt kosten' }, [
     el('header', { class: 'kopfzeile' }, [
-      iconKnopf({ label: 'Zurück', iconName: 'zurueck', href: '#/' }),
+      zurueckKnopf({ elternZiel: '#/' }),
       el('div', { class: 'kopfzeile__titelblock' }, [
         el('h1', { class: 'kopfzeile__titel', text: 'Kosten' }),
       ]),

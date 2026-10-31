@@ -6,6 +6,7 @@
 
 import { el } from './dom.js';
 import { icon } from './icons.js';
+import { ersetzeRoute, zurueck } from '../router.js';
 
 /**
  * Knopf mit Text, optional mit Icon davor.
@@ -37,6 +38,34 @@ export function iconKnopf({ label, iconName, href, variante = 'leise' }) {
   return href
     ? el('a', { ...attribute, href }, icon(iconName))
     : el('button', { ...attribute, type: 'button' }, icon(iconName));
+}
+
+/**
+ * Runder Zurück-Knopf. Er verhält sich wie die Zurück-Geste: zur vorherigen
+ * Seite. Gibt es in der App keine (Einstieg über Startbildschirm oder Link),
+ * führt er zur logischen Elternseite – nie aus der App heraus.
+ * @param {{ elternZiel: string, label?: string }} optionen
+ */
+export function zurueckKnopf({ elternZiel, label = 'Zurück' }) {
+  const knopfEl = iconKnopf({ label, iconName: 'zurueck' });
+  knopfEl.addEventListener('click', () => zurueck(elternZiel));
+  return knopfEl;
+}
+
+/**
+ * Lässt einen Link die aktuelle Seite ersetzen statt einen Verlaufseintrag
+ * anzuhängen – etwa beim Blättern, damit „Zurück“ zur Liste führt und nicht
+ * Teil für Teil rückwärts. Ohne href (deaktiviert) passiert nichts.
+ * @param {HTMLAnchorElement} link
+ */
+export function ersetztBeimKlick(link) {
+  link.addEventListener('click', (ereignis) => {
+    const ziel = link.getAttribute('href');
+    if (!ziel) return;
+    ereignis.preventDefault();
+    ersetzeRoute(ziel);
+  });
+  return link;
 }
 
 /**

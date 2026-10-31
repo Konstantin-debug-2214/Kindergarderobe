@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { abfrageAusHash, findeRoute, pfadAusHash } from '../js/router.js';
+import { abfrageAusHash, findeRoute, pfadAusHash, tiefeFuer } from '../js/router.js';
 
 test('der Pfad entsteht aus dem Hash', () => {
   assert.equal(pfadAusHash(''), '/');
@@ -53,4 +53,25 @@ test('Werte aus dem Pfad kommen als Parameter', () => {
     { teilId: 'abc-123' });
   assert.deepEqual(findeRoute(pfadAusHash('#/kategorie/sets_sonstiges')).parameter,
     { kategorieId: 'sets_sonstiges' });
+});
+
+/* --- Tiefe im Verlauf (#7) ------------------------------------------------- */
+
+test('der Einstieg hat Tiefe 0, jeder neue Eintrag eine mehr (#7)', () => {
+  assert.equal(tiefeFuer(null, null, false), 0);
+  assert.equal(tiefeFuer(null, 0, false), 1);
+  assert.equal(tiefeFuer(null, 3, false), 4);
+});
+
+test('ein ersetzter Eintrag behält die Tiefe (#7)', () => {
+  assert.equal(tiefeFuer(null, 2, true), 2);
+  assert.equal(tiefeFuer(null, null, true), 0);
+});
+
+test('zurück, vor und Neuladen nehmen die gemerkte Tiefe (#7)', () => {
+  // Nach einer Zurück-Geste kennt der Eintrag seine Tiefe – der alte Zähler
+  // hätte hier "es gibt einen Vorgänger" gemeldet und aus der App geführt.
+  assert.equal(tiefeFuer({ tiefe: 0 }, 1, false), 0);
+  assert.equal(tiefeFuer({ tiefe: 2 }, null, false), 2);
+  assert.equal(tiefeFuer({ tiefe: 1 }, 5, true), 1);
 });

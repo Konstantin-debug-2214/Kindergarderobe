@@ -9,7 +9,8 @@
 
 import { el, leeren } from '../ui/dom.js';
 import { icon } from '../ui/icons.js';
-import { iconKnopf, knopf } from '../ui/knoepfe.js';
+import { ersetztBeimKlick, iconKnopf, knopf, zurueckKnopf } from '../ui/knoepfe.js';
+import { zurueck } from '../router.js';
 import { banner } from '../ui/banner.js';
 import { zeigeHinweis } from '../ui/hinweis.js';
 import { waehleAus } from '../ui/dialog.js';
@@ -50,11 +51,8 @@ export function teilScreen({ teilId }, { neuZeichnen = () => {} } = {}) {
 
   return el('div', { class: 'inhalt detail' }, [
     el('header', { class: 'kopfzeile detail__kopf' }, [
-      iconKnopf({
-        label: 'Zurück',
-        iconName: 'zurueck',
-        href: `#/kategorie/${encodeURIComponent(teil.kategorie)}`,
-      }),
+      // Ohne vorherige Seite (Einstieg über einen Link) zur Kategorie.
+      zurueckKnopf({ elternZiel: `#/kategorie/${encodeURIComponent(teil.kategorie)}` }),
       el('div', { class: 'kopfzeile__titelblock' }, [
         // Tablet: der Kategoriename ist die Überschrift.
         el('h1', { class: 'kopfzeile__titel nur-tablet', text: kat?.name ?? 'Teil' }),
@@ -116,6 +114,11 @@ function blaetterKnoepfe(stelle) {
   if (!stelle.vorher) zurueck.setAttribute('aria-disabled', 'true');
   if (!stelle.nachher) vor.setAttribute('aria-disabled', 'true');
 
+  // Blättern ersetzt die Seite: "Zurück" führt danach zur Liste, nicht durch
+  // jedes angesehene Teil.
+  ersetztBeimKlick(zurueck);
+  ersetztBeimKlick(vor);
+
   return el('div', { class: 'detail__blaettern nur-smartphone' }, [zurueck, vor]);
 }
 
@@ -135,7 +138,8 @@ function listeAufbauen(liste, aktuelles) {
         ? (eintrag.groesse ? `Gr. ${groesseText(eintrag.groesse)}` : 'ohne Größe')
         : (Number.isInteger(eintrag.alterAb) ? `ab ${eintrag.alterAb}` : 'ohne Alter');
 
-      return el(
+      // Wie beim Blättern: ein anderes Teil der Liste ersetzt die Seite.
+      return ersetztBeimKlick(el(
         'a',
         {
           class: `detail__eintrag${aktiv ? ' detail__eintrag--aktiv' : ''}`,
@@ -156,7 +160,7 @@ function listeAufbauen(liste, aktuelles) {
             ? el('span', { class: 'etikett-warnung', text: 'Bald zu klein' })
             : null,
         ],
-      );
+      ));
     }),
   ];
 }
@@ -329,7 +333,8 @@ async function frageGrund(teil) {
   try {
     speicher.teilAussortieren(teil.id, grund);
     zeigeHinweis(`${teil.name} aussortiert`);
-    window.location.hash = `#/kategorie/${encodeURIComponent(teil.kategorie)}`;
+    // Zurück, woher man kam; ohne vorherige Seite zur Kategorie.
+    zurueck(`#/kategorie/${encodeURIComponent(teil.kategorie)}`);
   } catch (fehler) {
     zeigeHinweis(
       fehler instanceof SpeicherFehler ? fehler.message : 'Das Teil konnte nicht aussortiert werden.',
@@ -343,7 +348,7 @@ async function frageGrund(teil) {
 function nichtGefunden() {
   return el('div', { class: 'inhalt' }, [
     el('header', { class: 'kopfzeile' }, [
-      iconKnopf({ label: 'Zurück', iconName: 'zurueck', href: '#/' }),
+      zurueckKnopf({ elternZiel: '#/' }),
       el('div', { class: 'kopfzeile__titelblock' }, [
         el('h1', { class: 'kopfzeile__titel', text: 'Teil' }),
       ]),
@@ -363,7 +368,7 @@ function nichtGefunden() {
 function istAussortiert(teil) {
   return el('div', { class: 'inhalt' }, [
     el('header', { class: 'kopfzeile' }, [
-      iconKnopf({ label: 'Zurück', iconName: 'zurueck', href: '#/' }),
+      zurueckKnopf({ elternZiel: '#/' }),
       el('div', { class: 'kopfzeile__titelblock' }, [
         el('h1', { class: 'kopfzeile__titel', text: teil.name }),
       ]),

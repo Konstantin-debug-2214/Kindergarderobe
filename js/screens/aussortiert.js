@@ -7,7 +7,7 @@
 
 import { el } from '../ui/dom.js';
 import { icon } from '../ui/icons.js';
-import { iconKnopf, knopf } from '../ui/knoepfe.js';
+import { knopf, zurueckKnopf } from '../ui/knoepfe.js';
 import { leererZustand } from '../ui/kacheln.js';
 import { zeigeHinweis } from '../ui/hinweis.js';
 import { frageNach } from '../ui/dialog.js';
@@ -47,7 +47,7 @@ export function aussortiertScreen() {
   return el('div', { class: 'inhalt aussortiert' }, [
     el('header', { class: 'kopfzeile' }, [
       // Auf dem Smartphone navigiert die untere Leiste (CLAUDE.md).
-      zurueckKnopf(),
+      zurueckKnopfTablet(),
       el('div', { class: 'kopfzeile__titelblock' }, [
         el('h1', { class: 'kopfzeile__titel', text: 'Aussortiert' }),
         el('p', { class: 'kopfzeile__unterzeile nur-tablet' }, [
@@ -116,8 +116,8 @@ export function aussortiertScreen() {
 }
 
 /** Zurück-Knopf nur für das Tablet. */
-function zurueckKnopf() {
-  const knopfEl = iconKnopf({ label: 'Zurück', iconName: 'zurueck', href: '#/' });
+function zurueckKnopfTablet() {
+  const knopfEl = zurueckKnopf({ elternZiel: '#/' });
   knopfEl.classList.add('nur-tablet');
   return knopfEl;
 }

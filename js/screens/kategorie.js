@@ -8,7 +8,7 @@
 
 import { el, leeren } from '../ui/dom.js';
 import { icon } from '../ui/icons.js';
-import { knopf, iconKnopf, suchfeld } from '../ui/knoepfe.js';
+import { iconKnopf, knopf, suchfeld, zurueckKnopf } from '../ui/knoepfe.js';
 import { leererZustand, teilKarte } from '../ui/kacheln.js';
 import { wahlknoepfe } from '../ui/formularteile.js';
 import { speicher } from '../storage.js';
@@ -373,7 +373,7 @@ export function kategorieScreen({ kategorieId }, { neuZeichnen = () => {}, frisc
 
   return el('div', { class: 'inhalt kategorie' }, [
     el('header', { class: 'kopfzeile' }, [
-      iconKnopf({ label: 'Zurück', iconName: 'zurueck', href: '#/' }),
+      zurueckKnopf({ elternZiel: '#/' }),
       el('div', { class: 'kopfzeile__titelblock' }, [
         el('h1', { class: 'kopfzeile__titel', text: kat.name }),
         zaehlzeile,

@@ -7,7 +7,7 @@
 
 import { el, leeren } from '../ui/dom.js';
 import { icon } from '../ui/icons.js';
-import { iconKnopf } from '../ui/knoepfe.js';
+import { zurueckKnopf } from '../ui/knoepfe.js';
 import { leererZustand, teilKarte } from '../ui/kacheln.js';
 import { speicher } from '../storage.js';
 import { JAHRESZEITEN, jahreszeit as jahreszeitVon, kleidungsKategorien } from '../model.js';
@@ -117,7 +117,7 @@ export function jahreszeitScreen({ jahreszeitId }, { neuZeichnen = () => {}, fri
 
   return el('div', { class: 'inhalt jahreszeit' }, [
     el('header', { class: 'kopfzeile' }, [
-      iconKnopf({ label: 'Zurück', iconName: 'zurueck', href: '#/' }),
+      zurueckKnopf({ elternZiel: '#/' }),
       el('div', { class: 'kopfzeile__titelblock' }, [
         el('h1', { class: 'kopfzeile__titel', text: 'Nach Jahreszeit' }),
         zaehlzeile,
