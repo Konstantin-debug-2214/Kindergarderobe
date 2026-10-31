@@ -38,6 +38,9 @@ let gestartet = false;
 /** Gesetzt von ersetzeRoute: Der nächste Eintrag ersetzt den aktuellen. */
 let ersetztGerade = false;
 
+/** Adresse des aktuellen Eintrags und seines Vorgängers in der App. */
+let aktuell = { hash: null, vorher: null };
+
 /**
  * Tiefe eines Verlaufseintrags. Rein, damit testbar.
  * @param {*} state history.state des Eintrags
@@ -50,6 +53,21 @@ export function tiefeFuer(state, bisher, ersetzt) {
   if (Number.isInteger(state?.tiefe)) return state.tiefe;
   if (bisher === null) return 0;
   return ersetzt ? bisher : bisher + 1;
+}
+
+/**
+ * Adresse des Eintrags davor – damit sich prüfen lässt, ob „zurück“ an ein
+ * bestimmtes Ziel führt. Rein, damit testbar.
+ * @param {*} state history.state des Eintrags
+ * @param {{hash: string|null, vorher: string|null}} davor der bisherige Eintrag
+ * @param {boolean} gestartet gab es schon einen Eintrag?
+ * @param {boolean} ersetzt wurde der bisherige Eintrag ersetzt?
+ * @returns {string|null}
+ */
+export function vorherFuer(state, davor, gestartet, ersetzt) {
+  if (Number.isInteger(state?.tiefe)) return state.vorher ?? null;
+  if (!gestartet) return null;
+  return ersetzt ? davor.vorher : davor.hash;
 }
 
 /**
@@ -70,6 +88,18 @@ export function ersetzeRoute(hash) {
   if (window.location.hash === hash) return;
   ersetztGerade = true;
   window.location.replace(`${window.location.pathname}${window.location.search}${hash}`);
+}
+
+/**
+ * Zu einem festen Ziel, ohne einen Eintrag zu hinterlassen: Liegt das Ziel
+ * direkt davor, geht es per history.back() dorthin, sonst ersetzt es die
+ * aktuelle Seite. So führt Aussortieren zur Kategorie, und „Zurück“ landet
+ * danach nicht auf dem aussortierten Teil.
+ * @param {string} ziel z. B. '#/kategorie/schuhe'
+ */
+export function wechsleOhneEintrag(ziel) {
+  if (hatVorgaenger() && aktuell.vorher === ziel) window.history.back();
+  else ersetzeRoute(ziel);
 }
 
 /**
@@ -162,11 +192,14 @@ export function starteRouter({ beiWechsel }) {
       return;
     }
 
-    tiefe = tiefeFuer(window.history.state, gestartet ? tiefe : null, ersetztGerade);
+    const state = window.history.state;
+    const vorher = vorherFuer(state, aktuell, gestartet, ersetztGerade);
+    tiefe = tiefeFuer(state, gestartet ? tiefe : null, ersetztGerade);
     ersetztGerade = false;
     gestartet = true;
-    if (window.history.state?.tiefe !== tiefe) {
-      window.history.replaceState({ ...(window.history.state ?? {}), tiefe }, '');
+    aktuell = { hash: window.location.hash, vorher };
+    if (state?.tiefe !== tiefe || (state?.vorher ?? null) !== vorher) {
+      window.history.replaceState({ ...(state ?? {}), tiefe, vorher }, '');
     }
 
     // Werte aus der Adresse ergänzen die Werte aus dem Pfad.

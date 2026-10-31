@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { abfrageAusHash, findeRoute, pfadAusHash, tiefeFuer } from '../js/router.js';
+import { abfrageAusHash, findeRoute, pfadAusHash, tiefeFuer, vorherFuer } from '../js/router.js';
 
 test('der Pfad entsteht aus dem Hash', () => {
   assert.equal(pfadAusHash(''), '/');
@@ -74,4 +74,21 @@ test('zurück, vor und Neuladen nehmen die gemerkte Tiefe (#7)', () => {
   assert.equal(tiefeFuer({ tiefe: 0 }, 1, false), 0);
   assert.equal(tiefeFuer({ tiefe: 2 }, null, false), 2);
   assert.equal(tiefeFuer({ tiefe: 1 }, 5, true), 1);
+});
+
+/* --- Vorgänger im Verlauf (#7, Aussortieren) ------------------------------- */
+
+test('ein neuer Eintrag merkt sich die Adresse davor (#7)', () => {
+  const davor = { hash: '#/kategorie/schuhe', vorher: '#/' };
+  assert.equal(vorherFuer(null, davor, true, false), '#/kategorie/schuhe');
+});
+
+test('ein ersetzter Eintrag übernimmt den Vorgänger des ersetzten (#7)', () => {
+  const davor = { hash: '#/teil/a', vorher: '#/jahreszeit/herbst' };
+  assert.equal(vorherFuer(null, davor, true, true), '#/jahreszeit/herbst');
+});
+
+test('Einstieg hat keinen Vorgänger, zurück und Neuladen behalten ihn (#7)', () => {
+  assert.equal(vorherFuer(null, { hash: null, vorher: null }, false, false), null);
+  assert.equal(vorherFuer({ tiefe: 1, vorher: '#/statistik' }, { hash: '#/x', vorher: null }, true, false), '#/statistik');
 });

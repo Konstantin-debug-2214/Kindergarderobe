@@ -10,7 +10,7 @@
 import { el, leeren } from '../ui/dom.js';
 import { icon } from '../ui/icons.js';
 import { ersetztBeimKlick, iconKnopf, knopf, zurueckKnopf } from '../ui/knoepfe.js';
-import { zurueck } from '../router.js';
+import { wechsleOhneEintrag } from '../router.js';
 import { banner } from '../ui/banner.js';
 import { zeigeHinweis } from '../ui/hinweis.js';
 import { waehleAus } from '../ui/dialog.js';
@@ -340,8 +340,9 @@ async function frageGrund(teil) {
   try {
     speicher.teilAussortieren(teil.id, grund);
     zeigeHinweis(`${teil.name} aussortiert`);
-    // Zurück, woher man kam; ohne vorherige Seite zur Kategorie.
-    zurueck(`#/kategorie/${encodeURIComponent(teil.kategorie)}`);
+    // Danach zur Kategorie (Auftrag 05) – ohne dass das aussortierte Teil als
+    // Verlaufseintrag stehen bleibt.
+    wechsleOhneEintrag(`#/kategorie/${encodeURIComponent(teil.kategorie)}`);
   } catch (fehler) {
     zeigeHinweis(
       fehler instanceof SpeicherFehler ? fehler.message : 'Das Teil konnte nicht aussortiert werden.',
