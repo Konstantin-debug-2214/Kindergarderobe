@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
   artNachKategoriewechsel,
+  einzelpreisAusEingabe,
   artPasst,
   entwurfAusTeil,
   entwurfGeaendert,
@@ -259,4 +260,19 @@ test('nur Ausgaben mit mehreren Teilen gelten als Sammelkauf', () => {
 test('ohne Ausgaben gibt es keine Sammelkäufe', () => {
   assert.deepEqual(sammelkaeufe([]), []);
   assert.deepEqual(sammelkaeufe(), []);
+});
+
+/* --- Einzelpreis aus der Eingabe (#5) ------------------------------------- */
+
+test('ein ungültiger oder leerer Einzelpreis wird gemeldet statt 0,00 € (#5)', () => {
+  for (const text of ['8,5o', 'abc', '', '   ', '0', '0,00', '-3']) {
+    const ergebnis = einzelpreisAusEingabe(text);
+    assert.ok(ergebnis.fehler, `"${text}" muss eine Meldung geben`);
+    assert.equal(ergebnis.preis, undefined, `"${text}" darf keinen Preis ergeben`);
+  }
+});
+
+test('ein gültiger Einzelpreis wird in Cent übernommen (#5)', () => {
+  assert.deepEqual(einzelpreisAusEingabe('8,50').preis, { art: 'einzeln', betrag: 850 });
+  assert.deepEqual(einzelpreisAusEingabe('12', 'a1').preis, { art: 'einzeln', betrag: 1200, ausgabeId: 'a1' });
 });

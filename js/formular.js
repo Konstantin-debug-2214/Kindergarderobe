@@ -16,6 +16,7 @@ import {
   neuesKleidungsteil,
   neuesSpielzeug,
 } from './model.js';
+import { euroTextInCent } from './costs.js';
 
 /**
  * Gängige Größen für die Schnellauswahl im Formular.
@@ -205,6 +206,21 @@ export function preisEinzeln(betragInCent, ausgabeId = null) {
 
 export function preisSammelkauf(ausgabeId) {
   return { art: PREIS_ART.SAMMELKAUF, ausgabeId };
+}
+
+/**
+ * Einzelpreis aus dem Betragsfeld. Ein leeres Feld, ein Tippfehler oder 0
+ * ergibt eine Meldung – nicht stillschweigend 0,00 €.
+ * @param {string} text Eingabe, z. B. "8,50"
+ * @param {string|null} [ausgabeId] eigene Ausgabe, falls schon vorhanden
+ * @returns {{preis: Object}|{fehler: string}}
+ */
+export function einzelpreisAusEingabe(text, ausgabeId = null) {
+  const cent = euroTextInCent(text);
+  if (cent === null || cent <= 0) {
+    return { fehler: 'Bitte einen Betrag über 0 eintragen, z. B. 8,50.' };
+  }
+  return { preis: preisEinzeln(cent, ausgabeId) };
 }
 
 /**

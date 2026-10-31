@@ -46,6 +46,7 @@ import {
   entwurfAusTeil,
   entwurfGeaendert,
   eigeneAusgabeId,
+  einzelpreisAusEingabe,
   entwurfMitTyp,
   gaengigeGroessen,
   groesseNachWechsel,
@@ -800,8 +801,18 @@ function formular({ modus, teilId }, { neuZeichnen = () => {} }) {
   /* --- Speichern --------------------------------------------------------- */
 
   function speichereTeil() {
+    // Den Einzelpreis aus dem Betragsfeld lesen: ein Tippfehler darf nicht
+    // still zu 0,00 € werden.
+    let preisFehler = null;
+    if (entwurf.preis?.art === 'einzeln') {
+      const ergebnis = einzelpreisAusEingabe(betragText, eigeneAusgabeId(entwurf.preis));
+      if (ergebnis.fehler) preisFehler = ergebnis.fehler;
+      else entwurf = { ...entwurf, preis: ergebnis.preis };
+    }
+
     const teil = teilAusEntwurf(entwurf);
     const fehler = pruefeTeilAusfuehrlich(teil);
+    if (preisFehler) fehler.push({ feld: 'preis', text: preisFehler });
 
     fehlerJeFeld = {};
     for (const { feld, text } of fehler) {
