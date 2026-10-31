@@ -303,6 +303,36 @@ test('beschädigte Daten im Speicher geben eine verständliche Meldung', () => {
   );
 });
 
+/* --- Kein nutzbares localStorage (#3) -------------------------------------- */
+
+/** Führt fn mit einem vorgetäuschten globalen localStorage aus. */
+function mitLocalStorage(ersatz, fn) {
+  const vorher = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
+  Object.defineProperty(globalThis, 'localStorage', { value: ersatz, configurable: true, writable: true });
+  try {
+    return fn();
+  } finally {
+    if (vorher) Object.defineProperty(globalThis, 'localStorage', vorher);
+    else delete globalThis.localStorage;
+  }
+}
+
+test('ohne nutzbares localStorage meldet der Speicher, dass er nicht dauerhaft ist (#3)', () => {
+  const gesperrt = { getItem() { throw new Error('SecurityError'); } };
+  const speicher = mitLocalStorage(gesperrt, () => erstelleSpeicher());
+
+  assert.equal(speicher.dauerhaft, false);
+  // Die App bleibt trotzdem benutzbar – nur eben ohne Dauer.
+  speicher.teilAnlegen(kleidungsteil());
+  assert.equal(speicher.teile().length, 1);
+});
+
+test('mit nutzbarem localStorage ist der Speicher dauerhaft (#3)', () => {
+  const speicher = mitLocalStorage(speicherImArbeitsspeicher(), () => erstelleSpeicher());
+  assert.equal(speicher.dauerhaft, true);
+  assert.equal(neuerSpeicher().dauerhaft, true);
+});
+
 /* --- Beschädigte Daten (#2) ----------------------------------------------- */
 
 const KAPUTT = '{"teile":[{"name":"Regenjacke"';

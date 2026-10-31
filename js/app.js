@@ -118,8 +118,26 @@ function start() {
   speicher.beiAenderung(neuZeichnen);
 
   dauerhaftenSpeicherAnfragen();
+  if (!speicher.dauerhaft) warneOhneSpeicher();
   // Service Worker: Offline-Betrieb und Hinweis auf neue Versionen.
   richteAktualisierungEin();
+}
+
+/**
+ * Ohne nutzbares localStorage arbeitet die App nur im Arbeitsspeicher.
+ * Das darf nicht still geschehen: Der Hinweis bleibt stehen, solange es so ist.
+ */
+function warneOhneSpeicher() {
+  const hinweis = banner({
+    art: 'fehler',
+    rolle: 'alert',
+    text: 'Auf diesem Gerät werden keine Daten gespeichert.',
+    zusatz: 'Der Browser erlaubt der App keinen Speicher. Alles, was du jetzt einträgst, '
+      + 'ist nach dem Schließen weg. In Chrome unter Website-Einstellungen das Speichern '
+      + 'von Daten für diese Seite erlauben.',
+  });
+  hinweis.dataset.hinweis = 'speicher';
+  document.getElementById('hinweisband')?.append(hinweis);
 }
 
 /**

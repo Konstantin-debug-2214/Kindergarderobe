@@ -10,7 +10,6 @@
  * gehen angefangene Eingaben nicht verloren.
  */
 
-import { leeren } from './ui/dom.js';
 import { banner } from './ui/banner.js';
 import { knopf } from './ui/knoepfe.js';
 
@@ -69,6 +68,8 @@ function beobachte(anmeldung) {
 function zeigeHinweis(wartenderWorker) {
   const bereich = document.getElementById('hinweisband');
   if (!bereich) return;
+  // Das Band kann mehrere Hinweise tragen; nur den eigenen ersetzen.
+  bereich.querySelector('[data-hinweis="aktualisierung"]')?.remove();
 
   const neuLaden = knopf({
     text: 'Neu laden',
@@ -82,12 +83,14 @@ function zeigeHinweis(wartenderWorker) {
     wartenderWorker.postMessage('UEBERNEHMEN');
   });
 
-  leeren(bereich).append(banner({
+  const hinweis = banner({
     text: 'Neue Version verfügbar',
     zusatz: 'Beim Neuladen gehen nur nicht gespeicherte Eingaben verloren.',
     iconName: 'zurueckholen',
     aktionen: [neuLaden],
     // Ausgeblendet bleibt der Hinweis nur bis zum nächsten Start.
-    beiSchliessen: () => leeren(bereich),
-  }));
+    beiSchliessen: () => hinweis.remove(),
+  });
+  hinweis.dataset.hinweis = 'aktualisierung';
+  bereich.append(hinweis);
 }

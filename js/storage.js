@@ -89,17 +89,23 @@ function istGueltigerAufbau(zustand) {
     || (einstellungen !== null && typeof einstellungen === 'object' && !Array.isArray(einstellungen));
 }
 
+/**
+ * localStorage, falls nutzbar – sonst ein Speicher im Arbeitsspeicher.
+ * Bewusst nur ein Lesezugriff als Probe: Ein voller Speicher ist weiter
+ * lesbar und darf nicht durch einen leeren ersetzt werden.
+ * @returns {{hintergrund: Object, dauerhaft: boolean}}
+ */
 function standardHintergrund() {
   try {
     if (globalThis.localStorage) {
-      // Zugriff einmal testen: im privaten Modus kann er werfen.
+      // Zugriff einmal testen: bei gesperrten Website-Daten wirft er.
       globalThis.localStorage.getItem(SPEICHER_SCHLUESSEL);
-      return globalThis.localStorage;
+      return { hintergrund: globalThis.localStorage, dauerhaft: true };
     }
   } catch {
     // Kein nutzbares localStorage: im Arbeitsspeicher weiterarbeiten.
   }
-  return speicherImArbeitsspeicher();
+  return { hintergrund: speicherImArbeitsspeicher(), dauerhaft: false };
 }
 
 function neueId() {
@@ -112,9 +118,15 @@ function jetzt() {
 
 /**
  * Baut eine Speicher-Schnittstelle über einem Hintergrundspeicher.
+ * Ohne Angabe wird localStorage genommen bzw. – wenn es nicht nutzbar ist –
+ * der Arbeitsspeicher; dann ist `dauerhaft` false und die App warnt.
  * @param {{getItem: Function, setItem: Function, removeItem: Function}} [hintergrund]
+ * @param {{dauerhaft?: boolean}} [optionen]
  */
-export function erstelleSpeicher(hintergrund = standardHintergrund()) {
+export function erstelleSpeicher(hintergrund = null, { dauerhaft = true } = {}) {
+  if (!hintergrund) {
+    ({ hintergrund, dauerhaft } = standardHintergrund());
+  }
   const ereignisse = new EventTarget();
 
   /* --- Lesen und Schreiben ------------------------------------------------ */
@@ -288,6 +300,9 @@ export function erstelleSpeicher(hintergrund = standardHintergrund()) {
   return {
     /** Für Tests und Fehlersuche: der rohe Hintergrundspeicher. */
     hintergrund,
+
+    /** false, wenn nichts dauerhaft gespeichert werden kann (siehe oben). */
+    dauerhaft,
 
     /** Ereignisziel: auf "aenderung" hören, um neu zu zeichnen. */
     ereignisse,
