@@ -3,3 +3,4 @@
 # hochzählen und die Zeile ergänzen, die node --test nennt.
 v2 2b8ee4d2c323481f
 v3 363fcc91885397c0
+v4 8a2324759cb8ba0d

@@ -117,6 +117,16 @@ function start() {
   // Nach jeder Datenänderung den aktuellen Screen neu aufbauen.
   speicher.beiAenderung(neuZeichnen);
 
+  // Notiz und Name werden beim Verlassen des Feldes gespeichert. Wird die App
+  // bei offenem Feld geschlossen, in den Hintergrund gelegt oder neu geladen,
+  // gibt es kein Verlassen – dann selbst den Fokus nehmen, damit das Getippte
+  // noch gespeichert wird.
+  const eingabeSichern = () => document.activeElement?.blur?.();
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') eingabeSichern();
+  });
+  window.addEventListener('pagehide', eingabeSichern);
+
   dauerhaftenSpeicherAnfragen();
   if (!speicher.dauerhaft) warneOhneSpeicher();
   // Service Worker: Offline-Betrieb und Hinweis auf neue Versionen.
