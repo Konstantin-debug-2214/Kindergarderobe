@@ -1,6 +1,6 @@
 # Kindergarderobe – Projektregeln für Claude Code
 
-Stand: 20.10.2026 (nach Auftrag 11)
+Stand: 01.11.2026 (nach Auftrag 12)
 
 Inventar-App für Kleidung und Spielzeug eines Kindes. Eigenbedarf, ein Kind.
 Hauptgerät: **Android-Smartphone** im Hochformat (Chrome; Testgrößen 390 × 844 und 412 × 915). Das Tablet im Querformat (1194 × 834) wird weiterhin vollständig unterstützt, hat aber zweite Priorität (Entscheidung John, 20.10.2026). Genutzt wird die App hauptsächlich von einer Person.
@@ -12,7 +12,7 @@ Ziel: auf einen Blick sehen, was da ist, was passt, was fehlt und was es gekoste
 - Keine Netzwerkzugriffe zur Laufzeit. Schriften liegen lokal unter `fonts/` als Variable Fonts (Fredoka und Nunito, woff2, Teilmenge „latin“, OFL-Lizenz mitgeliefert); genutzt werden Fredoka 500/600 und Nunito 400/600/700/800.
 - Icons als Inline-SVG (Strich-Icons), keine Icon-Fonts, keine Emojis. Abweichend vom Design (Entscheidung John): **Einstellungen/„Mehr“ = Zahnrad** (nicht Sonne), **Spielzeug = Schaukelpferd** (nicht Teddykopf). Alle Icons liegen in `js/ui/icons.js` auf einem 24er-Raster mit Strichstärke 1,8, runden Enden und `currentColor`; neue Motive werden groß und bei 24 px gegengeprüft, bevor sie dort aufgenommen werden.
 - Daten in `localStorage` über ein eigenes Modul `js/storage.js` (nie direkt aus anderen Modulen). Beim Start `navigator.storage.persist()` anfragen.
-- Responsive: Layout für Tablet quer (Hauptziel) und Smartphone hoch; Umbruch per CSS (Grid/Flex, Media Queries), keine getrennten Seiten.
+- Responsive: Layout für Smartphone hoch (Hauptgerät) und Tablet quer; Umbruch per CSS (Grid/Flex, Media Queries), keine getrennten Seiten.
 - Veröffentlichung über GitHub Pages aus dem `main`-Branch; Installation auf Android als Web-App über Chrome („App installieren“), kein App-Store, kein APK. Alle Pfade relativ, damit die App unter `/Kindergarderobe/` und lokal läuft. Das Repository ist öffentlich: **niemals echte Daten, Backups (`*.json`), die alte CSV oder die Design-Screenshots committen.**
 - Diagramme selbst zeichnen – als SVG oder aus HTML und CSS, keine Bibliothek. Antippbare Balken als echte Links mit `aria-label` (freigegeben).
 - `manifest.webmanifest` + Service Worker (`sw.js` im Hauptverzeichnis), damit die App installiert und offline läuft. App-Icons in `icons/` (`icon.svg`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`; Motiv liegt im Sicherheitsbereich, daher auch als `maskable` nutzbar).
@@ -30,9 +30,11 @@ js/         app.js (Start, Router), router.js (Hash-Routing, siehe Routen)
             ui/nachOben.js: Nach-oben-Knopf für Seite und markierte Scrollbereiche (`data-nach-oben`)
             ui/ausgabeDialog.js: Ausgaben-Formular, einmal für Kosten-Ansicht, Bearbeiten und „Neuer Sammelkauf“
             screens/*.js (je Screen ein Modul; teilFormular.js für #/neu und Bearbeiten), ui/*.js (Bausteine)
+            screens/notfall.js: Notfallansicht bei beschädigten Daten
 fonts/
 icons/      App-Icons für das Manifest
 tests/        Tests der reinen Logik mit dem eingebauten Node-Testrunner (`node --test`), keine npm-Pakete
+              fingerabdruck.js (Fingerabdruck der App-Dateien), sw-versionen.txt (Fingerabdruck je VERSION, siehe Veröffentlichen)
 Claude-Code-Uebergabe/        Aufträge (*.md, werden committet)
 Design-Preview-Screenshots/   Design-Screenshots (nur lokal, stehen in .gitignore)
 ```
@@ -60,7 +62,6 @@ Unbekannte Routen führen zur Übersicht. Der Router liest Werte hinter `?` (z. 
 
 ## Navigation (laut Design)
 
-- **Tablet:** keine Leiste. Die Übersicht hat oben Suche, Knopf „Kosten“, Icon-Knöpfe Statistik, Aussortiert und Einstellungen sowie den Knopf „Teil hinzufügen“. Alle anderen Screens haben links oben einen runden Zurück-Knopf (Teil hinzufügen: Schließen-Knopf „×“ und „Abbrechen“). Die Statistik verlinkt auf „Soll-Mengen & Saisonwechsel“.
 - **Smartphone:** untere Navigationsleiste mit fünf Einträgen: **Start** (`#/`), **Statistik** (`#/statistik`), **+** als runder Primär-Knopf in der Mitte (`#/neu`), **Aussortiert** (`#/aussortiert`), **Mehr** (`#/einstellungen`). Der aktive Eintrag ist in Primärfarbe hervorgehoben.
   - Die Leiste erscheint nur auf Übersicht, Statistik, Aussortiert und Einstellungen.
   - Statistik, Aussortiert und Einstellungen haben auf dem Smartphone keinen Zurück-Knopf (die Leiste navigiert).
@@ -69,6 +70,8 @@ Unbekannte Routen führen zur Übersicht. Der Router liest Werte hinter `?` (z. 
   - Übersicht: Icon-Knopf „€“ oben rechts führt zu Kosten.
   - Statistik: Verweis-Karte „Soll-Mengen & Saisonwechsel“ mit Anzahl der Fehlenden oben.
   - „Mehr“ öffnet den Screen „Einstellungen“ mit Einträgen „Kosten“ (mit Jahressumme) und „Soll-Mengen & Saisonwechsel“, darunter Backup und Begrüßung.
+- **Tablet:** keine Leiste. Die Übersicht hat oben Suche, Knopf „Kosten“, Icon-Knöpfe Statistik, Aussortiert und Einstellungen sowie den Knopf „Teil hinzufügen“. Alle anderen Screens haben links oben einen runden Zurück-Knopf (Teil hinzufügen: Schließen-Knopf „×“ und „Abbrechen“). Die Statistik verlinkt auf „Soll-Mengen & Saisonwechsel“.
+- Alle Zurück-Knöpfe führen wie die Zurück-Geste zur vorherigen Seite; ohne vorherige Seite in der App zur Elternseite, nie aus der App heraus. Ausnahme: Nach dem Aussortieren geht es zur Kategorie (Auftrag 05).
 
 ## Datenmodell
 
@@ -146,6 +149,7 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
 - `ausgaben`: Liste `{ id, bezeichnung, datum, betrag, anzahlTeile }`. Ein Eintrag mit `anzahlTeile > 1` ist ein **Sammelkauf** (z. B. „Flohmarkt Kita, 25 € für 6 Teile“); Einzelpreise müssen dabei nicht bekannt sein.
 - `preis` am Teil: `{ art: "einzeln", betrag }` oder `{ art: "sammelkauf", ausgabeId }`. Ein Einzelpreis legt automatisch eine verknüpfte Ausgabe mit `anzahlTeile: 1` an, damit alle Summen nur aus `ausgaben` berechnet werden.
 - Teile können einem Sammelkauf auch nachträglich zugeordnet werden.
+- Wechsel der Preisart: Ein Einzelpreis legt immer eine eigene Ausgabe an und übernimmt nie einen Sammelkauf. Einzelpreis → Kein Preis oder Sammelkauf löscht die eigene Einzel-Ausgabe. Sammelkauf → Kein Preis oder Einzelpreis löst nur die Verknüpfung; der Sammelkauf bleibt.
 - **Alle Beträge intern in Cent als ganze Zahlen** (8,00 € = `800`), auch in `ausgaben`, `preis` und im Backup. Anzeige nur über `formatEuro` aus `js/costs.js`; Eingaben mit Komma werden in Cent umgerechnet.
 - Kostenansicht: Summe je Jahr, Anzahl Teile, Durchschnitt pro Teil, Einträge neueste zuerst; bei Sammelkäufen „ca. x € / Teil“. Beträge in Euro, deutsches Format (8,00 €).
 
@@ -155,6 +159,7 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
 - `sollMengen`: Liste `{ id, art, jahreszeit, soll }` – Soll je Art **und** Jahreszeit, optional, nur Kleidung. Gezählt werden nur Teile mit Passform „Passt gut“ in der Jahreszeit; „Bald zu klein“ zählt **nicht** mit. Unterschrittenes Soll wird als Lücke angezeigt.
 - `einstellungen`: `{ name, letztesBackupAm, aenderungenSeitBackup }`. `name` ist der Name des Kindes und erscheint in der Begrüßung „Hallo, [Name]!“.
 - Schema-Version `version: 1` für spätere Migrationen. Speicherschlüssel `kindergarderobe`.
+- Beschädigte Daten werden nie überschrieben; der Rohinhalt liegt unter `kindergarderobe-rohdaten`. Die Notfallansicht bietet Backup einspielen, Rohdaten herunterladen und Mit leeren Daten beginnen (mit Sicherheitsabfrage).
 - Backup-Datei: `{ app: "kindergarderobe", version: 1, erstelltAm, daten }`, Dateiname `kindergarderobe-backup-JJJJ-MM-TT.json`. Aus `einstellungen` wird nur `name` gesichert. Nach dem Einspielen gilt: `letztesBackupAm` = Erstelldatum der Datei, `aenderungenSeitBackup = 0`.
 
 ### Backup-Erinnerung
@@ -191,12 +196,12 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
 2. **Kategorie mit Filtern:** Suche; Karten mit Name, Größe (bzw. Alter ab), Jahreszeiten, Merkmal bzw. Marke. Filterspalte (scrollbar):
    - Kleidungs-Kategorien: Jahreszeit, Größe, Merkmal (Blanko / Aufdruck / Marke, bei Marke Auswahlliste), Passform, Art.
    - Kategorie Spielzeug: eigener Filter mit Art, Alter ab und Merkmal; kein Jahreszeit-, Größen- oder Passform-Filter.
-3. **Detail:** Tablet: Liste der Teile der Kategorie links (mit Größe, Preis und Hinweis „Bald zu klein“), Details rechts. Smartphone: Blättern mit „‹ ›“ und „2 von 7“, Aktionsleiste unten. Details: Name, darunter die **Notiz als Untertitel**; Kacheln Größe, Farbe, **Merkmal** (Blanko / Aufdruck / Markenname) und Preis (bei Sammelkauf mit Hinweis); Jahreszeiten; Passform zum Antippen; Notizfeld zum Bearbeiten. Knöpfe „Bearbeiten“ und „Aussortieren“ (fragt den Grund ab). Bei Spielzeug: Alter ab statt Größe, keine Jahreszeiten, keine Passform.
+3. **Detail:** Smartphone: Blättern mit „‹ ›“ und „2 von 7“, Aktionsleiste unten. Tablet: Liste der Teile der Kategorie links (mit Größe, Preis und Hinweis „Bald zu klein“), Details rechts. Details: Name, darunter die **Notiz als Untertitel**; Kacheln Größe, Farbe, **Merkmal** (Blanko / Aufdruck / Markenname) und Preis (bei Sammelkauf mit Hinweis); Jahreszeiten; Passform zum Antippen; Notizfeld zum Bearbeiten. Knöpfe „Bearbeiten“ und „Aussortieren“ (fragt den Grund ab). Bei Spielzeug: Alter ab statt Größe, keine Jahreszeiten, keine Passform.
 4. **Nach Jahreszeit:** vier Jahreszeiten-Knöpfe (gewählter Knopf in der Akzentfarbe der Jahreszeit), Filter nach Kategorie **ohne Spielzeug**, Karten mit Kategorie und Größe in der Farbe ihrer Kategorie.
 5. **Teil hinzufügen / bearbeiten:** Umschalter Kleidung / Spielzeug, Live-Vorschau der Karte (in der Farbe der Kategorie).
    - Kleidung: Name, Kategorie (nur die fünf Kleidungs-Kategorien), **Art** (direkt nach der Kategorie, Auswahl aus der Artenliste der Kategorie plus „Andere …“), Größe, Jahreszeiten, Farbe, Merkmal (+ Marke, Markenliste anlegen/löschen), Passform, **Anzahl** (Zähler − / +, Standard 1), Preis (Einzelpreis oder Sammelkauf auswählen / neu), Notiz.
    - Spielzeug: Name, Art, Alter ab, Farbe (optional), Merkmal, freie Merkmale, **Anzahl**, Preis, Notiz.
-   - Reihenfolge der Felder wie im Design (Farbe und Merkmal vor Passform). Tablet: links Vorschau, Name, Preis, Notiz, rechts die übrigen Felder in dieser Reihenfolge. Smartphone: eine Spalte in der oben genannten Reihenfolge.
+   - Reihenfolge der Felder wie im Design (Farbe und Merkmal vor Passform). Smartphone: eine Spalte in der oben genannten Reihenfolge. Tablet: links Vorschau, Name, Preis, Notiz, rechts die übrigen Felder in dieser Reihenfolge.
    - Art und Anzahl fehlen im Design und werden im Stil der übrigen Felder gestaltet.
 6. **Kosten:** Summe des Jahres, Teile, Durchschnitt; Formular „Kosten hinzufügen“ (Wofür?, Gesamtbetrag, Anzahl Teile); Einträge neueste zuerst. Smartphone: Knopf „+ Kosten“ statt dauerhaft sichtbarem Formular. Freigegeben (nicht im Design): Jahr-Umschalter ‹ › an der Summenkarte (nur bei Ausgaben in anderen Jahren), Datumsfeld (Standard heute), Tipp auf Einzelteil → Detail des Teils, Tipp auf Sammelkauf → Dialog zum Ändern/Löschen mit zugeordneten Teilen; Löschen nur nach Rückfrage, zugeordnete Teile verlieren ihren Preis. Beim Speichern wechselt die Ansicht in das Jahr der neuen Ausgabe.
 7. **Statistik:** Gesamtzahl im Schrank (ohne Aussortiertes); Balkendiagramme nach Kategorie, **Art der Kleidung** (die häufigsten 7), **Spielzeug nach Art** (neu, nicht im Design), Jahreszeit (Hinweis: ein Teil kann zu mehreren gehören) und Größe; jeder Balken führt per Tipp zu den Teilen; Link zu „Soll-Mengen & Saisonwechsel“. Freigegeben: Kategorie → Kategorie-Ansicht, Jahreszeit → Jahreszeiten-Ansicht, Art, Spielzeug-Art und Größe → Trefferansicht der Übersicht mit Filter-Chip (`#/?art=…`, `#/?groesse=…`). Größen-Diagramm nur Konfektion; Doppelgrößen zählen bei jeder enthaltenen Größe (mit Hinweis). „Spielzeug nach Art“ als fünfte Karte im Raster. Etikett „n fehlen“ an der Soll-Mengen-Verweiskarte ab Auftrag 08.
@@ -210,13 +215,13 @@ Nicht in V1: Anlässe, Fotos, mehrere Kinder, Sync, Wetterdaten/Temperaturen, Gr
 
 ## Design
 
-- Vorlage: Design-Canvas „Kindergarderobe“ (Tablet 1194 × 834, Smartphone 390 × 844). Screenshots liegen unter `Design-Preview-Screenshots/` (nur lokal). **Bei Widersprüchen zwischen Screenshot und dieser Datei gilt CLAUDE.md.**
+- Vorlage: Design-Canvas „Kindergarderobe“ (Smartphone 390 × 844, Tablet 1194 × 834). Screenshots liegen unter `Design-Preview-Screenshots/` (nur lokal). **Bei Widersprüchen zwischen Screenshot und dieser Datei gilt CLAUDE.md.**
 - Farben und Schriften in `css/tokens.css`:
   Hintergrund `#F1F5F3`, Text `#1E2B2F`, gedämpft `#55636A`, Text auf Kachel `#3E4C52`, Primär `#1F6F8B` (gedrückt: `--farbe-primaer-dunkel` `#195A71`), Rahmen `#DCE5E1`, Karten weiß.
   Kategorie-Farben: Oberteile `#CFE3EA`, Unterteile `#D9EBDF`, Sets & Sonstiges `#F7E2B5`, Schuhe `#F2D6CF`, Mützen & Co. `#E2DCF0`, Spielzeug weiß mit Rahmen.
   Jahreszeiten-Farben siehe oben. Überschriften Fredoka 600, Text Nunito.
 - Abstände: Skala in `tokens.css` mit 4-px-Basis, `--abstand-1` (4 px) bis `--abstand-10` (64 px); z. B. 20 px zwischen Kacheln, 32 px Innenabstand der Inhaltsfläche.
-- Breakpoint: bis 767 px Breite Smartphone-Layout (mit unterer Leiste), darüber Tablet-Layout. Hilfsklassen `.nur-tablet` / `.nur-smartphone`.
+- Breakpoint: bis 767 px Breite Smartphone-Layout (mit unterer Leiste), darüber Tablet-Layout. Hilfsklassen `.nur-smartphone` / `.nur-tablet`.
 - Radien: Kacheln 28 px, Karten 24 px, Knöpfe und Eingaben rund (Höhe/2).
 - Smartphone: Kacheln zweispaltig, Suche über volle Breite, Navigation siehe oben.
 - Hinweis-Banner (Backup): Fläche `#FBEFD5`, Text `#6B4A0E`; Erfolg: Fläche `#DDEFE3`, Text `#2F6B45`.
@@ -246,7 +251,8 @@ Jedes Teil wird **überall in der Farbe seiner Kategorie** dargestellt: Karten, 
 
 ## Veröffentlichen
 
-- Nach jeder Änderung an HTML, CSS, JS, Schriften oder Icons die Zeile `const VERSION` in `sw.js` hochzählen und neue Dateien in die Liste `DATEIEN` eintragen. `node --test` prüft die Dateiliste; das Hochzählen der Version prüft kein Test – ohne neue Version erreicht ein Update das installierte Gerät nicht.
+- Nach jeder Änderung an HTML, CSS, JS, Schriften oder Icons neue Dateien in die Liste `DATEIEN` eintragen. `node --test` prüft die Dateiliste. Ohne neue Version erreicht ein Update das installierte Gerät nicht.
+- Nach Änderungen VERSION in sw.js hochzählen und die Zeile, die `node --test` nennt, in tests/sw-versionen.txt eintragen.
 - Kein `viewport-fit=cover`; Chrome hält den Inhalt selbst über der Android-Gestenleiste.
 
 ## Arbeitsweise
