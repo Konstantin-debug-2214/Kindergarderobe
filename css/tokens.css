@@ -35,7 +35,7 @@
   --farbe-primaer-dunkel: #195A71;   /* selbst abgeleitet: gedrückter Zustand */
   --farbe-primaer-kontrast: #FFFFFF;
   --farbe-rahmen: #DCE5E1;
-  --rahmen-feld: #7E918A;    /* Kontur von Eingabefeldern und weißen Knöpfen (≥ 3:1) */
+  --farbe-rahmen-feld: #7E918A;    /* Kontur von Eingabefeldern und weißen Knöpfen (≥ 3:1) */
   --farbe-fokus: #1F6F8B;
 
   /* --- Kategorie-Kacheln -------------------------------------------------- */

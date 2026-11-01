@@ -12,7 +12,7 @@
   gap: var(--abstand-2);
   min-height: var(--touch-ziel);
   padding: 0 var(--abstand-6);
-  border: 1px solid var(--rahmen-feld);
+  border: 1px solid var(--farbe-rahmen-feld);
   border-radius: var(--radius-rund);
   background: var(--farbe-flaeche);
   color: var(--farbe-text);
@@ -50,7 +50,7 @@
   width: var(--touch-ziel);
   height: var(--touch-ziel);
   padding: 0;
-  border: 1px solid var(--rahmen-feld);
+  border: 1px solid var(--farbe-rahmen-feld);
   border-radius: var(--radius-rund);
   background: var(--farbe-flaeche);
   color: var(--farbe-text);
@@ -80,7 +80,7 @@
   gap: var(--abstand-3);
   min-height: var(--touch-ziel);
   padding: 0 var(--abstand-5);
-  border: 1px solid var(--rahmen-feld);
+  border: 1px solid var(--farbe-rahmen-feld);
   border-radius: var(--radius-rund);
   background: var(--farbe-flaeche);
   color: var(--farbe-text-gedaempft);
@@ -225,7 +225,7 @@
   width: 100%;
   min-height: var(--touch-ziel);
   padding: 0 var(--abstand-5);
-  border: 1px solid var(--rahmen-feld);
+  border: 1px solid var(--farbe-rahmen-feld);
   border-radius: var(--radius-rund);
   background: var(--farbe-flaeche);
   font-size: var(--text-md);
@@ -522,7 +522,7 @@
   gap: var(--abstand-2);
   min-height: var(--touch-ziel);
   padding: 0 var(--abstand-5);
-  border: 1px solid var(--rahmen-feld);
+  border: 1px solid var(--farbe-rahmen-feld);
   border-radius: var(--radius-rund);
   background: var(--farbe-flaeche);
   color: var(--farbe-text);
@@ -576,7 +576,7 @@
   max-width: 100%;
   /* Nur 2 px Luft: die Felder innen sollen die vollen 48 px behalten. */
   padding: 2px;
-  border: 1px solid var(--rahmen-feld);
+  border: 1px solid var(--farbe-rahmen-feld);
   border-radius: var(--radius-rund);
   background: var(--farbe-hintergrund);
 }
@@ -626,7 +626,7 @@
   justify-content: center;
   width: var(--touch-ziel);
   height: var(--touch-ziel);
-  border: 1px solid var(--rahmen-feld);
+  border: 1px solid var(--farbe-rahmen-feld);
   border-radius: var(--radius-rund);
   background: var(--farbe-flaeche);
   color: var(--farbe-text);
@@ -685,7 +685,7 @@
   width: 100%;
   min-height: 96px;
   padding: var(--abstand-3) var(--abstand-5);
-  border: 1px solid var(--rahmen-feld);
+  border: 1px solid var(--farbe-rahmen-feld);
   border-radius: var(--radius-feld);
   background: var(--farbe-flaeche);
   font-family: inherit;
@@ -709,7 +709,7 @@
   gap: var(--abstand-2);
   min-height: var(--touch-ziel);
   padding: 0 var(--abstand-5);
-  border: 1px solid var(--rahmen-feld);
+  border: 1px solid var(--farbe-rahmen-feld);
   border-radius: var(--radius-rund);
   background: var(--farbe-flaeche);
 }
@@ -752,7 +752,7 @@
   gap: var(--abstand-1);
   min-height: var(--touch-ziel);
   padding: 0 0 0 var(--abstand-4);
-  border: 1px solid var(--rahmen-feld);
+  border: 1px solid var(--farbe-rahmen-feld);
   border-radius: var(--radius-rund);
   background: var(--farbe-flaeche);
   font-weight: var(--schriftgewicht-halbfett);
@@ -1491,7 +1491,7 @@
   gap: var(--abstand-3);
   min-height: 72px;
   padding: var(--abstand-3) var(--abstand-5);
-  border: 1px solid var(--rahmen-feld);
+  border: 1px solid var(--farbe-rahmen-feld);
   border-radius: var(--radius-kachel);
   background: var(--farbe-flaeche);
   color: var(--jahreszeit-akzent);
@@ -2372,7 +2372,7 @@ a.saeulen__saeule:hover {
   justify-content: center;
   width: var(--touch-ziel);
   height: var(--touch-ziel);
-  border: 1px solid var(--rahmen-feld);
+  border: 1px solid var(--farbe-rahmen-feld);
   border-radius: var(--radius-rund);
   background: var(--farbe-flaeche);
   color: var(--farbe-text);
