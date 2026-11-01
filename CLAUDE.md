@@ -217,7 +217,7 @@ Nicht in V1: Anlässe, Fotos, mehrere Kinder, Sync, Wetterdaten/Temperaturen, Gr
 
 - Vorlage: Design-Canvas „Kindergarderobe“ (Smartphone 390 × 844, Tablet 1194 × 834). Screenshots liegen unter `Design-Preview-Screenshots/` (nur lokal). **Bei Widersprüchen zwischen Screenshot und dieser Datei gilt CLAUDE.md.**
 - Farben und Schriften in `css/tokens.css`:
-  Hintergrund `#F1F5F3`, Text `#1E2B2F`, gedämpft `#55636A`, Text auf Kachel `#3E4C52`, Primär `#1F6F8B` (gedrückt: `--farbe-primaer-dunkel` `#195A71`), Rahmen `#DCE5E1`, Karten weiß.
+  Hintergrund `#F1F5F3`, Text `#1E2B2F`, gedämpft `#55636A`, Text auf Kachel `#3E4C52`, Primär `#1F6F8B` (gedrückt: `--farbe-primaer-dunkel` `#195A71`), Rahmen `#DCE5E1`, Karten weiß. Konturen von Eingabefeldern und weißen Knöpfen `#7E918A` (Token `--rahmen-feld`, Kontrast ≥ 3:1); `#DCE5E1` nur für Karten, Kacheln und Trennlinien.
   Kategorie-Farben: Oberteile `#CFE3EA`, Unterteile `#D9EBDF`, Sets & Sonstiges `#F7E2B5`, Schuhe `#F2D6CF`, Mützen & Co. `#E2DCF0`, Spielzeug weiß mit Rahmen.
   Jahreszeiten-Farben siehe oben. Überschriften Fredoka 600, Text Nunito.
 - Abstände: Skala in `tokens.css` mit 4-px-Basis, `--abstand-1` (4 px) bis `--abstand-10` (64 px); z. B. 20 px zwischen Kacheln, 32 px Innenabstand der Inhaltsfläche.
