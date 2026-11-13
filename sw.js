@@ -16,7 +16,7 @@
  */
 
 /** Bei jeder Änderung an den App-Dateien hochzählen. */
-const VERSION = 'v15';
+const VERSION = 'v16';
 const CACHE_NAME = `kindergarderobe-${VERSION}`;
 
 /** Alle Dateien, die die App zum Laufen braucht. */
@@ -62,6 +62,7 @@ const DATEIEN = [
   './js/ui/diagramme.js',
   './js/ui/dialog.js',
   './js/ui/dom.js',
+  './js/ui/ergebnisliste.js',
   './js/ui/felder.js',
   './js/ui/formularteile.js',
   './js/ui/hinweis.js',

@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   abfrageAusHash,
   abfrageListenAusHash,
+  adresseMitWerten,
   findeRoute,
   gleicherPfad,
   pfadAusHash,
@@ -115,4 +116,17 @@ test('gleicher Pfad unabhängig von den Werten hinter "?"', () => {
   assert.equal(gleicherPfad('#/kategorie/schuhe?art=Sneaker', '#/kategorie/schuhe'), true);
   assert.equal(gleicherPfad('#/kategorie/schuhe', '#/kategorie/muetzen'), false);
   assert.equal(gleicherPfad(null, '#/'), false);
+});
+
+test('eine Adresse entsteht aus Pfad und Werten, leere Werte fallen weg', () => {
+  assert.equal(
+    adresseMitWerten('/kategorie/unterteile', { art: ['Badehose'], suche: '', groesse: [], ansicht: 'einzeln' }),
+    '#/kategorie/unterteile?art=Badehose&ansicht=einzeln',
+  );
+  assert.equal(adresseMitWerten('/', { suche: null }), '#/');
+});
+
+test('Werte überstehen den Weg in die Adresse und zurück', () => {
+  const werte = { art: ['Set (Oberteil + Hose)', 'Hemd'], suche: ['Paw Patrol & Co'], groesse: ['104'] };
+  assert.deepEqual(abfrageListenAusHash(adresseMitWerten('/kategorie/oberteile', werte)), werte);
 });

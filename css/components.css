@@ -2437,3 +2437,92 @@ a.saeulen__saeule:hover {
   padding-top: calc(var(--abstand-4) + env(safe-area-inset-top));
   box-shadow: var(--schatten-karte);
 }
+
+/* --- Zusammenfassen nach Art (Auftrag 13, nicht im Design) ---------------- */
+
+/* Umschalter „Zusammengefasst / Einzeln“ über der Kartenliste. */
+.ergebnisliste__steuerung {
+  margin-bottom: var(--abstand-4);
+}
+
+/* Gruppenkarte: Aufbau wie die Karte eines Teils, darunter die Größen. */
+.gruppenkarte__zusatz {
+  margin-top: var(--abstand-1);
+  color: var(--farbe-text-gedaempft);
+  font-size: var(--text-sm);
+}
+
+.groessenchips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--abstand-2);
+  margin-top: var(--abstand-3);
+}
+
+.groessenchip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--abstand-1);
+  padding: 2px var(--abstand-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-rund);
+  background: var(--farbe-hintergrund);
+  color: var(--farbe-text);
+  font-size: var(--text-sm);
+  font-weight: var(--schriftgewicht-halbfett);
+}
+
+/* Passt gut: hervorgehoben in den Erfolgsfarben. */
+.groessenchip--passt {
+  background: var(--farbe-erfolg-flaeche);
+  color: var(--farbe-erfolg-text);
+  font-weight: var(--schriftgewicht-fett);
+}
+
+/* Bald zu klein: Hinweisfarben und das Wörtchen „bald“. */
+.groessenchip--bald {
+  background: var(--farbe-hinweis-flaeche);
+  color: var(--farbe-hinweis-text);
+}
+
+.groessenchip__hinweis {
+  font-size: var(--text-xs);
+  font-weight: var(--schriftgewicht-normal);
+}
+
+/* Zu klein: blass – ohne Fläche, gestrichelt, gedämpfte Schrift. */
+.groessenchip--klein {
+  border-color: var(--farbe-rahmen);
+  border-style: dashed;
+  background: transparent;
+  color: var(--farbe-text-gedaempft);
+  font-weight: var(--schriftgewicht-normal);
+}
+
+/* --- Zählzeile: Trefferzahl und „x von y“ deutlich (Auftrag 13) ---------- */
+
+.zaehlzeile {
+  margin-top: var(--abstand-1);
+  color: var(--farbe-text);
+  font-family: var(--schrift-ueberschrift);
+  font-size: var(--text-lg);
+  font-weight: var(--schriftgewicht-ueberschrift);
+  line-height: var(--zeilenhoehe-eng);
+}
+
+@media (max-width: 767px) {
+  /* Wie der Umschalter Kleidung/Spielzeug: volle Breite, zwei gleiche Felder. */
+  .ergebnisliste__steuerung .umschalter {
+    display: flex;
+    width: 100%;
+  }
+
+  .ergebnisliste__steuerung .umschalter__feld {
+    flex: 1 1 0;
+  }
+}
+
+/* Filter-Chip aus der Statistik steht unter der Trefferzahl. */
+.trefferchips {
+  margin-bottom: var(--abstand-4);
+}

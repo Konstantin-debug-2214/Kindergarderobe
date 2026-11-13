@@ -178,6 +178,27 @@ export function abfrageListenAusHash(hash) {
   return werte;
 }
 
+/**
+ * Baut eine Adresse aus Pfad und Werten – das Gegenstück zu
+ * abfrageListenAusHash. Leere Werte fallen weg, Listen werden zu mehrfachen
+ * Einträgen.
+ * adresseMitWerten('/kategorie/unterteile', { art: ['Badehose'], ansicht: 'einzeln' })
+ *   -> '#/kategorie/unterteile?art=Badehose&ansicht=einzeln'
+ * @param {string} pfad
+ * @param {Object<string, *>} [werte]
+ */
+export function adresseMitWerten(pfad, werte = {}) {
+  const abfrage = new URLSearchParams();
+  for (const [name, wert] of Object.entries(werte)) {
+    for (const einzeln of [].concat(wert ?? [])) {
+      if (einzeln === null || einzeln === undefined || einzeln === '') continue;
+      abfrage.append(name, String(einzeln));
+    }
+  }
+  const text = abfrage.toString();
+  return `#${pfad}${text ? `?${text}` : ''}`;
+}
+
 /** Gleicher Pfad – unabhängig von den Werten hinter dem Fragezeichen. */
 export function gleicherPfad(a, b) {
   if (!a || !b) return false;

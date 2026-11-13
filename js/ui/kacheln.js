@@ -118,6 +118,56 @@ export function teilKarte(teil, { zeigeKategorie = false, variante = 'standard' 
   );
 }
 
+/** Vorlesetext und Klasse je Passform eines Größen-Chips. */
+const CHIP_PASSFORM = {
+  passt_gut: { klasse: 'groessenchip--passt', vorlesen: 'passt gut' },
+  bald_zu_klein: { klasse: 'groessenchip--bald', vorlesen: 'bald zu klein' },
+  zu_klein: { klasse: 'groessenchip--klein', vorlesen: 'zu klein' },
+};
+
+/**
+ * Karte einer Art: alle Teile einer Art zusammengefasst, mit Stückzahl und
+ * den vorhandenen Größen als Chips (Auftrag 13, nicht im Design). Trägt wie
+ * jede Karte die Farbe ihrer Kategorie.
+ * @param {{kategorie: string, art: string, stueck: number,
+ *   werte: Array<{text: string, passform: string|null}>}} gruppe
+ * @param {{href: string, zeigeKategorie?: boolean}} optionen
+ */
+export function gruppenKarte(gruppe, { href, zeigeKategorie = false }) {
+  const zusatz = [`${gruppe.stueck} ${einheit(gruppe.kategorie, gruppe.stueck)}`];
+  if (zeigeKategorie) zusatz.push(kategorie(gruppe.kategorie)?.name ?? '');
+
+  const chips = gruppe.werte.map(({ text, passform }) => {
+    const art = CHIP_PASSFORM[passform];
+    return el('li', { class: `groessenchip${art ? ` ${art.klasse}` : ''}` }, [
+      el('span', { text }),
+      // "Bald zu klein" bekommt einen sichtbaren kleinen Hinweis.
+      passform === 'bald_zu_klein'
+        ? el('span', { class: 'groessenchip__hinweis', 'aria-hidden': 'true', text: 'bald' })
+        : null,
+      art ? el('span', { class: 'nur-vorlesehilfe', text: `, ${art.vorlesen}` }) : null,
+    ]);
+  });
+
+  return el(
+    'a',
+    { class: 'teilkarte gruppenkarte', href, 'data-kategorie': gruppe.kategorie },
+    [
+      el('div', { class: 'teilkarte__bild' }, [icon(gruppe.kategorie, 36)]),
+      el('div', { class: 'teilkarte__koerper' }, [
+        el('p', { class: 'teilkarte__name', text: gruppe.art }),
+        el('p', { class: 'gruppenkarte__zusatz', text: zusatz.join(' · ') }),
+        chips.length > 0
+          ? el('ul', {
+            class: 'groessenchips',
+            'aria-label': gruppe.typ === TYP.SPIELZEUG ? 'Alter ab' : 'Größen',
+          }, chips)
+          : null,
+      ]),
+    ],
+  );
+}
+
 /** Marke, sonst das Merkmal – als Etikett oben rechts auf der Karte. */
 function etikettText(teil) {
   if (teil.merkmal === 'marke' && teil.marke) return teil.marke;
