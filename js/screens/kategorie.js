@@ -1,9 +1,12 @@
 /**
  * kategorie.js – Screen "Kategorie mit Filtern" (#/kategorie/:id).
  *
- * Filter und Suchbegriff liegen außerhalb der Zeichenfunktion: Sie sollen den
- * Weg ins Detail und zurück überstehen. Beim Betreten der Übersicht setzt
- * uebersicht.js sie über setzeKategorieZustandZurueck() zurück.
+ * Filter, Suchbegriff und eine gewählte Ansicht stehen in der Adresse, z. B.
+ * #/kategorie/unterteile?art=Badehose&ansicht=einzeln. Beim Betreten liest der
+ * Screen sie von dort, jede Änderung schreibt sie ohne Verlaufseintrag zurück.
+ * So stellt "Zurück" genau den vorherigen Stand wieder her – auch aus dem
+ * Detail. Von der Übersicht aus führt die Kachel ohne Werte in die Kategorie,
+ * die Filter beginnen dann leer.
  */
 
 import { el, leeren } from '../ui/dom.js';
@@ -11,7 +14,9 @@ import { icon } from '../ui/icons.js';
 import { iconKnopf, knopf, suchfeld, zurueckKnopf } from '../ui/knoepfe.js';
 import { leererZustand, teilKarte } from '../ui/kacheln.js';
 import { wahlknoepfe } from '../ui/formularteile.js';
+import { ergebnisliste, geltendeAnsicht } from '../ui/ergebnisliste.js';
 import { speicher } from '../storage.js';
+import { abfrageListenAusHash, adresseMitWerten, aktualisiereAdresse } from '../router.js';
 import {
   ALTER_AB_VORGABEN,
   JAHRESZEITEN,
@@ -33,25 +38,62 @@ import {
 } from '../filters.js';
 
 /**
- * Zustand der Kategorie-Ansicht: gilt nur für eine Kategorie.
+ * Zustand der Kategorie-Ansicht. Er entsteht beim Betreten aus der Adresse.
  * `filterOffen` gehört dazu, weil jede Filteränderung den Screen neu aufbaut –
  * sonst würde sich das Filterblatt auf dem Smartphone bei jedem Tipp schließen.
+ * `ansicht` ist nur gesetzt, wenn die Adresse eine Ansicht vorgibt.
  */
 let zustand = {
-  kategorieId: null, filter: leererFilter(), suchbegriff: '', filterOffen: false,
+  kategorieId: null, filter: leererFilter(), suchbegriff: '', filterOffen: false, ansicht: null,
 };
 
-/** Setzt Filter und Suche zurück – beim Zurück zur Übersicht. */
-export function setzeKategorieZustandZurueck() {
-  zustand = {
-    kategorieId: null, filter: leererFilter(), suchbegriff: '', filterOffen: false,
+/** Filtergruppe -> Name in der Adresse, in dieser Reihenfolge. */
+const ADRESS_NAMEN = {
+  arten: 'art',
+  jahreszeiten: 'jahreszeit',
+  groessen: 'groesse',
+  merkmale: 'merkmal',
+  marken: 'marke',
+  passformen: 'passform',
+  alterAb: 'alter',
+};
+
+/** Diese Gruppen enthalten Zahlen. */
+const ZAHL_GRUPPEN = new Set(['groessen', 'alterAb']);
+
+/** Liest Filter, Suche und Ansicht aus der Adresse. */
+function zustandAusAdresse(kategorieId) {
+  const werte = abfrageListenAusHash(window.location.hash);
+  const filter = leererFilter();
+
+  for (const [gruppe, name] of Object.entries(ADRESS_NAMEN)) {
+    const liste = werte[name] ?? [];
+    filter[gruppe] = ZAHL_GRUPPEN.has(gruppe)
+      ? liste.map(Number).filter(Number.isFinite)
+      : liste;
+  }
+
+  return {
+    kategorieId,
+    filter,
+    suchbegriff: werte.suche?.[0] ?? '',
+    filterOffen: false,
+    ansicht: werte.ansicht?.[0] ?? null,
   };
 }
 
-function stelleZustandBereit(kategorieId) {
-  if (zustand.kategorieId !== kategorieId) {
-    zustand = { kategorieId, filter: leererFilter(), suchbegriff: '', filterOffen: false };
-  }
+/** Die Adresse zu einem Zustand – für die Adresszeile und für Gruppen-Links. */
+function adresseAus({ kategorieId, filter, suchbegriff, ansicht }) {
+  const werte = {};
+  for (const [gruppe, name] of Object.entries(ADRESS_NAMEN)) werte[name] = filter[gruppe];
+  werte.suche = suchbegriff.trim() === '' ? null : suchbegriff;
+  werte.ansicht = ansicht;
+  return adresseMitWerten(`/kategorie/${kategorieId}`, werte);
+}
+
+/** Schreibt den aktuellen Zustand in die Adresse, ohne Verlaufseintrag. */
+function merkeInAdresse() {
+  aktualisiereAdresse(adresseAus(zustand));
 }
 
 export function kategorieScreen({ kategorieId }, { neuZeichnen = () => {}, frisch = true } = {}) {
@@ -63,7 +105,7 @@ export function kategorieScreen({ kategorieId }, { neuZeichnen = () => {}, frisc
     return el('div', { class: 'inhalt' });
   }
 
-  if (frisch) stelleZustandBereit(kategorieId);
+  if (frisch) zustand = zustandAusAdresse(kategorieId);
 
   const istSpielzeug = istSpielzeugKategorie(kategorieId);
   const alleTeile = teileDerKategorie(speicher.teile(), kategorieId);
@@ -77,7 +119,7 @@ export function kategorieScreen({ kategorieId }, { neuZeichnen = () => {}, frisc
 
   // Nur Liste und Kopfzahl werden getauscht, damit der Fokus im Suchfeld bleibt.
   const listenbereich = el('div', { class: 'kategorie__liste', 'data-nach-oben': '' });
-  const zaehlzeile = el('p', { class: 'kopfzeile__unterzeile' });
+  const zaehlzeile = el('p', { class: 'zaehlzeile' });
   const chipzeile = el('div', { class: 'filterchips nur-smartphone' });
   const filterKnopfText = el('span', {});
 
@@ -95,9 +137,36 @@ export function kategorieScreen({ kategorieId }, { neuZeichnen = () => {}, frisc
 
     leeren(listenbereich).append(
       sichtbar.length > 0
-        ? el('div', { class: 'kartenraster' }, sichtbar.map((teil) => teilKarte(teil)))
+        ? ergebnisliste({
+          teile: sichtbar,
+          ansicht: geltendeAnsicht(zustand.ansicht, speicher.ansichtGemerkt()),
+          beiAnsicht: wechsleAnsicht,
+          karte: (teil) => teilKarte(teil),
+          gruppenZiel: gruppenAdresse,
+        })
         : leererListenZustand(alleTeile.length === 0),
     );
+  }
+
+  /**
+   * Tipp auf eine Gruppe: dieselbe Kategorie mit allen gesetzten Filtern,
+   * nur auf diese Art beschränkt und einzeln. "Zurück" führt zur Gruppen-
+   * ansicht, denn deren Stand steht in der Adresse davor.
+   */
+  function gruppenAdresse(gruppe) {
+    return adresseAus({
+      ...zustand,
+      filter: { ...zustand.filter, arten: [gruppe.art] },
+      ansicht: 'einzeln',
+    });
+  }
+
+  /** Umschalter: Wahl merken; ein Wert aus der Adresse gilt dann nicht mehr. */
+  function wechsleAnsicht(neu) {
+    zustand.ansicht = null;
+    speicher.ansichtMerken(neu);
+    merkeInAdresse();
+    neuZeichnen();
   }
 
   /** Leerer Zustand: ganz ohne Teile oder nur ohne Treffer. */
@@ -130,6 +199,7 @@ export function kategorieScreen({ kategorieId }, { neuZeichnen = () => {}, frisc
 
   function alleFilterZuruecksetzen() {
     zustand.filter = leererFilter();
+    merkeInAdresse();
     neuZeichnen();
   }
 
@@ -138,6 +208,7 @@ export function kategorieScreen({ kategorieId }, { neuZeichnen = () => {}, frisc
     const gesetzt = new Set(zustand.filter[gruppe]);
     if (gesetzt.has(wert)) gesetzt.delete(wert); else gesetzt.add(wert);
     zustand.filter = { ...zustand.filter, [gruppe]: [...gesetzt] };
+    merkeInAdresse();
     neuZeichnen();
   }
 
@@ -362,6 +433,7 @@ export function kategorieScreen({ kategorieId }, { neuZeichnen = () => {}, frisc
     wert: zustand.suchbegriff,
     beiEingabe: (wert) => {
       zustand.suchbegriff = wert;
+      merkeInAdresse();
       zeichneListe();
     },
   });

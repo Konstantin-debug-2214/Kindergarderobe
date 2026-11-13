@@ -9,7 +9,9 @@ import { el, leeren } from '../ui/dom.js';
 import { icon } from '../ui/icons.js';
 import { zurueckKnopf } from '../ui/knoepfe.js';
 import { leererZustand, teilKarte } from '../ui/kacheln.js';
+import { ergebnisliste, geltendeAnsicht } from '../ui/ergebnisliste.js';
 import { speicher } from '../storage.js';
+import { adresseMitWerten, aktualisiereAdresse } from '../router.js';
 import { JAHRESZEITEN, jahreszeit as jahreszeitVon, kleidungsKategorien } from '../model.js';
 import { einheit, stueck, teileDerJahreszeit } from '../filters.js';
 
@@ -20,7 +22,10 @@ import { einheit, stueck, teileDerJahreszeit } from '../filters.js';
 let gewaehlteKategorie = null;
 let zuletztGezeigt = null;
 
-export function jahreszeitScreen({ jahreszeitId }, { neuZeichnen = () => {}, frisch = true } = {}) {
+/** Ansicht aus der Adresse (?ansicht=…); hat Vorrang vor der gemerkten Wahl. */
+let ansichtAusAdresse = null;
+
+export function jahreszeitScreen({ jahreszeitId, ansicht }, { neuZeichnen = () => {}, frisch = true } = {}) {
   const jz = jahreszeitVon(jahreszeitId);
 
   // Unbekannte Jahreszeit führt zurück zur Übersicht.
@@ -35,9 +40,19 @@ export function jahreszeitScreen({ jahreszeitId }, { neuZeichnen = () => {}, fri
     zuletztGezeigt = jahreszeitId;
   }
 
+  if (frisch) ansichtAusAdresse = ansicht ?? null;
+
   const alleTeile = speicher.teile();
   const liste = el('div', { class: 'jahreszeit__liste' });
-  const zaehlzeile = el('p', { class: 'kopfzeile__unterzeile' });
+  const zaehlzeile = el('p', { class: 'zaehlzeile' });
+
+  /** Umschalter: Wahl merken; ein Wert aus der Adresse gilt dann nicht mehr. */
+  function wechsleAnsicht(neu) {
+    ansichtAusAdresse = null;
+    speicher.ansichtMerken(neu);
+    aktualisiereAdresse(`#/jahreszeit/${jahreszeitId}`);
+    neuZeichnen();
+  }
 
   function zeichneListe() {
     const gefiltert = teileDerJahreszeit(alleTeile, jahreszeitId, gewaehlteKategorie);
@@ -47,11 +62,21 @@ export function jahreszeitScreen({ jahreszeitId }, { neuZeichnen = () => {}, fri
 
     leeren(liste).append(
       gefiltert.length > 0
-        ? el(
-          'div',
-          { class: 'kartenraster kartenraster--vier' },
-          gefiltert.map((teil) => teilKarte(teil, { variante: 'jahreszeit' })),
-        )
+        ? ergebnisliste({
+          teile: gefiltert,
+          ansicht: geltendeAnsicht(ansichtAusAdresse, speicher.ansichtGemerkt()),
+          beiAnsicht: wechsleAnsicht,
+          karte: (teil) => teilKarte(teil, { variante: 'jahreszeit' }),
+          // Tipp auf eine Gruppe: die Teile dieser Art in ihrer Kategorie,
+          // gefiltert auf diese Jahreszeit.
+          gruppenZiel: (gruppe) => adresseMitWerten(`/kategorie/${gruppe.kategorie}`, {
+            art: gruppe.art,
+            jahreszeit: jahreszeitId,
+            ansicht: 'einzeln',
+          }),
+          zeigeKategorie: true,
+          rasterKlasse: 'kartenraster kartenraster--vier',
+        })
         : leererZustand({
           text: gewaehlteKategorie
             ? 'Keine Teile in dieser Kategorie.'

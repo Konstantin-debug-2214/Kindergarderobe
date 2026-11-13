@@ -3,7 +3,8 @@
  *
  * Datum, Begrüßung, Backup-Hinweis, sechs Kategorie-Kacheln, vier
  * Jahreszeiten-Kacheln. Beim Tippen in die Suche treten die Treffer an die
- * Stelle der Kacheln.
+ * Stelle der Kacheln. Der Suchbegriff steht in der Adresse (#/?suche=…),
+ * damit "Zurück" aus einer Gruppe oder einem Teil zu denselben Treffern führt.
  */
 
 import { el, leeren } from '../ui/dom.js';
@@ -11,7 +12,9 @@ import { icon } from '../ui/icons.js';
 import { iconKnopf, knopf, suchfeld } from '../ui/knoepfe.js';
 import { banner } from '../ui/banner.js';
 import { jahreszeitKachel, kategorieKachel, leererZustand, teilKarte } from '../ui/kacheln.js';
+import { ergebnisliste, geltendeAnsicht } from '../ui/ergebnisliste.js';
 import { speicher } from '../storage.js';
+import { adresseMitWerten, aktualisiereAdresse } from '../router.js';
 import { backupAlterInTagen, bannerSichtbar, exportiereBackup } from '../backup.js';
 import {
   einheit,
@@ -25,13 +28,16 @@ import {
 } from '../filters.js';
 import { JAHRESZEITEN, KATEGORIEN, aktuelleJahreszeit } from '../model.js';
 import { alterText, begruessung } from './einstellungen.js';
-import { setzeKategorieZustandZurueck } from './kategorie.js';
 
 /**
  * Suchbegriff der Übersicht. Liegt außerhalb der Zeichenfunktion, weil jede
- * Datenänderung den Screen neu aufbaut. Beim Betreten wird er geleert.
+ * Datenänderung den Screen neu aufbaut. Beim Betreten kommt er aus der
+ * Adresse – ohne ?suche=… beginnt die Übersicht leer.
  */
 let suchbegriff = '';
+
+/** Ansicht aus der Adresse (?ansicht=…); hat Vorrang vor der gemerkten Wahl. */
+let ansichtAusAdresse = null;
 
 /** Formatiert das heutige Datum, z. B. "Montag, 13. Oktober". */
 function heutigesDatum() {
@@ -58,13 +64,41 @@ export function bannerText(letztesBackupAm, heute = new Date()) {
 
 export function uebersichtScreen(parameter = {}, { neuZeichnen = () => {}, frisch = true } = {}) {
   if (frisch) {
-    suchbegriff = '';
-    // Beim Zurück zur Übersicht fallen Filter und Suche einer Kategorie weg.
-    setzeKategorieZustandZurueck();
+    suchbegriff = String(parameter.suche ?? '');
+    ansichtAusAdresse = parameter.ansicht ?? null;
   }
 
   // Aus der Statistik kommt ein Filter in der Adresse: #/?art=… oder #/?groesse=…
   const statistikFilter = filterAusAdresse(parameter);
+
+  /** Suche, Statistik-Filter und Ansicht als Adresse – ohne Verlaufseintrag. */
+  function merkeInAdresse() {
+    aktualisiereAdresse(adresseMitWerten('/', {
+      art: statistikFilter?.art,
+      groesse: statistikFilter?.groesse,
+      suche: suchbegriff.trim() === '' ? null : suchbegriff,
+      ansicht: ansichtAusAdresse,
+    }));
+  }
+
+  /** Was die Trefferlisten zum Zusammenfassen brauchen. */
+  const liste = {
+    ansicht: () => geltendeAnsicht(ansichtAusAdresse, speicher.ansichtGemerkt()),
+    wechsleAnsicht: (neu) => {
+      ansichtAusAdresse = null;
+      speicher.ansichtMerken(neu);
+      merkeInAdresse();
+      zeichneErgebnis();
+    },
+    // Tipp auf eine Gruppe: Kategorie-Ansicht mit dieser Art, einzeln. Suche
+    // und Größe aus der Statistik gehen mit, damit genau diese Teile kommen.
+    gruppenZiel: (gruppe) => adresseMitWerten(`/kategorie/${gruppe.kategorie}`, {
+      art: gruppe.art,
+      groesse: statistikFilter?.groesse,
+      suche: suchbegriff.trim() === '' ? null : suchbegriff.trim(),
+      ansicht: 'einzeln',
+    }),
+  };
 
   const einstellungen = speicher.einstellungen();
   const teile = speicher.teile();
@@ -79,13 +113,23 @@ export function uebersichtScreen(parameter = {}, { neuZeichnen = () => {}, frisc
   const ergebnis = el('div', { class: 'uebersicht__ergebnis' });
 
   function zeichneErgebnis() {
+    const trefferModus = Boolean(statistikFilter) || suchbegriff.trim() !== '';
     leeren(ergebnis).append(
       statistikFilter
-        ? gefilterterBereich(teile, statistikFilter, suchbegriff)
-        : (suchbegriff.trim() === ''
-          ? kachelBereiche(teile)
-          : trefferBereich(teile, suchbegriff)),
+        ? gefilterterBereich(teile, statistikFilter, suchbegriff, liste)
+        : (trefferModus ? trefferBereich(teile, suchbegriff, liste) : kachelBereiche(teile)),
     );
+    ordneBanner(trefferModus);
+  }
+
+  /**
+   * Bei Treffern steht die Trefferzahl direkt unter dem Suchfeld; der
+   * Backup-Hinweis rückt dafür ans Ende der Liste.
+   */
+  function ordneBanner(trefferModus) {
+    if (!bannerHuelle || !ergebnis.parentNode) return;
+    if (trefferModus) ergebnis.after(bannerHuelle);
+    else ergebnis.before(bannerHuelle);
   }
 
   function sucheFeld(klasse) {
@@ -96,6 +140,7 @@ export function uebersichtScreen(parameter = {}, { neuZeichnen = () => {}, frisc
       wert: suchbegriff,
       beiEingabe: (wert) => {
         suchbegriff = wert;
+        merkeInAdresse();
         zeichneErgebnis();
       },
     });
@@ -121,18 +166,21 @@ export function uebersichtScreen(parameter = {}, { neuZeichnen = () => {}, frisc
   ]);
 
   const hinweis = backupBanner(einstellungen, neuZeichnen);
-  zeichneErgebnis();
+  const bannerHuelle = hinweis ? el('div', { class: 'uebersicht__banner' }, [hinweis]) : null;
 
-  return el('div', { class: 'inhalt' }, [
+  const screen = el('div', { class: 'inhalt' }, [
     el('header', { class: 'uebersicht__kopf' }, [
       begruessungsBlock,
       werkzeugeTablet,
       werkzeugeSmartphone,
     ]),
     sucheSmartphone,
-    hinweis ? el('div', { class: 'uebersicht__banner' }, [hinweis]) : null,
+    bannerHuelle,
     ergebnis,
   ]);
+
+  zeichneErgebnis();
+  return screen;
 }
 
 /* --- Kacheln -------------------------------------------------------------- */
@@ -184,7 +232,12 @@ function kachelBereiche(teile) {
 
 /* --- Suchtreffer ---------------------------------------------------------- */
 
-function trefferBereich(teile, begriff) {
+/** Überschrift der Trefferansicht: "175 Treffer" (Stückzahl). */
+function trefferKopf(gefunden) {
+  return el('h2', { class: 'bereich__titel trefferzahl', text: `${gefunden} Treffer` });
+}
+
+function trefferBereich(teile, begriff, liste) {
   const treffer = sucheTeile(teile, begriff);
 
   if (treffer.length === 0) {
@@ -197,22 +250,22 @@ function trefferBereich(teile, begriff) {
     ]);
   }
 
-  const gefunden = stueck(treffer);
-
   return el('section', { class: 'bereich' }, [
-    el('div', { class: 'bereich__kopf' }, [
-      el('h2', { class: 'bereich__titel', text: 'Treffer' }),
-      el('p', {
-        class: 'bereich__zusatz',
-        text: `${gefunden} ${einheit(null, gefunden)} gefunden`,
-      }),
-    ]),
-    el(
-      'div',
-      { class: 'kartenraster' },
-      treffer.map((teil) => teilKarte(teil, { zeigeKategorie: true })),
-    ),
+    el('div', { class: 'bereich__kopf' }, [trefferKopf(stueck(treffer))]),
+    trefferListe(treffer, liste),
   ]);
+}
+
+/** Karten der Treffer – nach Art zusammengefasst oder einzeln. */
+function trefferListe(treffer, liste) {
+  return ergebnisliste({
+    teile: treffer,
+    ansicht: liste.ansicht(),
+    beiAnsicht: liste.wechsleAnsicht,
+    karte: (teil) => teilKarte(teil, { zeigeKategorie: true }),
+    gruppenZiel: liste.gruppenZiel,
+    zeigeKategorie: true,
+  });
 }
 
 /* --- Backup-Hinweis ------------------------------------------------------- */
@@ -263,7 +316,7 @@ function filterAusAdresse(parameter) {
   };
 }
 
-function gefilterterBereich(teile, filter, begriff) {
+function gefilterterBereich(teile, filter, begriff, liste) {
   const treffer = teileZuStatistik(teile, filter)
     .filter((teil) => passtZurSuche(teil, begriff));
 
@@ -279,22 +332,11 @@ function gefilterterBereich(teile, filter, begriff) {
     entfernen,
   ]);
 
-  const gefunden = stueck(treffer);
-
   return el('section', { class: 'bereich' }, [
-    el('div', { class: 'bereich__kopf' }, [
-      el('div', { class: 'filterchips' }, [chip]),
-      el('p', {
-        class: 'bereich__zusatz',
-        text: `${gefunden} ${einheit(null, gefunden)} gefunden`,
-      }),
-    ]),
+    el('div', { class: 'bereich__kopf' }, [trefferKopf(stueck(treffer))]),
+    el('div', { class: 'filterchips trefferchips' }, [chip]),
     treffer.length > 0
-      ? el(
-        'div',
-        { class: 'kartenraster' },
-        treffer.map((teil) => teilKarte(teil, { zeigeKategorie: true })),
-      )
+      ? trefferListe(treffer, liste)
       : leererZustand({
         text: `Nichts gefunden für „${filter.beschriftung}“.`,
         hinweis: 'Aussortierte Teile erscheinen hier nicht.',
