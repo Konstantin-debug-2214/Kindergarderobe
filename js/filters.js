@@ -14,6 +14,7 @@ import {
   KATEGORIE_SPIELZEUG,
   TYP,
 } from './model.js';
+import { groesseText } from './formular.js';
 
 /* --- Grundlagen ----------------------------------------------------------- */
 
@@ -335,4 +336,104 @@ export function teileZuStatistik(teile = [], { art = null, groesse = null } = {}
   }
 
   return sortiereNachName(gefunden);
+}
+
+/* --- Zusammenfassen nach Art ---------------------------------------------- */
+
+/** Je kleiner, desto besser passt es. */
+const PASSFORM_RANG = { passt_gut: 0, bald_zu_klein: 1, zu_klein: 2 };
+
+/**
+ * Die Größen einer Gruppe als Chips: jede vorhandene Größe einmal, aufsteigend,
+ * mit der besten Passform der Teile dieser Größe. Eine Doppelgröße wie 98/104
+ * ist ein eigener Eintrag. Spielzeug zeigt "ab n J." und keine Passform.
+ * @param {Array<Object>} teile
+ * @returns {Array<{text: string, passform: string|null}>}
+ */
+export function groessenChips(teile = []) {
+  const chips = new Map();
+
+  for (const teil of teile) {
+    let text;
+    let reihenfolge;
+
+    if (teil.typ === TYP.SPIELZEUG) {
+      if (!Number.isInteger(teil.alterAb)) continue;
+      text = `ab ${teil.alterAb} J.`;
+      reihenfolge = [teil.alterAb, teil.alterAb];
+    } else {
+      if (typeof teil.groesse?.von !== 'number') continue;
+      text = groesseText(teil.groesse);
+      reihenfolge = [teil.groesse.von, teil.groesse.bis];
+    }
+
+    const passform = teil.typ === TYP.KLEIDUNG && PASSFORM_RANG[teil.passform] !== undefined
+      ? teil.passform
+      : null;
+    const vorhanden = chips.get(text);
+
+    if (!vorhanden) {
+      chips.set(text, { text, passform, reihenfolge });
+    } else if (passform && (vorhanden.passform === null
+      || PASSFORM_RANG[passform] < PASSFORM_RANG[vorhanden.passform])) {
+      vorhanden.passform = passform;
+    }
+  }
+
+  return [...chips.values()]
+    .sort((a, b) => a.reihenfolge[0] - b.reihenfolge[0] || a.reihenfolge[1] - b.reihenfolge[1])
+    .map(({ text, passform }) => ({ text, passform }));
+}
+
+/**
+ * Fasst eine (bereits gefilterte) Teileliste nach Kategorie und Art zusammen.
+ * Gruppen stehen alphabetisch nach Art; die Stückzahl zählt nach `anzahl`.
+ * @param {Array<Object>} teile
+ * @returns {Array<{schluessel: string, kategorie: string, art: string, typ: string,
+ *   stueck: number, teile: Array<Object>, werte: Array<{text: string, passform: string|null}>}>}
+ */
+export function gruppiereNachArt(teile = []) {
+  const gruppen = new Map();
+
+  for (const teil of teile) {
+    const art = String(teil.art ?? '').trim() || 'Ohne Art';
+    const schluessel = `${teil.kategorie}|${art}`;
+    if (!gruppen.has(schluessel)) {
+      gruppen.set(schluessel, { schluessel, kategorie: teil.kategorie, art, typ: teil.typ, teile: [] });
+    }
+    gruppen.get(schluessel).teile.push(teil);
+  }
+
+  const stelle = (id) => KATEGORIEN.findIndex((k) => k.id === id);
+
+  return [...gruppen.values()]
+    .map((gruppe) => ({
+      ...gruppe,
+      stueck: stueck(gruppe.teile),
+      teile: sortiereNachName(gruppe.teile),
+      werte: groessenChips(gruppe.teile),
+    }))
+    .sort((a, b) => a.art.localeCompare(b.art, 'de') || stelle(a.kategorie) - stelle(b.kategorie));
+}
+
+/**
+ * Was eine Ergebnisliste in der Ansicht "Zusammengefasst" zeigt: je Art eine
+ * Gruppe, eine Art mit nur einem Eintrag als normale Karte. Gehören alle
+ * Teile zu einer einzigen Art, gibt es nichts zusammenzufassen – dann einzeln.
+ * @param {Array<Object>} teile
+ * @returns {{einzeln: boolean, eintraege: Array<{gruppe?: Object, teil?: Object}>}}
+ */
+export function zusammenfassen(teile = []) {
+  const gruppen = gruppiereNachArt(teile);
+
+  if (gruppen.length <= 1) {
+    return { einzeln: true, eintraege: sortiereNachName(teile).map((teil) => ({ teil })) };
+  }
+
+  return {
+    einzeln: false,
+    eintraege: gruppen.map((gruppe) => (gruppe.teile.length === 1
+      ? { teil: gruppe.teile[0] }
+      : { gruppe })),
+  };
 }
