@@ -1,6 +1,6 @@
 # Kindergarderobe – Projektregeln für Claude Code
 
-Stand: 01.11.2026 (nach Auftrag 12)
+Stand: 11.11.2026 (nach Auftrag 12, vor Auftrag 13)
 
 Inventar-App für Kleidung und Spielzeug eines Kindes. Eigenbedarf, ein Kind.
 Hauptgerät: **Android-Smartphone** im Hochformat (Chrome; Testgrößen 390 × 844 und 412 × 915). Das Tablet im Querformat (1194 × 834) wird weiterhin vollständig unterstützt, hat aber zweite Priorität (Entscheidung John, 20.10.2026). Genutzt wird die App hauptsächlich von einer Person.
@@ -66,12 +66,11 @@ Unbekannte Routen führen zur Übersicht. Der Router liest Werte hinter `?` (z. 
   - Die Leiste erscheint nur auf Übersicht, Statistik, Aussortiert und Einstellungen.
   - Statistik, Aussortiert und Einstellungen haben auf dem Smartphone keinen Zurück-Knopf (die Leiste navigiert).
   - Ohne Leiste (mit Zurück- bzw. Schließen-Knopf): Kategorie, Detail, Nach Jahreszeit, Teil hinzufügen/bearbeiten, Kosten, Soll-Mengen & Saisonwechsel. Das Detail hat unten eine eigene Aktionsleiste mit „Aussortieren“ und „Bearbeiten“.
-  - Der Zurück-Knopf auf „Soll-Mengen & Saisonwechsel“ führt zur vorherigen Seite (Statistik oder Einstellungen/„Mehr“); ohne Vorgänger – direkt geöffnet oder nach dem Neuladen – zur Statistik.
   - Übersicht: Icon-Knopf „€“ oben rechts führt zu Kosten.
   - Statistik: Verweis-Karte „Soll-Mengen & Saisonwechsel“ mit Anzahl der Fehlenden oben.
   - „Mehr“ öffnet den Screen „Einstellungen“ mit Einträgen „Kosten“ (mit Jahressumme) und „Soll-Mengen & Saisonwechsel“, darunter Backup und Begrüßung.
 - **Tablet:** keine Leiste. Die Übersicht hat oben Suche, Knopf „Kosten“, Icon-Knöpfe Statistik, Aussortiert und Einstellungen sowie den Knopf „Teil hinzufügen“. Alle anderen Screens haben links oben einen runden Zurück-Knopf (Teil hinzufügen: Schließen-Knopf „×“ und „Abbrechen“). Die Statistik verlinkt auf „Soll-Mengen & Saisonwechsel“.
-- Alle Zurück-Knöpfe führen wie die Zurück-Geste zur vorherigen Seite; ohne vorherige Seite in der App zur Elternseite, nie aus der App heraus. Ausnahme: Nach dem Aussortieren geht es zur Kategorie (Auftrag 05).
+- Alle Zurück-Knöpfe führen wie die Zurück-Geste zur vorherigen Seite; ohne vorherige Seite in der App zur Elternseite, nie aus der App heraus. Ausnahme: Nach dem Aussortieren geht es zur Kategorie (Auftrag 05). Speichern, Abbrechen, Blättern ‹ › und der Wechsel in der Tablet-Teileliste legen keine Verlaufseinträge an.
 
 ## Datenmodell
 
@@ -150,16 +149,20 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
 - `preis` am Teil: `{ art: "einzeln", betrag }` oder `{ art: "sammelkauf", ausgabeId }`. Ein Einzelpreis legt automatisch eine verknüpfte Ausgabe mit `anzahlTeile: 1` an, damit alle Summen nur aus `ausgaben` berechnet werden.
 - Teile können einem Sammelkauf auch nachträglich zugeordnet werden.
 - Wechsel der Preisart: Ein Einzelpreis legt immer eine eigene Ausgabe an und übernimmt nie einen Sammelkauf. Einzelpreis → Kein Preis oder Sammelkauf löscht die eigene Einzel-Ausgabe. Sammelkauf → Kein Preis oder Einzelpreis löst nur die Verknüpfung; der Sammelkauf bleibt.
+- Betragseingabe: nur Ziffern mit höchstens einem Komma bzw. Punkt und zwei Nachkommastellen, Tausenderpunkt vor dem Komma erlaubt; ungültige oder leere Beträge werden am Feld gemeldet, nie still zu 0,00 €. Ein Sammelkauf hat mindestens 2 Teile und nie weniger als ihm zugeordnet sind.
+- Tagesdaten immer lokal (nie `toISOString()` für ein Datum).
 - **Alle Beträge intern in Cent als ganze Zahlen** (8,00 € = `800`), auch in `ausgaben`, `preis` und im Backup. Anzeige nur über `formatEuro` aus `js/costs.js`; Eingaben mit Komma werden in Cent umgerechnet.
 - Kostenansicht: Summe je Jahr, Anzahl Teile, Durchschnitt pro Teil, Einträge neueste zuerst; bei Sammelkäufen „ca. x € / Teil“. Beträge in Euro, deutsches Format (8,00 €).
 
 ### Weitere gespeicherte Daten
 
-- `marken`: pflegbare Liste (anlegen, löschen). Gelöschte Marken bleiben an bestehenden Teilen erhalten.
+- `marken`: pflegbare Liste (anlegen, löschen). Gelöschte Marken bleiben an bestehenden Teilen erhalten; im Formular erscheint die Marke des Teils immer als gewählt, auch wenn sie nicht mehr in der Liste steht.
 - `sollMengen`: Liste `{ id, art, jahreszeit, soll }` – Soll je Art **und** Jahreszeit, optional, nur Kleidung. Gezählt werden nur Teile mit Passform „Passt gut“ in der Jahreszeit; „Bald zu klein“ zählt **nicht** mit. Unterschrittenes Soll wird als Lücke angezeigt.
 - `einstellungen`: `{ name, letztesBackupAm, aenderungenSeitBackup }`. `name` ist der Name des Kindes und erscheint in der Begrüßung „Hallo, [Name]!“.
 - Schema-Version `version: 1` für spätere Migrationen. Speicherschlüssel `kindergarderobe`.
 - Beschädigte Daten werden nie überschrieben; der Rohinhalt liegt unter `kindergarderobe-rohdaten`. Die Notfallansicht bietet Backup einspielen, Rohdaten herunterladen und Mit leeren Daten beginnen (mit Sicherheitsabfrage).
+- Ist `localStorage` nicht nutzbar, meldet das Hinweisband „Auf diesem Gerät können keine Daten gespeichert werden.“ Jeder Schreibzugriff meldet Speicherfehler sichtbar. Notiz und Name des Kindes werden zusätzlich beim Verbergen der App (`visibilitychange`/`pagehide`) gespeichert.
+- Import prüft alle Listen (Teile, Ausgaben, Marken, Soll-Mengen, Name, eindeutige Ids) und lehnt fehlerhafte Dateien mit Meldung ab.
 - Backup-Datei: `{ app: "kindergarderobe", version: 1, erstelltAm, daten }`, Dateiname `kindergarderobe-backup-JJJJ-MM-TT.json`. Aus `einstellungen` wird nur `name` gesichert. Nach dem Einspielen gilt: `letztesBackupAm` = Erstelldatum der Datei, `aenderungenSeitBackup = 0`.
 
 ### Backup-Erinnerung
@@ -189,6 +192,8 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
 - Filterlogik: innerhalb einer Gruppe ODER, zwischen Gruppen UND; Standard ohne Filter (alle Teile sichtbar). Doppelgrößen und Spannen passen auf jede enthaltene Größe.
 - Karten sortiert alphabetisch nach Name. Bei `anzahl > 1` wird die Anzahl auf der Karte angezeigt.
 - Filter und Suchbegriff einer Kategorie bleiben beim Wechsel ins Detail und zurück erhalten; beim Zurück zur Übersicht werden sie zurückgesetzt.
+- **Zusammenfassen nach Art** (Wunsch Tester/John, nicht im Design): In Trefferansicht, Kategorie-Ansicht und „Nach Jahreszeit“ werden Teile standardmäßig zu einer Karte je Art zusammengefasst (Art-Name, Stückzahl, alle vorhandenen Größen als Chips; passende Größen hervorgehoben, zu kleine blass). Umschalter „Zusammengefasst / Einzeln“, Wahl wird im Oberflächen-Zustand gemerkt. Tipp auf eine Gruppe zeigt die einzelnen Teile dieser Art. Eine Art mit nur einem Eintrag erscheint als normale Karte; gehören alle Ergebnisse zu einer einzigen Art, wird direkt einzeln angezeigt.
+- **Zählzeile hervorgehoben:** Trefferzahl als Überschrift („175 Treffer“), auf dem Smartphone direkt unter dem Suchfeld; „x von y Teilen“ in der Kategorie und „n Teile für [Jahreszeit]“ ebenso deutlich (Überschriftenschrift, nicht grau).
 
 ## Screens in Version 1
 
