@@ -16,7 +16,7 @@
  */
 
 /** Bei jeder Änderung an den App-Dateien hochzählen. */
-const VERSION = 'v14';
+const VERSION = 'v15';
 const CACHE_NAME = `kindergarderobe-${VERSION}`;
 
 /** Alle Dateien, die die App zum Laufen braucht. */

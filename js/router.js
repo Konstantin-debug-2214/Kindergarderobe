@@ -92,14 +92,32 @@ export function ersetzeRoute(hash) {
 
 /**
  * Zu einem festen Ziel, ohne einen Eintrag zu hinterlassen: Liegt das Ziel
- * direkt davor, geht es per history.back() dorthin, sonst ersetzt es die
- * aktuelle Seite. So führt Aussortieren zur Kategorie, und „Zurück“ landet
- * danach nicht auf dem aussortierten Teil.
+ * direkt davor, geht es per history.back() dorthin – samt den Filtern, die
+ * dort in der Adresse stehen –, sonst ersetzt es die aktuelle Seite. So führt
+ * Aussortieren zur Kategorie, und „Zurück“ landet danach nicht auf dem
+ * aussortierten Teil.
  * @param {string} ziel z. B. '#/kategorie/schuhe'
  */
 export function wechsleOhneEintrag(ziel) {
-  if (hatVorgaenger() && aktuell.vorher === ziel) window.history.back();
+  if (hatVorgaenger() && gleicherPfad(aktuell.vorher, ziel)) window.history.back();
   else ersetzeRoute(ziel);
+}
+
+/**
+ * Schreibt den Zustand eines Screens (Suche, Filter, Ansicht) in die Adresse,
+ * ohne neu zu zeichnen und ohne Verlaufseintrag. „Zurück“ findet ihn dann
+ * genau so wieder vor.
+ * @param {string} hash z. B. '#/?suche=Hose'
+ */
+export function aktualisiereAdresse(hash) {
+  if (window.location.hash === hash) return;
+  // replaceState löst kein hashchange aus: Der Fokus bleibt im Suchfeld.
+  window.history.replaceState(
+    window.history.state,
+    '',
+    `${window.location.pathname}${window.location.search}${hash}`,
+  );
+  aktuell = { ...aktuell, hash };
 }
 
 /**
@@ -140,6 +158,30 @@ export function abfrageAusHash(hash) {
   const fragezeichen = roh.indexOf('?');
   if (fragezeichen === -1) return {};
   return Object.fromEntries(new URLSearchParams(roh.slice(fragezeichen + 1)));
+}
+
+/**
+ * Alle Werte hinter dem Fragezeichen als Listen – auch mehrfach vorkommende,
+ * z. B. '#/kategorie/oberteile?art=Pullover&art=Hemd' -> { art: ['Pullover', 'Hemd'] }.
+ * So stehen gesetzte Filter vollständig in der Adresse.
+ * @param {string} hash
+ * @returns {Object<string, Array<string>>}
+ */
+export function abfrageListenAusHash(hash) {
+  const roh = String(hash || '').replace(/^#/, '');
+  const fragezeichen = roh.indexOf('?');
+  if (fragezeichen === -1) return {};
+  const werte = {};
+  for (const [name, wert] of new URLSearchParams(roh.slice(fragezeichen + 1))) {
+    (werte[name] ??= []).push(wert);
+  }
+  return werte;
+}
+
+/** Gleicher Pfad – unabhängig von den Werten hinter dem Fragezeichen. */
+export function gleicherPfad(a, b) {
+  if (!a || !b) return false;
+  return pfadAusHash(a) === pfadAusHash(b);
 }
 
 /**

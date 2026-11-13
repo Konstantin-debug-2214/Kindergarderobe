@@ -514,6 +514,21 @@ export function erstelleSpeicher(hintergrund = null, { dauerhaft = true } = {}) 
       schreibeOberflaeche({ ...liesOberflaeche(), besorgt: [...werte] });
     },
 
+    /**
+     * Gewählte Ansicht der Ergebnislisten: "zusammengefasst" (Standard) oder
+     * "einzeln". Oberflächen-Zustand: keine Datenänderung, nicht im Backup.
+     * @returns {'zusammengefasst'|'einzeln'}
+     */
+    ansichtGemerkt() {
+      return liesOberflaeche().ansicht === 'einzeln' ? 'einzeln' : 'zusammengefasst';
+    },
+
+    /** Merkt die Ansicht für den nächsten Start. */
+    ansichtMerken(ansicht) {
+      const wert = ansicht === 'einzeln' ? 'einzeln' : 'zusammengefasst';
+      schreibeOberflaeche({ ...liesOberflaeche(), ansicht: wert });
+    },
+
     /** Entfernt Haken, für die es nichts mehr zu besorgen gibt. */
     besorgtAufraeumen(noetigeSchluessel) {
       const noetig = new Set(noetigeSchluessel);

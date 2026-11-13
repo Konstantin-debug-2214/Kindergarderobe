@@ -532,3 +532,31 @@ test('eine Einzelpreis-Ausgabe kurz nach Mitternacht trägt das lokale Datum (#6
     else process.env.TZ = zeitzoneVorher;
   }
 });
+
+/* --- Ansicht "Zusammengefasst / Einzeln" (Auftrag 13) --------------------- */
+
+test('ohne Wahl ist die Ansicht "zusammengefasst"', () => {
+  assert.equal(neuerSpeicher().ansichtGemerkt(), 'zusammengefasst');
+});
+
+test('die gewählte Ansicht überlebt einen Neustart der App', () => {
+  const hintergrund = speicherImArbeitsspeicher();
+  erstelleSpeicher(hintergrund).ansichtMerken('einzeln');
+  assert.equal(erstelleSpeicher(hintergrund).ansichtGemerkt(), 'einzeln');
+});
+
+test('die Ansicht ist Oberflächen-Zustand: keine Änderung, nicht in den Daten', () => {
+  const hintergrund = speicherImArbeitsspeicher();
+  const speicher = erstelleSpeicher(hintergrund);
+  speicher.ansichtMerken('einzeln');
+
+  assert.equal(speicher.einstellungen().aenderungenSeitBackup, 0);
+  assert.equal(JSON.stringify(speicher.zustand()).includes('einzeln'), false);
+  assert.match(hintergrund.getItem(OBERFLAECHE_SCHLUESSEL), /einzeln/);
+});
+
+test('unbekannte Werte gelten als "zusammengefasst"', () => {
+  const speicher = neuerSpeicher();
+  speicher.ansichtMerken('quer');
+  assert.equal(speicher.ansichtGemerkt(), 'zusammengefasst');
+});

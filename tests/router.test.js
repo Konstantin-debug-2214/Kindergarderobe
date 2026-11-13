@@ -1,7 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { abfrageAusHash, findeRoute, pfadAusHash, tiefeFuer, vorherFuer } from '../js/router.js';
+import {
+  abfrageAusHash,
+  abfrageListenAusHash,
+  findeRoute,
+  gleicherPfad,
+  pfadAusHash,
+  tiefeFuer,
+  vorherFuer,
+} from '../js/router.js';
 
 test('der Pfad entsteht aus dem Hash', () => {
   assert.equal(pfadAusHash(''), '/');
@@ -91,4 +99,20 @@ test('ein ersetzter Eintrag übernimmt den Vorgänger des ersetzten (#7)', () =>
 test('Einstieg hat keinen Vorgänger, zurück und Neuladen behalten ihn (#7)', () => {
   assert.equal(vorherFuer(null, { hash: null, vorher: null }, false, false), null);
   assert.equal(vorherFuer({ tiefe: 1, vorher: '#/statistik' }, { hash: '#/x', vorher: null }, true, false), '#/statistik');
+});
+
+/* --- Werte in der Adresse (Auftrag 13) -------------------------------------- */
+
+test('mehrfach vorkommende Werte hinter "?" bleiben alle erhalten', () => {
+  assert.deepEqual(
+    abfrageListenAusHash('#/kategorie/oberteile?art=Pullover&art=Set%20(Oberteil%20%2B%20Hose)&groesse=104'),
+    { art: ['Pullover', 'Set (Oberteil + Hose)'], groesse: ['104'] },
+  );
+  assert.deepEqual(abfrageListenAusHash('#/kategorie/oberteile'), {});
+});
+
+test('gleicher Pfad unabhängig von den Werten hinter "?"', () => {
+  assert.equal(gleicherPfad('#/kategorie/schuhe?art=Sneaker', '#/kategorie/schuhe'), true);
+  assert.equal(gleicherPfad('#/kategorie/schuhe', '#/kategorie/muetzen'), false);
+  assert.equal(gleicherPfad(null, '#/'), false);
 });
