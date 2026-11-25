@@ -1,6 +1,6 @@
 # Kindergarderobe – Projektregeln für Claude Code
 
-Stand: 11.11.2026 (nach Auftrag 12, vor Auftrag 13)
+Stand: 25.11.2026 (nach Auftrag 13, vor Auftrag 14)
 
 Inventar-App für Kleidung und Spielzeug eines Kindes. Eigenbedarf, ein Kind.
 Hauptgerät: **Android-Smartphone** im Hochformat (Chrome; Testgrößen 390 × 844 und 412 × 915). Das Tablet im Querformat (1194 × 834) wird weiterhin vollständig unterstützt, hat aber zweite Priorität (Entscheidung John, 20.10.2026). Genutzt wird die App hauptsächlich von einer Person.
@@ -27,6 +27,7 @@ js/         app.js (Start, Router), router.js (Hash-Routing, siehe Routen)
             costs.js (reine Kostenberechnung), backup.js (Export, Import, Erinnerung), formular.js (reine Formular-Logik), saison.js (Soll-Mengen und Saisonwechsel-Check)
             ui/diagramme.js: Balken- und Säulendiagramme
             aktualisierung.js: Service Worker anmelden, Hinweisband „Neue Version verfügbar“
+            ui/ergebnisliste.js: Ergebnisliste mit Umschalter Zusammengefasst / Einzeln (Übersicht-Treffer, Kategorie, Nach Jahreszeit)
             ui/nachOben.js: Nach-oben-Knopf für Seite und markierte Scrollbereiche (`data-nach-oben`)
             ui/ausgabeDialog.js: Ausgaben-Formular, einmal für Kosten-Ansicht, Bearbeiten und „Neuer Sammelkauf“
             screens/*.js (je Screen ein Modul; teilFormular.js für #/neu und Bearbeiten), ui/*.js (Bausteine)
@@ -47,6 +48,8 @@ Reine Logik (Filtern, Zählen, Größen vergleichen, Kosten rechnen, Backup prü
 |---|---|
 | `#/` | Übersicht |
 | `#/?art=…`, `#/?groesse=…` | Trefferansicht der Übersicht mit Filter-Chip (aus der Statistik) |
+| `#/?suche=…` | Trefferansicht der Suche |
+| `#/kategorie/:id?art=…&jahreszeit=…&ansicht=einzeln` | Kategorie mit vorgesetzten Filtern und Ansicht |
 | `#/kategorie/:id` | Kategorie mit Filtern |
 | `#/jahreszeit/:id` | Nach Jahreszeit |
 | `#/teil/:id` | Detail |
@@ -99,7 +102,7 @@ Unbekannte Routen führen zur Übersicht. Der Router liest Werte hinter `?` (z. 
 
 | Feld | Typ | Pflicht | Hinweis |
 |---|---|---|---|
-| `groesse` | Objekt | ja | `{ system, von, bis }`, siehe Größensysteme |
+| `groesse` | Objekt oder `null` | ja, außer in Sets & Sonstiges | `{ system, von, bis }`, siehe Größensysteme. In **Sets & Sonstiges optional** (`null` = ohne Größe, z. B. Bettwäsche; Entscheidung John, 25.11.2026) |
 | `jahreszeiten` | Array | ja, min. 1 | `fruehling`, `sommer`, `herbst`, `winter`; kein Schnellknopf „Ganzjährig“ (entfällt, Entscheidung John) |
 
 ### Nur Spielzeug
@@ -130,6 +133,7 @@ Spielzeug hat **keine** Größe, **keine** Jahreszeiten und **keine** Passform.
 - `schuh`: EU 17 … 40; Spannen wie 23–26 erlaubt.
 - `kopf`: Kopfumfang in cm (35 … 58).
 - `handschuh`: 0 … 6.
+- Teile ohne Größe (nur Sets & Sonstiges): Karte ohne Größenangabe, Detail-Kachel „–“, Tablet-Teileliste „ohne Größe“; bei gesetztem Größenfilter erscheinen sie nicht; in Gruppenkarten bekommen sie keinen Größen-Chip.
 - Bei Einzelgröße gilt `von === bis`. Im Formular: Schnellauswahl der gängigen Größen plus „Andere …“ (Von/Bis über den vollen Bereich). Gängig (freigegeben): Konfektion 86–134, Schuh 22–34, Kopfumfang 48–55 cm, Handschuh 0–6.
 
 ### Jahreszeiten (nur Kleidung)
@@ -170,7 +174,7 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
 - Die Erinnerung erscheint, **sobald seit dem letzten Backup etwas hinzugefügt, bearbeitet oder geändert wurde** (`aenderungenSeitBackup > 0`). Ein regelmäßiges, zeitgesteuertes Backup ist nicht vorgesehen.
 - Nach einem erfolgreichen Export (Teilen abgeschlossen oder Download) wird `aenderungenSeitBackup` auf 0 gesetzt und `letztesBackupAm` gespeichert. Ein abgebrochenes Teilen-Menü ändert nichts.
 - **Ausblenden-Knopf:** blendet den Banner aus, bis die nächste Änderung erfolgt – auch über Neuladen und App-Neustart hinweg. Dafür wird der Zählerstand beim Ausblenden unter einem eigenen Schlüssel gemerkt (Oberflächen-Zustand, zählt nicht als Datenänderung, gehört nicht ins Backup). Der Banner erscheint wieder, sobald `aenderungenSeitBackup` diesen Stand übersteigt.
-- Oberflächen-Zustand unter `kindergarderobe-oberflaeche`: ausgeblendeter Backup-Hinweis und die Haken der Besorgen-Liste (je Jahreszeit). Zählt nicht als Änderung, gehört nicht ins Backup.
+- Oberflächen-Zustand unter `kindergarderobe-oberflaeche`: ausgeblendeter Backup-Hinweis, die Haken der Besorgen-Liste (je Jahreszeit) und die gewählte Ansicht der Ergebnislisten (Zusammengefasst / Einzeln). Zählt nicht als Änderung, gehört nicht ins Backup.
 - Texte: Banner „Das letzte Backup ist n Tage alt. Zeit, die Daten zu sichern.“ bzw. ohne Backup „Es gibt noch kein Backup. Zeit, die Daten zu sichern.“ Status in den Einstellungen „vor n Tagen – es gibt Änderungen seitdem, ein neues Backup ist fällig“ bzw. „heute – alle Änderungen sind gesichert“ (freigegeben).
 - Es gibt **keine** Einstellung für ein Erinnerungsintervall. Die Auswahl „Erinnern nach“ aus dem Design entfällt (Entscheidung John, 13.10.2026).
 
@@ -192,7 +196,8 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
 - Filterlogik: innerhalb einer Gruppe ODER, zwischen Gruppen UND; Standard ohne Filter (alle Teile sichtbar). Doppelgrößen und Spannen passen auf jede enthaltene Größe.
 - Karten sortiert alphabetisch nach Name. Bei `anzahl > 1` wird die Anzahl auf der Karte angezeigt.
 - Filter und Suchbegriff einer Kategorie bleiben beim Wechsel ins Detail und zurück erhalten; beim Zurück zur Übersicht werden sie zurückgesetzt.
-- **Zusammenfassen nach Art** (Wunsch Tester/John, nicht im Design): In Trefferansicht, Kategorie-Ansicht und „Nach Jahreszeit“ werden Teile standardmäßig zu einer Karte je Art zusammengefasst (Art-Name, Stückzahl, alle vorhandenen Größen als Chips; passende Größen hervorgehoben, zu kleine blass). Umschalter „Zusammengefasst / Einzeln“, Wahl wird im Oberflächen-Zustand gemerkt. Tipp auf eine Gruppe zeigt die einzelnen Teile dieser Art. Eine Art mit nur einem Eintrag erscheint als normale Karte; gehören alle Ergebnisse zu einer einzigen Art, wird direkt einzeln angezeigt.
+- **Zusammenfassen nach Art** (Wunsch Tester/John, nicht im Design): In Trefferansicht, Kategorie-Ansicht und „Nach Jahreszeit“ werden Teile standardmäßig zu einer Karte je Art zusammengefasst (Art-Name, Stückzahl, alle vorhandenen Größen als Chips; passende Größen hervorgehoben, zu kleine blass). Umschalter „Zusammengefasst / Einzeln“, Wahl wird im Oberflächen-Zustand gemerkt. Tipp auf eine Gruppe führt zur Kategorie mit Art-Filter (aus „Nach Jahreszeit“ zusätzlich mit Jahreszeit-Filter, aus der Suche mit Suchbegriff) in der Einzelansicht. Der Umschalter ist ausgeblendet, wenn ohnehin einzeln angezeigt wird. In der Trefferansicht steht der Backup-Hinweis am Ende der Liste, damit die Trefferzahl direkt unter dem Suchfeld steht. Eine Art mit nur einem Eintrag erscheint als normale Karte; gehören alle Ergebnisse zu einer einzigen Art, wird direkt einzeln angezeigt.
+- Suche, Filter und Ansicht stehen in der Adresse (`?suche=`, `?art=`, `?jahreszeit=`, `?ansicht=` …) und werden ohne Verlaufseintrag aktualisiert; Kacheln und Navigation verlinken ohne Werte, deshalb beginnen Filter beim Weg über die Übersicht leer.
 - **Zählzeile hervorgehoben:** Trefferzahl als Überschrift („175 Treffer“), auf dem Smartphone direkt unter dem Suchfeld; „x von y Teilen“ in der Kategorie und „n Teile für [Jahreszeit]“ ebenso deutlich (Überschriftenschrift, nicht grau).
 
 ## Screens in Version 1
@@ -204,12 +209,12 @@ Die aktuelle Jahreszeit wird aus dem Datum bestimmt und mit „Jetzt“ markiert
 3. **Detail:** Smartphone: Blättern mit „‹ ›“ und „2 von 7“, Aktionsleiste unten. Tablet: Liste der Teile der Kategorie links (mit Größe, Preis und Hinweis „Bald zu klein“), Details rechts. Details: Name, darunter die **Notiz als Untertitel**; Kacheln Größe, Farbe, **Merkmal** (Blanko / Aufdruck / Markenname) und Preis (bei Sammelkauf mit Hinweis); Jahreszeiten; Passform zum Antippen; Notizfeld zum Bearbeiten. Knöpfe „Bearbeiten“ und „Aussortieren“ (fragt den Grund ab). Bei Spielzeug: Alter ab statt Größe, keine Jahreszeiten, keine Passform.
 4. **Nach Jahreszeit:** vier Jahreszeiten-Knöpfe (gewählter Knopf in der Akzentfarbe der Jahreszeit), Filter nach Kategorie **ohne Spielzeug**, Karten mit Kategorie und Größe in der Farbe ihrer Kategorie.
 5. **Teil hinzufügen / bearbeiten:** Umschalter Kleidung / Spielzeug, Live-Vorschau der Karte (in der Farbe der Kategorie).
-   - Kleidung: Name, Kategorie (nur die fünf Kleidungs-Kategorien), **Art** (direkt nach der Kategorie, Auswahl aus der Artenliste der Kategorie plus „Andere …“), Größe, Jahreszeiten, Farbe, Merkmal (+ Marke, Markenliste anlegen/löschen), Passform, **Anzahl** (Zähler − / +, Standard 1), Preis (Einzelpreis oder Sammelkauf auswählen / neu), Notiz.
+   - Kleidung: Name, Kategorie (nur die fünf Kleidungs-Kategorien), **Art** (direkt nach der Kategorie, Auswahl aus der Artenliste der Kategorie plus „Andere …“), Größe (in Sets & Sonstiges optional, gewählte Größe lässt sich wieder abwählen), Jahreszeiten, Farbe, Merkmal (+ Marke, Markenliste anlegen/löschen), Passform, **Anzahl** (Zähler − / +, Standard 1), Preis (Einzelpreis oder Sammelkauf auswählen / neu), Notiz.
    - Spielzeug: Name, Art, Alter ab, Farbe (optional), Merkmal, freie Merkmale, **Anzahl**, Preis, Notiz.
    - Reihenfolge der Felder wie im Design (Farbe und Merkmal vor Passform). Smartphone: eine Spalte in der oben genannten Reihenfolge. Tablet: links Vorschau, Name, Preis, Notiz, rechts die übrigen Felder in dieser Reihenfolge.
    - Art und Anzahl fehlen im Design und werden im Stil der übrigen Felder gestaltet.
 6. **Kosten:** Summe des Jahres, Teile, Durchschnitt; Formular „Kosten hinzufügen“ (Wofür?, Gesamtbetrag, Anzahl Teile); Einträge neueste zuerst. Smartphone: Knopf „+ Kosten“ statt dauerhaft sichtbarem Formular. Freigegeben (nicht im Design): Jahr-Umschalter ‹ › an der Summenkarte (nur bei Ausgaben in anderen Jahren), Datumsfeld (Standard heute), Tipp auf Einzelteil → Detail des Teils, Tipp auf Sammelkauf → Dialog zum Ändern/Löschen mit zugeordneten Teilen; Löschen nur nach Rückfrage, zugeordnete Teile verlieren ihren Preis. Beim Speichern wechselt die Ansicht in das Jahr der neuen Ausgabe.
-7. **Statistik:** Gesamtzahl im Schrank (ohne Aussortiertes); Balkendiagramme nach Kategorie, **Art der Kleidung** (die häufigsten 7), **Spielzeug nach Art** (neu, nicht im Design), Jahreszeit (Hinweis: ein Teil kann zu mehreren gehören) und Größe; jeder Balken führt per Tipp zu den Teilen; Link zu „Soll-Mengen & Saisonwechsel“. Freigegeben: Kategorie → Kategorie-Ansicht, Jahreszeit → Jahreszeiten-Ansicht, Art, Spielzeug-Art und Größe → Trefferansicht der Übersicht mit Filter-Chip (`#/?art=…`, `#/?groesse=…`). Größen-Diagramm nur Konfektion; Doppelgrößen zählen bei jeder enthaltenen Größe (mit Hinweis). „Spielzeug nach Art“ als fünfte Karte im Raster. Etikett „n fehlen“ an der Soll-Mengen-Verweiskarte ab Auftrag 08.
+7. **Statistik:** Gesamtzahl im Schrank (ohne Aussortiertes); Balkendiagramme nach Kategorie, **Art der Kleidung** (die häufigsten 7), **Spielzeug nach Art** (neu, nicht im Design), Jahreszeit (Hinweis: ein Teil kann zu mehreren gehören) und Größe; jeder Balken führt per Tipp zu den Teilen; Link zu „Soll-Mengen & Saisonwechsel“. Freigegeben: Kategorie → Kategorie-Ansicht, Jahreszeit → Jahreszeiten-Ansicht, Art, Spielzeug-Art und Größe → Trefferansicht der Übersicht mit Filter-Chip (`#/?art=…`, `#/?groesse=…`). Größen-Diagramm nur Konfektion; Doppelgrößen zählen bei jeder enthaltenen Größe (mit Hinweis). Auch die Trefferansicht zu einem Größen-Balken zeigt nur Teile mit Konfektionsgröße, damit ihre Zahl dem Balken entspricht (z. B. keine Mütze mit 56 cm Kopfumfang bei Größe 56). „Spielzeug nach Art“ als fünfte Karte im Raster. Etikett „n fehlen“ an der Soll-Mengen-Verweiskarte ab Auftrag 08.
 8. **Soll-Mengen & Saisonwechsel:** Umschalter für die vier Jahreszeiten (gewählter Knopf in der Akzentfarbe der Jahreszeit). Links Tabelle „Art · Passend · Soll (− / +) · Stand“ mit Stand „kein Soll“, „noch n fehlen“ oder „vollständig“. Rechts Saisonwechsel-Check mit Saisonbeginn („ab 1. Dezember · in 7 Wochen“), Summen „ist da / passt / fehlt“, Liste „Besorgen“ (Art + Anzahl) und Liste „Wird bald zu klein“. Nur Kleidung. Freigegeben: „ist da“ = Passt gut + Bald zu klein, „passt“ = Passt gut, „fehlt“ = Summe der Fehlenden – jeweils nur über Arten mit Soll, „Zu klein“ zählt nicht. Tabelle zeigt alle Arten mit Soll oder mit passenden bzw. bald zu kleinen Teilen der Jahreszeit; weitere Arten über „+ Art“; Soll 0 entfernt das Soll. „Besorgen“-Häkchen sind eine Merkhilfe im Oberflächen-Zustand (keine Datenänderung, nicht im Backup) und verschwinden, sobald nichts mehr fehlt. Beim Öffnen ist die kommende Jahreszeit gewählt; für die laufende „läuft · noch n Wochen“. Etikett „n fehlen“ in der Statistik = Fehlende der kommenden Jahreszeit, bei 0 kein Etikett.
 9. **Aussortiert:** Liste mit Name, Kategorie, Größe bzw. Alter, Datum und Grund (zu klein, verschenkt, verkauft, kaputt); „Zurückholen“ je Teil; „Aussortiert leeren“ mit Bestätigungsdialog (endgültig, nur über ein älteres Backup wiederherstellbar); leerer Zustand mit Hinweis.
 10. **Einstellungen & Backup:** Name des Kindes mit Live-Vorschau der Begrüßung; Backup-Status (letztes Backup, fällig oder gesichert); „Backup exportieren“ (Teilen-Menü, JSON); „Backup einspielen“ mit Vorschau (Dateiname, Erstelldatum, Anzahl Teile, Aussortiert, Kosten, Marken), Warnung, dass alle aktuellen Daten ersetzt werden, und Bestätigung. Keine Auswahl „Erinnern nach“. Smartphone zusätzlich: Einträge „Kosten“ und „Soll-Mengen & Saisonwechsel“.
