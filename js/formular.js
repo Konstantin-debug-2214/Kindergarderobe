@@ -11,6 +11,7 @@ import {
   PREIS_ART,
   TYP,
   artenVon,
+  groesseOptional,
   groessenSystemFuer,
   groessenWerte,
   neuesKleidungsteil,
@@ -97,6 +98,23 @@ export function groessePasst(kategorieId, art, groesse) {
 /** Größe nach einem Wechsel von Kategorie oder Art. */
 export function groesseNachWechsel(kategorieId, art, groesse) {
   return groessePasst(kategorieId, art, groesse) ? groesse : null;
+}
+
+/**
+ * Größe nach einem Tipp auf einen Knopf der Schnellauswahl. Wo die Größe
+ * optional ist (Sets & Sonstiges), wählt ein erneuter Tipp auf die gewählte
+ * Größe sie wieder ab; sonst bleibt sie gewählt.
+ * @param {string} kategorieId
+ * @param {string} system Größensystem der Knöpfe
+ * @param {{system: string, von: number, bis: number}|null} aktuell
+ * @param {number} wert getippte Größe
+ * @returns {{system: string, von: number, bis: number}|null}
+ */
+export function groesseNachTipp(kategorieId, system, aktuell, wert) {
+  const schonGewaehlt = Boolean(aktuell) && aktuell.system === system
+    && aktuell.von === wert && aktuell.bis === wert;
+  if (schonGewaehlt && groesseOptional(kategorieId)) return null;
+  return { system, von: wert, bis: wert };
 }
 
 /* --- Entwurf: der Zustand, mit dem das Formular arbeitet ------------------ */

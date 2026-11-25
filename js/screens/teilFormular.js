@@ -37,6 +37,7 @@ import {
   PASSFORM,
   TYP,
   artenVon,
+  groesseOptional,
   groessenSystemFuer,
   groessenWerte,
   kleidungsKategorien,
@@ -53,6 +54,7 @@ import {
   markenZurAuswahl,
   entwurfMitTyp,
   gaengigeGroessen,
+  groesseNachTipp,
   groesseNachWechsel,
   groesseText,
   leererEntwurf,
@@ -623,10 +625,13 @@ function formular({ modus, teilId }, { neuZeichnen = () => {} }) {
 
   function bauGroesse() {
     const system = groessenSystemFuer(entwurf.kategorie, entwurf.art);
+    // In Sets & Sonstiges darf die Größe fehlen, z. B. bei Bettwäsche.
+    const optional = groesseOptional(entwurf.kategorie);
 
     if (!system) {
       return reihe(abschnitt({
         label: 'Größe',
+        hinweis: optional ? '(optional)' : '',
         inhalt: [el('p', { class: 'abschnitt__leer', text: 'Erst eine Art wählen.' })],
       }), 5);
     }
@@ -645,8 +650,14 @@ function formular({ modus, teilId }, { neuZeichnen = () => {} }) {
       optionen,
       wert: istEinzelwert ? gewaehlt.von : (gewaehlt ? 'eigene' : null),
       beiWahl: (wert) => {
-        if (wert === 'eigene') { eigeneGroesse(system); return; }
-        setze({ groesse: { system, von: wert, bis: wert } });
+        if (wert === 'eigene') {
+          // Der Knopf der eigenen Größe ist immer gewählt: In Sets & Sonstiges
+          // wählt ein Tipp sie ab, sonst öffnet er die Auswahl zum Ändern.
+          if (optional) setze({ groesse: null });
+          else eigeneGroesse(system);
+          return;
+        }
+        setze({ groesse: groesseNachTipp(entwurf.kategorie, system, entwurf.groesse, wert) });
       },
     });
 
@@ -656,9 +667,12 @@ function formular({ modus, teilId }, { neuZeichnen = () => {} }) {
     andere.addEventListener('click', () => eigeneGroesse(system));
     gruppe.append(andere);
 
+    const einheit = GROESSENSYSTEME[system].einheit;
+    const hinweise = [optional ? 'optional' : null, einheit].filter(Boolean);
+
     return reihe(abschnitt({
       label: 'Größe',
-      hinweis: GROESSENSYSTEME[system].einheit ? `(${GROESSENSYSTEME[system].einheit})` : '',
+      hinweis: hinweise.length > 0 ? `(${hinweise.join(', ')})` : '',
       feld: 'groesse',
       fehler: fehlerJeFeld.groesse,
       inhalt: [gruppe],

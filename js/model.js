@@ -90,6 +90,18 @@ export const KATEGORIEN = [
 /** Die Kategorie, zu der Spielzeug immer gehört. */
 export const KATEGORIE_SPIELZEUG = 'spielzeug';
 
+/**
+ * Kleidungs-Kategorien, in denen die Größe optional ist – etwa für Bettwäsche
+ * in "Sets & Sonstiges" (Entscheidung John, 25.11.2026). Überall sonst ist
+ * die Größe bei Kleidung Pflicht.
+ */
+export const KATEGORIEN_GROESSE_OPTIONAL = ['sets_sonstiges'];
+
+/** Darf ein Kleidungsstück dieser Kategorie ohne Größe sein? */
+export function groesseOptional(kategorieId) {
+  return KATEGORIEN_GROESSE_OPTIONAL.includes(kategorieId);
+}
+
 /** Arten, die vom Größensystem ihrer Kategorie abweichen (siehe CLAUDE.md). */
 const GROESSEN_SONDERFAELLE = {
   unterteile: { Socken: GROESSENSYSTEM.SCHUH },
@@ -249,7 +261,13 @@ function istGanzeZahl(wert) {
 function pruefeGroesse(teil, melde) {
   const erwartet = groessenSystemFuer(teil.kategorie, teil.art);
 
-  if (!teil.groesse || typeof teil.groesse !== 'object') {
+  // Ohne Größe: nur in Kategorien erlaubt, in denen sie optional ist.
+  if (teil.groesse === null || teil.groesse === undefined) {
+    if (!groesseOptional(teil.kategorie)) melde('groesse', 'Größe fehlt.');
+    return;
+  }
+
+  if (typeof teil.groesse !== 'object') {
     melde('groesse', 'Größe fehlt.');
     return;
   }
