@@ -332,7 +332,11 @@ export function teileZuStatistik(teile = [], { art = null, groesse = null } = {}
 
   if (art) gefunden = gefunden.filter((teil) => teil.art === art);
   if (Number.isFinite(groesse)) {
-    gefunden = gefunden.filter((teil) => groesseEnthaelt(teil.groesse, groesse));
+    // Wie zaehleJeGroesse nur Konfektion: Ein Kopfumfang von 56 cm ist keine
+    // Konfektionsgröße 56, sonst wichen Trefferzahl und Balken voneinander ab.
+    // Dieselbe Zerlegung wie dort, damit jeder Balken genau seine Teile findet.
+    gefunden = gefunden.filter((teil) => teil.groesse?.system === GROESSENSYSTEM.KONFEKTION
+      && enthalteneGroessen(teil.groesse).includes(groesse));
   }
 
   return sortiereNachName(gefunden);
